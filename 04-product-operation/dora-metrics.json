@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "document": "DORA Metrics — Targets and Measurement",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "agent": "operations",
+    "phase": "04-product-operation",
+    "reference": "https://dora.dev/guides/dora-metrics-four-keys/"
+  },
+  "dora_metrics": [
+    {
+      "id": "DORA-001",
+      "name": "Deployment Frequency",
+      "description": "Frequência com que o time faz deploy para produção. Mede a capacidade de entregar valor incrementalmente.",
+      "target": {
+        "initial": "2-3 deploys por semana",
+        "6_months": "1 deploy por dia (on-demand)",
+        "12_months": "Múltiplos deploys por dia"
+      },
+      "current_classification": "Medium",
+      "elite_benchmark": "On-demand (múltiplos deploys/dia)",
+      "measurement": {
+        "data_source": "GitHub Actions workflow completions com status success no job deploy-production",
+        "formula": "count(successful_production_deploys) / time_period",
+        "granularity": "weekly",
+        "dashboard": "DORA Metrics — Deployment Frequency (rolling 4 weeks)"
+      },
+      "improvement_levers": [
+        "Reduzir tamanho dos PRs (max 400 linhas de diff)",
+        "Trunk-based development com feature flags",
+        "Automatizar smoke tests para reduzir tempo de validação",
+        "Eliminar aprovação manual para deploys com cobertura > 80%"
+      ]
+    },
+    {
+      "id": "DORA-002",
+      "name": "Lead Time for Changes",
+      "description": "Tempo desde o primeiro commit em um branch até o deploy em produção. Mede a eficiência do pipeline de entrega.",
+      "target": {
+        "initial": "< 48 horas",
+        "6_months": "< 24 horas",
+        "12_months": "< 4 horas"
+      },
+      "current_classification": "Medium",
+      "elite_benchmark": "< 1 hora",
+      "measurement": {
+        "data_source": "Git metadata (first_commit_timestamp) + deploy pipeline (production_deploy_timestamp)",
+        "formula": "median(production_deploy_timestamp - first_commit_on_branch_timestamp)",
+        "granularity": "per deploy, aggregated weekly",
+        "breakdown": {
+          "coding_time": "first_commit → PR opened",
+          "review_time": "PR opened → PR approved",
+          "ci_time": "PR merged → pipeline green",
+          "deploy_time": "pipeline green → live in production"
+        },
+        "dashboard": "DORA Metrics — Lead Time Breakdown (rolling 4 weeks)"
+      },
+      "improvement_levers": [
+        "Code review SLA: resposta em < 4h durante horário útil",
+        "CI pipeline total < 15 minutos",
+        "Auto-merge para PRs aprovados com CI green",
+        "Pair programming para reduzir ciclo de review"
+      ]
+    },
+    {
+      "id": "DORA-003",
+      "name": "Change Failure Rate",
+      "description": "Percentual de deploys em produção que causam falha (incidente, rollback, hotfix). Mede a qualidade das entregas.",
+      "target": {
+        "initial": "< 15%",
+        "6_months": "< 10%",
+        "12_months": "< 5%"
+      },
+      "current_classification": "Medium",
+      "elite_benchmark": "< 5%",
+      "measurement": {
+        "data_source": "Incident tracker + rollback logs + hotfix PRs tagged com label 'hotfix'",
+        "formula": "count(deploys_causing_failure) / count(total_deploys) * 100",
+        "failure_definition": [
+          "Deploy seguido de rollback em < 24h",
+          "Deploy que gera incidente de severidade S1 ou S2",
+          "Deploy que requer hotfix em < 24h",
+          "Deploy que viola SLO (error budget burn > 10x)"
+        ],
+        "granularity": "per deploy, aggregated monthly",
+        "dashboard": "DORA Metrics — Change Failure Rate (rolling 3 months)"
+      },
+      "improvement_levers": [
+        "Aumentar cobertura de testes de integração (target: 70%)",
+        "Canary deploys com 5% de tráfego antes de rollout completo",
+        "Feature flags para desacoplar deploy de release",
+        "Pre-production environment com dados realistas"
+      ]
+    },
+    {
+      "id": "DORA-004",
+      "name": "Time to Restore Service",
+      "description": "Tempo desde a detecção de um incidente em produção até a restauração completa do serviço. Mede a resiliência operacional.",
+      "target": {
+        "initial": "< 2 horas",
+        "6_months": "< 1 hora",
+        "12_months": "< 30 minutos"
+      },
+      "current_classification": "Medium",
+      "elite_benchmark": "< 1 hora",
+      "measurement": {
+        "data_source": "Incident management system: alert_fired_at → service_restored_at",
+        "formula": "median(service_restored_timestamp - incident_detected_timestamp)",
+        "breakdown": {
+          "detection_time": "issue_start → alert_fired (target: < 5min via monitoring)",
+          "triage_time": "alert_fired → engineer_acknowledged (target: < 10min)",
+          "diagnosis_time": "engineer_acknowledged → root_cause_identified (target: < 30min)",
+          "resolution_time": "root_cause_identified → service_restored (target: < 15min)"
+        },
+        "granularity": "per incident, aggregated quarterly",
+        "dashboard": "DORA Metrics — MTTR Breakdown (rolling 3 months)"
+      },
+      "improvement_levers": [
+        "Runbooks documentados para os 10 cenários de falha mais comuns",
+        "Rollback automatizado quando smoke tests falham pós-deploy",
+        "Alertas com contexto rico (logs, métricas, possível causa)",
+        "Exercícios de game day trimestrais para treinar resposta a incidentes",
+        "On-call rotation com engenheiro sempre disponível em horário comercial"
+      ]
+    }
+  ],
+  "tracking": {
+    "review_cadence": "Quinzenal na retrospectiva de sprint",
+    "reporting": "Dashboard consolidado atualizado em tempo real",
+    "targets_review": "Trimestral — ajustar targets conforme maturidade do time",
+    "north_star_connection": "Melhores DORA metrics → deploys mais frequentes → experimentação mais rápida → mais dados para otimizar EFAS"
+  }
+}

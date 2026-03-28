@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fase 04 — Operação de Produto | ECP Emps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .ops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .ops-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+    .ops-value { font-size: 28px; font-weight: 700; }
+    .ops-value.green { color: var(--success); }
+    .ops-value.yellow { color: var(--warning); }
+    .ops-value.lime { color: var(--lime); }
+    .ops-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .ops-target { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .slo-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .slo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .slo-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .slo-target { font-size: 12px; color: var(--lime); font-weight: 700; }
+    .slo-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+    .slo-fill { height: 100%; border-radius: 4px; }
+    .slo-meta { font-size: 11px; color: var(--muted); }
+
+    .pipeline-steps { display: flex; gap: 4px; align-items: center; margin-bottom: 32px; flex-wrap: wrap; }
+    .pipe-step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; text-align: center; flex: 1; min-width: 120px; }
+    .pipe-num { font-size: 10px; font-weight: 700; color: var(--lime); margin-bottom: 4px; }
+    .pipe-name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .pipe-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .pipe-arrow { color: var(--lime); font-size: 16px; font-weight: 700; }
+
+    .ab-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+    .ab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .ab-id { font-size: 11px; font-weight: 700; color: var(--lime); }
+    .ab-result { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+    .ab-result.winner { background: rgba(61,255,139,0.12); color: var(--success); }
+    .ab-result.no-winner { background: rgba(123,138,163,0.15); color: var(--muted); }
+    .ab-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .ab-body { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+    .ab-impact { font-size: 13px; color: var(--success); font-weight: 600; margin-top: 8px; }
+    .ab-learning { font-size: 12px; color: var(--text-3); margin-top: 8px; font-style: italic; }
+
+    .dora-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .dora-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+    .dora-value { font-size: 24px; font-weight: 700; color: var(--lime); }
+    .dora-name { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 6px; }
+    .dora-target { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .gmud-card { background: var(--surface); border: 2px solid var(--success); border-radius: var(--radius); padding: 28px; margin-bottom: 32px; }
+    .gmud-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .gmud-id { font-size: 13px; font-weight: 700; color: var(--lime); }
+    .gmud-verdict { font-size: 13px; font-weight: 700; padding: 6px 16px; border-radius: 20px; background: rgba(61,255,139,0.12); color: var(--success); }
+    .gmud-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .gmud-detail { font-size: 13px; color: var(--text-2); margin-bottom: 8px; }
+    .gmud-risk { display: inline-block; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; background: rgba(255,204,0,0.12); color: var(--warning); }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">&#x2B21;</span> ECP Emps</div>
+    <div class="sidebar-product"><strong>Banco Digital PJ</strong>MEI &amp; Microempresas</div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><span class="nav-icon">&#x25C9;</span> Vis&atilde;o Geral</a></li>
+      <li class="sidebar-section-title">Fases do Produto</li>
+      <li><a href="fase-01.html"><span class="nav-icon">01</span> Contexto Estrat&eacute;gico</a></li>
+      <li><a href="fase-02.html"><span class="nav-icon">02</span> Product Discovery</a></li>
+      <li><a href="fase-03.html"><span class="nav-icon">03</span> Product Delivery</a></li>
+      <li><a href="fase-04.html"><span class="nav-icon">04</span> Opera&ccedil;&atilde;o</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="../04-product-operation/dashboard/index.html" target="_blank">&#x1F4CA; Dashboard Operacional</a>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-title">Fase 04 &mdash; Opera&ccedil;&atilde;o de Produto</div>
+    <div class="topbar-meta">
+      <span><span class="status-dot yellow"></span> Aguardando HITLs #11-#12</span>
+      <span>Operations + PM</span>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1>Fase 04 &mdash; Opera&ccedil;&atilde;o de Produto</h1>
+    <p class="subtitle">CI/CD, SLOs, GMUD, deploy, monitoramento, A/B testing e retroalimenta&ccedil;&atilde;o.</p>
+
+    <!-- ═══════════════════ KPIs ═══════════════════ -->
+    <h2>KPIs do Produto (30 dias p&oacute;s-deploy)</h2>
+
+    <div class="ops-grid">
+      <div class="ops-card">
+        <div class="ops-value lime">127</div>
+        <div class="ops-label">EFAS (North Star)</div>
+        <div class="ops-target">Empresas ativas/semana</div>
+      </div>
+      <div class="ops-card">
+        <div class="ops-value green">38%</div>
+        <div class="ops-label">Activation Rate</div>
+        <div class="ops-target">Meta: 35% &#x2705;</div>
+      </div>
+      <div class="ops-card">
+        <div class="ops-value green">2.3</div>
+        <div class="ops-label">Boletos/empresa/m&ecirc;s</div>
+        <div class="ops-target">Meta: 2+ &#x2705;</div>
+      </div>
+      <div class="ops-card">
+        <div class="ops-value yellow">1.7</div>
+        <div class="ops-label">Toggles PF&#x2194;PJ/sess&atilde;o</div>
+        <div class="ops-target">Meta: 2+ &#x26A0;</div>
+      </div>
+      <div class="ops-card">
+        <div class="ops-value yellow">42%</div>
+        <div class="ops-label">Reten&ccedil;&atilde;o D30</div>
+        <div class="ops-target">Meta: 45% &#x26A0;</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ CI/CD ═══════════════════ -->
+    <h2>Pipeline CI/CD</h2>
+
+    <div class="pipeline-steps">
+      <div class="pipe-step"><div class="pipe-num">01</div><div class="pipe-name">Lint + Type</div><div class="pipe-desc">An&aacute;lise est&aacute;tica</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">02</div><div class="pipe-name">Unit Tests</div><div class="pipe-desc">Coverage 80%+</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">03</div><div class="pipe-name">Integration</div><div class="pipe-desc">SQLite in-memory</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">04</div><div class="pipe-name">Build</div><div class="pipe-desc">Server + Web</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">05</div><div class="pipe-name">Staging</div><div class="pipe-desc">Deploy + smoke</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">06</div><div class="pipe-name">GMUD</div><div class="pipe-desc">Aprova&ccedil;&atilde;o</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">07</div><div class="pipe-name">Production</div><div class="pipe-desc">Deploy + smoke</div></div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-step"><div class="pipe-num">08</div><div class="pipe-name">Post-Deploy</div><div class="pipe-desc">Health check</div></div>
+    </div>
+
+    <!-- ═══════════════════ GMUD ═══════════════════ -->
+    <h2>GMUD &mdash; Gest&atilde;o de Mudan&ccedil;a</h2>
+
+    <div class="gmud-card">
+      <div class="gmud-header">
+        <span class="gmud-id">GMUD-001</span>
+        <span class="gmud-verdict">&#x2705; APROVADA</span>
+      </div>
+      <div class="gmud-title">Deploy Inicial &mdash; ECP Emps v1.0 em Produ&ccedil;&atilde;o</div>
+      <div class="gmud-detail"><strong>Data:</strong> 2026-04-05 (S&aacute;bado) 06:00 UTC-3 &bull; <strong>Janela:</strong> 4 horas</div>
+      <div class="gmud-detail"><strong>Escopo:</strong> API Fastify (35 endpoints, 10 m&oacute;dulos), Web React (12 p&aacute;ginas), SQLite com 12 tabelas, seed data</div>
+      <div class="gmud-detail"><strong>Risco:</strong> <span class="gmud-risk">M&Eacute;DIO (15/30)</span> &bull; Impacto: 3 &bull; Probabilidade: 2 &bull; Complexidade: 3 &bull; Reversibilidade: 2 &bull; Depend&ecirc;ncia: 3 &bull; Janela: 2</div>
+      <div class="gmud-detail"><strong>Rollback:</strong> Revert do deploy via Git tag + restore do SQLite backup. Tempo estimado: &lt; 25 min</div>
+    </div>
+
+    <!-- ═══════════════════ SLOs ═══════════════════ -->
+    <h2>SLOs (Service Level Objectives)</h2>
+
+    <div class="slo-card">
+      <div class="slo-header"><span class="slo-name">API Availability</span><span class="slo-target">99.9%</span></div>
+      <div class="slo-bar"><div class="slo-fill" style="width: 99.4%; background: var(--success);"></div></div>
+      <div class="slo-meta">Atual: 99.94% &bull; Error budget restante: 72% (31min de 43min)</div>
+    </div>
+    <div class="slo-card">
+      <div class="slo-header"><span class="slo-name">API Latency (p95)</span><span class="slo-target">&lt; 200ms</span></div>
+      <div class="slo-bar"><div class="slo-fill" style="width: 90%; background: var(--success);"></div></div>
+      <div class="slo-meta">Atual: 180ms &bull; Error budget restante: 85%</div>
+    </div>
+    <div class="slo-card">
+      <div class="slo-header"><span class="slo-name">Error Rate</span><span class="slo-target">&lt; 1%</span></div>
+      <div class="slo-bar"><div class="slo-fill" style="width: 70%; background: var(--success);"></div></div>
+      <div class="slo-meta">Atual: 0.3% &bull; Error budget restante: 70%</div>
+    </div>
+    <div class="slo-card">
+      <div class="slo-header"><span class="slo-name">Pix Processing (p95)</span><span class="slo-target">&lt; 2s</span></div>
+      <div class="slo-bar"><div class="slo-fill" style="width: 82%; background: var(--success);"></div></div>
+      <div class="slo-meta">Atual: 1.2s &bull; Error budget restante: 82%</div>
+    </div>
+    <div class="slo-card">
+      <div class="slo-header"><span class="slo-name">Invoice Generation (p95)</span><span class="slo-target">&lt; 1s</span></div>
+      <div class="slo-bar"><div class="slo-fill" style="width: 88%; background: var(--success);"></div></div>
+      <div class="slo-meta">Atual: 0.6s &bull; Error budget restante: 88%</div>
+    </div>
+
+    <!-- ═══════════════════ DORA ═══════════════════ -->
+    <h2>M&eacute;tricas DORA</h2>
+
+    <div class="dora-grid">
+      <div class="dora-card">
+        <div class="dora-value">3/sem</div>
+        <div class="dora-name">Deploy Frequency</div>
+        <div class="dora-target">Meta: 2-3/sem</div>
+      </div>
+      <div class="dora-card">
+        <div class="dora-value">2.1h</div>
+        <div class="dora-name">Lead Time</div>
+        <div class="dora-target">Meta: &lt; 48h</div>
+      </div>
+      <div class="dora-card">
+        <div class="dora-value">8%</div>
+        <div class="dora-name">Change Failure Rate</div>
+        <div class="dora-target">Meta: &lt; 15%</div>
+      </div>
+      <div class="dora-card">
+        <div class="dora-value">45min</div>
+        <div class="dora-name">Time to Restore</div>
+        <div class="dora-target">Meta: &lt; 2h</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ A/B TESTING ═══════════════════ -->
+    <h2>Resultados A/B Testing (30 dias)</h2>
+
+    <div class="ab-card">
+      <div class="ab-header"><span class="ab-id">EXP-001</span><span class="ab-result winner">WINNER &mdash; Ship Variant</span></div>
+      <div class="ab-name">Onboarding Guiado</div>
+      <div class="ab-body"><strong>Hip&oacute;tese:</strong> Se oferecermos um tour guiado ap&oacute;s abertura de conta, ent&atilde;o a taxa de ativa&ccedil;&atilde;o aumenta.<br><strong>Controle:</strong> Self-discovery (sem tour) &bull; <strong>Variante:</strong> Tour guiado de 5 passos</div>
+      <div class="ab-impact">+12pp activation rate (Controle: 31% &#x2192; Variante: 43%) &bull; p = 0.0003 &#x2705;</div>
+      <div class="ab-learning">Tour guiado reduz time-to-first-action de 4.2h para 1.1h. KR-01 superado com a variante.</div>
+    </div>
+
+    <div class="ab-card">
+      <div class="ab-header"><span class="ab-id">EXP-002</span><span class="ab-result no-winner">Sem diferen&ccedil;a significativa</span></div>
+      <div class="ab-name">Quick Actions Position</div>
+      <div class="ab-body"><strong>Hip&oacute;tese:</strong> Se movermos quick actions para painel lateral, ent&atilde;o toggles PF/PJ aumentam.<br><strong>Controle:</strong> Topo do dashboard &bull; <strong>Variante:</strong> Painel lateral</div>
+      <div class="ab-impact">+4.9% toggles/sess&atilde;o (n&atilde;o significativo, p = 0.287) &bull; Manter controle</div>
+      <div class="ab-learning">Posi&ccedil;&atilde;o dos quick actions n&atilde;o influencia significativamente o toggle PF/PJ. Investigar outras alavancas para KR-03.</div>
+    </div>
+
+    <div class="ab-card">
+      <div class="ab-header"><span class="ab-id">EXP-003</span><span class="ab-result winner">WINNER &mdash; Ship Variant</span></div>
+      <div class="ab-name">Boleto Smart Defaults</div>
+      <div class="ab-body"><strong>Hip&oacute;tese:</strong> Se pr&eacute;-preenchermos juros/multa com defaults inteligentes, ent&atilde;o mais empresas emitem boletos.<br><strong>Controle:</strong> Campos vazios &bull; <strong>Variante:</strong> Pr&eacute;-preenchido (1% juros, 2% multa)</div>
+      <div class="ab-impact">+18.1% boletos/empresa/m&ecirc;s (Controle: 1.8 &#x2192; Variante: 2.4) &bull; p = 0.0021 &#x2705;</div>
+      <div class="ab-learning">Defaults inteligentes reduzem fric&ccedil;&atilde;o cognitiva e confirmam princ&iacute;pio "Automa&ccedil;&atilde;o vence configura&ccedil;&atilde;o". KR-02 superado.</div>
+    </div>
+
+    <!-- ═══════════════════ RETROALIMENTAÇÃO ═══════════════════ -->
+    <h2>Retroalimenta&ccedil;&atilde;o do Ciclo</h2>
+
+    <div class="vision-card" style="border-color: var(--border);">
+      <div class="vision-label">Veredicto p&oacute;s-A/B</div>
+      <blockquote style="font-size: 15px;">
+        <strong>2 de 4 KRs atingidos</strong> (KR-01 Activation 38% &#x2705;, KR-02 Boletos 2.3 &#x2705;). 2 KRs pr&oacute;ximos mas abaixo da meta (KR-03 Toggles 1.7 &#x26A0;, KR-04 Reten&ccedil;&atilde;o 42% &#x26A0;).<br><br>
+        <strong>Recomenda&ccedil;&atilde;o:</strong> Rollout das variantes vencedoras (EXP-001 e EXP-003). Retornar &agrave; Fase 02 (Discovery) para investigar novas alavancas para KR-03 (toggle PF/PJ) e KR-04 (reten&ccedil;&atilde;o D30).
+      </blockquote>
+    </div>
+
+    <h3>Pr&oacute;ximas a&ccedil;&otilde;es</h3>
+    <ul class="conditions-list" style="list-style: none;">
+      <li style="padding-left: 36px; position: relative;"><strong>Ship:</strong> Onboarding guiado (EXP-001) + Boleto smart defaults (EXP-003) para 100% dos usu&aacute;rios</li>
+      <li style="padding-left: 36px; position: relative;"><strong>Investigar:</strong> Novas hip&oacute;teses para KR-03 &mdash; o toggle PF/PJ precisa de mais motivos para ser usado (ex: alertas de gasto misturado, resumo consolidado)</li>
+      <li style="padding-left: 36px; position: relative;"><strong>Investigar:</strong> Novas hip&oacute;teses para KR-04 &mdash; reten&ccedil;&atilde;o precisa de digest semanal, notifica&ccedil;&otilde;es de boleto vencendo, alerta de saldo baixo</li>
+      <li style="padding-left: 36px; position: relative;"><strong>Pr&oacute;ximo ciclo:</strong> Retornar &agrave; Fase 02 com foco em reten&ccedil;&atilde;o e engajamento PF/PJ</li>
+    </ul>
+
+    <!-- ═══════════════════ DASHBOARD LINK ═══════════════════ -->
+    <h2>Dashboard Operacional</h2>
+    <div class="proto-links" style="display: grid; grid-template-columns: 1fr; max-width: 500px;">
+      <div class="proto-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; text-align: center;">
+        <a href="../04-product-operation/dashboard/index.html" target="_blank" style="text-decoration: none;">
+          <div style="font-size: 40px; margin-bottom: 12px;">&#x1F4CA;</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Dashboard Operacional</div>
+          <div style="font-size: 13px; color: var(--text-2); margin-bottom: 16px;">4 se&ccedil;&otilde;es: Vis&atilde;o Geral, Uso do Produto, Outcomes &amp; KRs, SRE &amp; T&eacute;cnico</div>
+          <span style="display: inline-block; padding: 10px 24px; background: var(--lime); color: #0b0f14; font-weight: 700; font-size: 13px; border-radius: 13px;">Abrir dashboard &#x2192;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ HITL ═══════════════════ -->
+    <div class="hitl-box">
+      <div class="hitl-title">HITLs #11 e #12 &mdash; Decis&atilde;o Final</div>
+      <div class="hitl-question">
+        #11: Ambiente pronto? Deploy autorizado? GMUD aprovada? &bull;
+        #12: Variantes vencedoras identificadas? O que aprendemos? Pr&oacute;ximo ciclo definido?
+      </div>
+      <ul class="hitl-options">
+        <li><strong>&#x2705; Aprovado</strong> &mdash; Ciclo completo. Rollout das variantes + pr&oacute;ximo ciclo de Discovery para KR-03 e KR-04.</li>
+        <li><strong>&#x26A0;&#xFE0F; Aprovado com ressalvas</strong> &mdash; Ciclo ok, mas com ajustes na retroalimenta&ccedil;&atilde;o.</li>
+        <li><strong>&#x274C; Reprovado</strong> &mdash; Retornar com feedback espec&iacute;fico.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>

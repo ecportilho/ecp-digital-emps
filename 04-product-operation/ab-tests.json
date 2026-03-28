@@ -1,0 +1,208 @@
+{
+  "metadata": {
+    "document": "A/B Test Configurations",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "experiments": [
+    {
+      "id": "EXP-001",
+      "name": "Onboarding Guiado",
+      "status": "running",
+      "start_date": "2026-04-07",
+      "hypothesis": "Um tour guiado pós-criação de conta (com highlights nas 3 funcionalidades core: dashboard, boleto e Pix) aumentará a taxa de ativação (3+ operações em 7 dias) em pelo menos 10 pontos percentuais comparado ao modelo de auto-descoberta atual.",
+      "rationale": "Dados do ecp-digital-bank (PF) mostram que 40% dos usuários não completam nenhuma operação nos primeiros 7 dias. A hipótese é que a falta de orientação inicial é o principal driver de drop-off, especialmente para MEIs com baixa familiaridade digital.",
+      "control": {
+        "name": "Self-Discovery",
+        "description": "Após criação da conta, o usuário é direcionado ao dashboard sem nenhuma orientação. Funcionalidades são descobertas organicamente pela navegação.",
+        "traffic_allocation": 50
+      },
+      "variant": {
+        "name": "Guided Tour",
+        "description": "Após criação da conta, um tour interativo de 4 passos guia o usuário: (1) Visão geral do dashboard, (2) Como gerar um boleto, (3) Como fazer Pix PJ, (4) Como alternar entre PF e PJ. Tour pode ser pulado a qualquer momento.",
+        "traffic_allocation": 50
+      },
+      "success_metric": {
+        "primary": {
+          "name": "Activation Rate",
+          "definition": "Percentual de novas contas que realizam 3+ operações nos primeiros 7 dias",
+          "current_baseline": "23%"
+        },
+        "secondary": [
+          {
+            "name": "Time to First Operation",
+            "definition": "Mediana de tempo entre criação da conta e primeira operação"
+          },
+          {
+            "name": "Tour Completion Rate",
+            "definition": "Percentual de usuários que completam todos os 4 passos do tour (apenas variante)"
+          },
+          {
+            "name": "7-Day Retention",
+            "definition": "Percentual de usuários que retornam ao app após 7 dias"
+          }
+        ]
+      },
+      "minimum_detectable_effect": "10 percentage points (23% → 33%)",
+      "statistical_parameters": {
+        "significance_level": 0.05,
+        "power": 0.80,
+        "test_type": "two-tailed z-test for proportions"
+      },
+      "sample_size": {
+        "per_variant": 385,
+        "total": 770,
+        "calculation_method": "Power analysis com alpha=0.05, beta=0.20, baseline=23%, MDE=10pp"
+      },
+      "duration_days": 30,
+      "decision_criteria": {
+        "ship_variant": "Variante vence com p < 0.05 E lift > 8pp E sem degradação em métricas secundárias",
+        "ship_control": "Controle vence com p < 0.05 OU variante sem significância estatística após 30 dias",
+        "extend": "Tendência positiva (p < 0.15) mas amostra insuficiente — estender por mais 15 dias",
+        "kill": "Variante tem impacto negativo significativo em qualquer métrica primária ou secundária"
+      },
+      "linked_krs": ["KR-01: Activation Rate 35%"],
+      "guardrails": [
+        "Error rate não pode aumentar > 0.5% vs. controle",
+        "Latência da página não pode aumentar > 200ms",
+        "Tour não pode cobrir mais de 30% da tela em mobile"
+      ]
+    },
+    {
+      "id": "EXP-002",
+      "name": "Quick Actions Position",
+      "status": "running",
+      "start_date": "2026-04-07",
+      "hypothesis": "Posicionar os quick actions (Pix, Boleto, Extrato, Toggle PJ/PF) no topo do dashboard ao invés de um side panel lateral aumentará o número de operações por sessão em pelo menos 15%, pois reduz a distância cognitiva e o número de cliques para ações frequentes.",
+      "rationale": "Heatmaps do ecp-digital-bank (PF) mostram que 65% dos cliques acontecem no terço superior da tela. O side panel atual tem taxa de interação de apenas 22%. A hipótese é que visibilidade imediata das ações principais acelera o uso.",
+      "control": {
+        "name": "Side Panel",
+        "description": "Quick actions posicionados em um painel lateral colapsável à direita do dashboard. Usuário precisa abrir o painel ou scrollar para acessar.",
+        "traffic_allocation": 50
+      },
+      "variant": {
+        "name": "Top Dashboard",
+        "description": "Quick actions posicionados em uma barra horizontal fixa no topo do dashboard, logo abaixo do saldo. Botões sempre visíveis com ícones + labels.",
+        "traffic_allocation": 50
+      },
+      "success_metric": {
+        "primary": {
+          "name": "Operations per Session",
+          "definition": "Número médio de operações (Pix + Boleto + Transferência + Consulta) por sessão de usuário",
+          "current_baseline": "1.8 ops/sessão"
+        },
+        "secondary": [
+          {
+            "name": "Quick Action Click Rate",
+            "definition": "Percentual de sessões com pelo menos 1 clique em quick action"
+          },
+          {
+            "name": "Time to First Action",
+            "definition": "Mediana de tempo entre login e primeira operação na sessão"
+          },
+          {
+            "name": "PF/PJ Toggle Rate",
+            "definition": "Número médio de toggles PF/PJ por sessão"
+          }
+        ]
+      },
+      "minimum_detectable_effect": "15% relative increase (1.8 → 2.07 ops/session)",
+      "statistical_parameters": {
+        "significance_level": 0.05,
+        "power": 0.80,
+        "test_type": "two-tailed t-test for means"
+      },
+      "sample_size": {
+        "per_variant": 500,
+        "total": 1000,
+        "calculation_method": "Power analysis com alpha=0.05, beta=0.20, baseline_mean=1.8, baseline_sd=1.2, MDE=15%"
+      },
+      "duration_days": 30,
+      "decision_criteria": {
+        "ship_variant": "Variante vence com p < 0.05 E lift relativo > 12% E KR-03 (toggles PF/PJ) não degrada",
+        "ship_control": "Controle vence com p < 0.05 OU variante sem significância estatística após 30 dias",
+        "extend": "Tendência positiva (p < 0.15) mas amostra insuficiente — estender por mais 15 dias",
+        "kill": "Variante reduz ops/sessão OU degrada significativamente algum KR"
+      },
+      "linked_krs": ["KR-03: 2+ toggles PF↔PJ/sessão", "KR-01: Activation Rate 35%"],
+      "guardrails": [
+        "Layout não pode quebrar em telas < 375px (mobile)",
+        "Core Web Vitals (LCP, CLS) não podem degradar > 10%",
+        "Acessibilidade WCAG 2.1 AA deve ser mantida"
+      ]
+    },
+    {
+      "id": "EXP-003",
+      "name": "Boleto Smart Defaults",
+      "status": "running",
+      "start_date": "2026-04-07",
+      "hypothesis": "Pré-preencher os campos de juros (2% ao mês) e multa (2%) no formulário de geração de boleto aumentará a taxa de emissão de boletos por empresa em pelo menos 15%, pois reduz a fricção de configuração e dúvida sobre valores adequados.",
+      "rationale": "Análise do funil de geração de boletos mostra que 35% dos usuários abandonam o formulário no passo de juros/multa. Entrevistas qualitativas indicam que MEIs não sabem quais valores praticar e têm medo de errar. Pre-filling com valores de mercado pode eliminar essa barreira.",
+      "control": {
+        "name": "Empty Fields",
+        "description": "Campos de juros e multa no formulário de boleto iniciam vazios. Usuário precisa preencher manualmente ou deixar em branco (sem juros/multa).",
+        "traffic_allocation": 50
+      },
+      "variant": {
+        "name": "Smart Defaults",
+        "description": "Campos de juros (2% a.m.) e multa (2%) vêm pré-preenchidos com valores padrão de mercado. Tooltip explica o que significa. Usuário pode alterar ou zerar os valores. Badge 'Recomendado' nos defaults.",
+        "traffic_allocation": 50
+      },
+      "success_metric": {
+        "primary": {
+          "name": "Boletos per Company per Month",
+          "definition": "Número médio de boletos emitidos por empresa ativa por mês",
+          "current_baseline": "1.4 boletos/empresa/mês"
+        },
+        "secondary": [
+          {
+            "name": "Form Completion Rate",
+            "definition": "Percentual de usuários que iniciam o form de boleto e completam a emissão"
+          },
+          {
+            "name": "Time to Complete Form",
+            "definition": "Mediana de tempo para preencher o formulário de boleto"
+          },
+          {
+            "name": "Juros/Multa Adoption",
+            "definition": "Percentual de boletos emitidos com juros e multa configurados (> 0)"
+          }
+        ]
+      },
+      "minimum_detectable_effect": "15% relative increase (1.4 → 1.61 boletos/empresa/mês)",
+      "statistical_parameters": {
+        "significance_level": 0.05,
+        "power": 0.80,
+        "test_type": "two-tailed t-test for means"
+      },
+      "sample_size": {
+        "per_variant": 420,
+        "total": 840,
+        "calculation_method": "Power analysis com alpha=0.05, beta=0.20, baseline_mean=1.4, baseline_sd=1.1, MDE=15%"
+      },
+      "duration_days": 30,
+      "decision_criteria": {
+        "ship_variant": "Variante vence com p < 0.05 E lift relativo > 12% E sem aumento de disputas/chargebacks",
+        "ship_control": "Controle vence com p < 0.05 OU variante sem significância estatística após 30 dias",
+        "extend": "Tendência positiva (p < 0.15) mas amostra insuficiente — estender por mais 15 dias",
+        "kill": "Variante causa aumento > 5% em disputas de boleto OU reclamações sobre valores pré-preenchidos"
+      },
+      "linked_krs": ["KR-02: 2+ boletos/empresa/mês"],
+      "guardrails": [
+        "Valores pré-preenchidos devem respeitar limites legais (juros max 1% a.m. para consumidor, 2% a.m. para B2B)",
+        "Tooltip obrigatório explicando que valores são editáveis",
+        "Nenhum boleto pode ser emitido sem confirmação explícita do valor total"
+      ]
+    }
+  ],
+  "experiment_governance": {
+    "owner": "Product Manager + Operations Engineer",
+    "analysis_cadence": "Semanal (toda segunda-feira)",
+    "early_stopping_rule": "Se qualquer guardrail for violado com p < 0.01, experimento é pausado imediatamente",
+    "documentation": "Resultados documentados em ab-results.json com learning e recomendação",
+    "retroalimentacao": "Resultados alimentam decisões de produto na próxima sprint e atualizam KR targets"
+  }
+}

@@ -1,0 +1,312 @@
+{
+  "metadata": {
+    "document": "CI/CD Pipeline Configuration",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "pipeline": {
+    "name": "ecp-emps-ci-cd",
+    "trigger": {
+      "branches": ["main", "release/*"],
+      "pull_requests": ["main"],
+      "tags": ["v*"]
+    },
+    "environment": {
+      "node_version": "20",
+      "os": "ubuntu-latest",
+      "artifacts_retention_days": 30
+    },
+    "stages": [
+      {
+        "name": "static-analysis",
+        "order": 1,
+        "parallel": true,
+        "jobs": [
+          {
+            "name": "lint",
+            "command": "npm run lint",
+            "description": "ESLint com regras TypeScript strict para server e web",
+            "timeout_minutes": 5,
+            "fail_fast": true
+          },
+          {
+            "name": "typecheck-server",
+            "command": "cd apps/server && npx tsc --noEmit",
+            "description": "TypeScript strict check no backend Fastify",
+            "timeout_minutes": 5,
+            "fail_fast": true
+          },
+          {
+            "name": "typecheck-web",
+            "command": "cd apps/web && npx tsc --noEmit",
+            "description": "TypeScript strict check no frontend React",
+            "timeout_minutes": 5,
+            "fail_fast": true
+          }
+        ]
+      },
+      {
+        "name": "unit-tests",
+        "order": 2,
+        "parallel": false,
+        "depends_on": ["static-analysis"],
+        "jobs": [
+          {
+            "name": "test-server",
+            "command": "cd apps/server && npm test -- --coverage",
+            "description": "Testes unitários do backend com cobertura via Vitest",
+            "timeout_minutes": 10,
+            "coverage": {
+              "tool": "vitest",
+              "thresholds": {
+                "statements": 80,
+                "branches": 75,
+                "functions": 80,
+                "lines": 80
+              },
+              "report_formats": ["text", "lcov", "json-summary"]
+            }
+          },
+          {
+            "name": "test-web",
+            "command": "cd apps/web && npm test -- --coverage",
+            "description": "Testes unitários do frontend com cobertura via Vitest",
+            "timeout_minutes": 10,
+            "coverage": {
+              "tool": "vitest",
+              "thresholds": {
+                "statements": 75,
+                "branches": 70,
+                "functions": 75,
+                "lines": 75
+              },
+              "report_formats": ["text", "lcov", "json-summary"]
+            }
+          }
+        ]
+      },
+      {
+        "name": "integration-tests",
+        "order": 3,
+        "parallel": false,
+        "depends_on": ["unit-tests"],
+        "jobs": [
+          {
+            "name": "integration-sqlite",
+            "command": "cd apps/server && npm run test:integration",
+            "description": "Testes de integração com SQLite em WAL mode — database-emps-test.sqlite efêmero",
+            "timeout_minutes": 15,
+            "environment": {
+              "DATABASE_PATH": ":memory:",
+              "NODE_ENV": "test",
+              "JWT_SECRET": "test-secret-ci"
+            },
+            "setup": [
+              "Cria banco SQLite em memória",
+              "Executa migrations",
+              "Seed de dados de teste (empresa MEI, usuários, contas)"
+            ],
+            "teardown": [
+              "Banco em memória é descartado automaticamente"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "build",
+        "order": 4,
+        "parallel": true,
+        "depends_on": ["integration-tests"],
+        "jobs": [
+          {
+            "name": "build-server",
+            "command": "cd apps/server && npm run build",
+            "description": "Compilação TypeScript do backend para dist/",
+            "timeout_minutes": 5,
+            "artifacts": {
+              "path": "apps/server/dist",
+              "name": "server-build"
+            }
+          },
+          {
+            "name": "build-web",
+            "command": "cd apps/web && npm run build",
+            "description": "Build Vite do frontend React para dist/",
+            "timeout_minutes": 5,
+            "artifacts": {
+              "path": "apps/web/dist",
+              "name": "web-build"
+            }
+          }
+        ]
+      },
+      {
+        "name": "deploy-staging",
+        "order": 5,
+        "parallel": false,
+        "depends_on": ["build"],
+        "condition": "branch == 'main' || branch.startsWith('release/')",
+        "jobs": [
+          {
+            "name": "deploy-api-staging",
+            "command": "npm run deploy:staging:api",
+            "description": "Deploy do backend Fastify para ambiente staging",
+            "timeout_minutes": 10,
+            "environment": {
+              "NODE_ENV": "staging",
+              "API_PORT": 3334,
+              "DATABASE_PATH": "./database-emps-staging.sqlite"
+            }
+          },
+          {
+            "name": "deploy-web-staging",
+            "command": "npm run deploy:staging:web",
+            "description": "Deploy do frontend React para CDN staging",
+            "timeout_minutes": 10,
+            "environment": {
+              "VITE_API_URL": "https://staging-api.ecpemps.com.br",
+              "VITE_ENV": "staging"
+            }
+          }
+        ]
+      },
+      {
+        "name": "smoke-tests-staging",
+        "order": 6,
+        "parallel": false,
+        "depends_on": ["deploy-staging"],
+        "jobs": [
+          {
+            "name": "smoke-staging",
+            "command": "npm run test:smoke -- --env=staging",
+            "description": "Smoke tests no ambiente staging antes de promover para produção",
+            "timeout_minutes": 10,
+            "checks": [
+              "GET /health retorna 200 com status ok",
+              "POST /auth/login retorna JWT válido",
+              "GET /companies/:id retorna dados da empresa",
+              "POST /invoices gera boleto com código de barras",
+              "POST /pix/transfer processa transferência Pix",
+              "GET /dashboard retorna métricas agregadas",
+              "Webapp carrega sem erros de console",
+              "Toggle PF/PJ funciona corretamente"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "deploy-production",
+        "order": 7,
+        "parallel": false,
+        "depends_on": ["smoke-tests-staging"],
+        "condition": "branch == 'main' && smoke-tests-staging.status == 'passed'",
+        "approval_required": true,
+        "approval_timeout_minutes": 60,
+        "jobs": [
+          {
+            "name": "deploy-api-production",
+            "command": "npm run deploy:production:api",
+            "description": "Deploy do backend Fastify para produção com rolling update",
+            "timeout_minutes": 15,
+            "strategy": "rolling-update",
+            "max_unavailable": "25%",
+            "environment": {
+              "NODE_ENV": "production",
+              "API_PORT": 3334,
+              "DATABASE_PATH": "./database-emps.sqlite"
+            }
+          },
+          {
+            "name": "deploy-web-production",
+            "command": "npm run deploy:production:web",
+            "description": "Deploy do frontend React para CDN de produção",
+            "timeout_minutes": 10,
+            "strategy": "blue-green",
+            "environment": {
+              "VITE_API_URL": "https://api.ecpemps.com.br",
+              "VITE_ENV": "production"
+            }
+          }
+        ]
+      },
+      {
+        "name": "post-deploy-smoke",
+        "order": 8,
+        "parallel": false,
+        "depends_on": ["deploy-production"],
+        "jobs": [
+          {
+            "name": "smoke-production",
+            "command": "npm run test:smoke -- --env=production",
+            "description": "Smoke tests pós-deploy em produção — falha aciona rollback automático",
+            "timeout_minutes": 5,
+            "checks": [
+              "GET /health retorna 200",
+              "Autenticação funciona end-to-end",
+              "Criação de boleto retorna 201",
+              "Dashboard carrega em menos de 3s",
+              "Feature flags retornam valores esperados"
+            ],
+            "on_failure": "trigger-rollback"
+          }
+        ]
+      }
+    ],
+    "rollback": {
+      "trigger": "manual || post-deploy-smoke.status == 'failed'",
+      "strategy": "revert-to-previous",
+      "steps": [
+        {
+          "order": 1,
+          "action": "Pausar tráfego para nova versão via load balancer",
+          "command": "npm run rollback:pause-traffic",
+          "timeout_minutes": 2
+        },
+        {
+          "order": 2,
+          "action": "Reverter API para versão anterior (container/processo anterior)",
+          "command": "npm run rollback:api",
+          "timeout_minutes": 5
+        },
+        {
+          "order": 3,
+          "action": "Reverter frontend para build anterior no CDN",
+          "command": "npm run rollback:web",
+          "timeout_minutes": 3
+        },
+        {
+          "order": 4,
+          "action": "Executar migrations de rollback no SQLite se necessário",
+          "command": "npm run db:rollback -- --steps=1",
+          "timeout_minutes": 5,
+          "condition": "migration_changed == true"
+        },
+        {
+          "order": 5,
+          "action": "Validar saúde do sistema após rollback",
+          "command": "npm run test:smoke -- --env=production",
+          "timeout_minutes": 5
+        },
+        {
+          "order": 6,
+          "action": "Notificar equipe via Slack e criar incident report",
+          "command": "npm run notify:rollback",
+          "timeout_minutes": 1
+        }
+      ],
+      "post_rollback": {
+        "incident_report_required": true,
+        "postmortem_deadline_hours": 48,
+        "block_deploys_until_resolved": true
+      }
+    },
+    "notifications": {
+      "on_success": ["slack:#ecp-emps-deploys"],
+      "on_failure": ["slack:#ecp-emps-deploys", "slack:#ecp-emps-oncall", "email:ops@ecpemps.com.br"],
+      "on_rollback": ["slack:#ecp-emps-incidents", "pagerduty:ecp-emps"]
+    }
+  }
+}

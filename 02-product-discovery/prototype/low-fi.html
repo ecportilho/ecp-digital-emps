@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECP Emps — Low-Fi Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #333; min-height: 100vh; }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: #fff; border-right: 1px solid #ddd; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; z-index: 10; }
+  .sidebar-logo { padding: 20px 16px; font-weight: 700; font-size: 15px; border-bottom: 1px solid #ddd; color: #333; }
+  .sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .sidebar-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 16px; background: none; border: none; cursor: pointer; font-size: 13.5px; color: #555; text-align: left; border-radius: 0; }
+  .sidebar-nav button:hover { background: #f0f0f0; }
+  .sidebar-nav button.active { background: #eee; color: #111; font-weight: 600; }
+  .sidebar-nav .nav-divider { height: 1px; background: #eee; margin: 8px 16px; }
+
+  .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: #fff; border-bottom: 1px solid #ddd; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 5; }
+  .topbar-title { font-size: 14px; font-weight: 600; color: #333; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .pf-pj-toggle { display: flex; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
+  .pf-pj-toggle button { padding: 5px 14px; font-size: 12px; border: none; cursor: pointer; background: #fff; color: #666; }
+  .pf-pj-toggle button.active { background: #333; color: #fff; }
+  .topbar-user { font-size: 13px; color: #666; }
+
+  .content { flex: 1; padding: 24px; }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Cards ── */
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333; }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 20px; border-radius: 6px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: #333; color: #fff; }
+  .btn-secondary { background: #fff; color: #333; border: 1px solid #999; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-block { width: 100%; }
+  .btn-danger { background: #c33; color: #fff; }
+  .btn-success { background: #2a7d2a; color: #fff; }
+
+  /* ── Form ── */
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #888; }
+  .form-group .hint { font-size: 11px; color: #999; margin-top: 3px; }
+  .form-group .error-text { font-size: 11px; color: #c33; margin-top: 3px; display: none; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #ddd; font-size: 12px; color: #666; font-weight: 600; }
+  td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+  tr:hover { background: #fafafa; }
+
+  /* ── Badges ── */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-pending { background: #fef3cd; color: #856404; }
+  .badge-paid { background: #d4edda; color: #155724; }
+  .badge-overdue { background: #f8d7da; color: #721c24; }
+  .badge-cancelled { background: #e2e3e5; color: #6c757d; }
+
+  /* ── Quick Actions ── */
+  .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .quick-action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 12px; color: #444; }
+  .quick-action-btn:hover { border-color: #999; background: #fafafa; }
+  .quick-action-icon { font-size: 22px; }
+
+  /* ── Balance ── */
+  .balance-big { font-size: 28px; font-weight: 700; color: #111; }
+  .balance-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+
+  /* ── Misc ── */
+  .back-btn { background: none; border: none; cursor: pointer; color: #666; font-size: 13px; margin-bottom: 16px; padding: 0; display: inline-flex; align-items: center; gap: 4px; }
+  .back-btn:hover { color: #333; }
+  .page-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
+  .text-center { text-align: center; }
+  .text-muted { color: #999; }
+  .text-secondary { color: #666; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-8 { gap: 8px; }
+
+  /* ── Onboarding layout ── */
+  .onboarding-wrap { max-width: 480px; margin: 60px auto; }
+  .onboarding-wrap .card { padding: 32px; }
+  .step-indicator { display: flex; gap: 8px; margin-bottom: 24px; }
+  .step-dot { width: 32px; height: 4px; border-radius: 2px; background: #ddd; }
+  .step-dot.done { background: #333; }
+
+  /* ── Success state ── */
+  .success-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* ── Toggle ── */
+  .direction-toggle { display: flex; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+  .direction-toggle button { flex: 1; padding: 10px; font-size: 13px; border: none; cursor: pointer; background: #fff; color: #666; }
+  .direction-toggle button.active { background: #333; color: #fff; }
+
+  /* ── Mini chart placeholder ── */
+  .mini-chart { height: 120px; background: #fafafa; border: 1px dashed #ccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+
+  /* ── Filters ── */
+  .filters-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filters-row input, .filters-row select { padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px; font-family: inherit; }
+  .filters-row input { width: 220px; }
+
+  /* ── Pix key list ── */
+  .key-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+  .key-item:last-child { border-bottom: none; }
+  .key-type { font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; }
+  .key-value { font-size: 14px; color: #333; margin-top: 2px; }
+
+  /* ── Sidebar hide for onboarding ── */
+  body.onboarding-mode .sidebar, body.onboarding-mode .topbar { display: none; }
+  body.onboarding-mode .main { margin-left: 0; }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 100; display: none; }
+  .toast.show { display: block; }
+
+  /* ── QR placeholder ── */
+  .qr-placeholder { width: 140px; height: 140px; border: 2px dashed #bbb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px; margin: 0 auto 12px; }
+</style>
+</head>
+<body class="onboarding-mode">
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">ECP Emps</div>
+    <nav class="sidebar-nav">
+      <button onclick="go('dashboard')" data-nav="dashboard">📊 Dashboard</button>
+      <button onclick="go('extrato')" data-nav="extrato">📄 Extrato</button>
+      <div class="nav-divider"></div>
+      <button onclick="go('pix-enviar')" data-nav="pix-enviar">⚡ Pix Enviar</button>
+      <button onclick="go('pix-chaves')" data-nav="pix-chaves">🔑 Pix Chaves</button>
+      <div class="nav-divider"></div>
+      <button onclick="go('transferencia')" data-nav="transferencia">🔄 Transferência PF↔PJ</button>
+      <div class="nav-divider"></div>
+      <button onclick="go('nova-cobranca')" data-nav="nova-cobranca">➕ Nova Cobrança</button>
+      <button onclick="go('lista-cobrancas')" data-nav="lista-cobrancas">📋 Cobranças</button>
+    </nav>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">ECP Emps — Wireframe</span>
+      <div class="topbar-right">
+        <div class="pf-pj-toggle">
+          <button id="toggle-pf">PF</button>
+          <button id="toggle-pj" class="active">PJ</button>
+        </div>
+        <span class="topbar-user">Marina Silva</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 1: Onboarding Step 1                     -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-onboarding1" class="screen active">
+        <div class="onboarding-wrap">
+          <div class="step-indicator">
+            <div class="step-dot done"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+          </div>
+          <div class="card">
+            <h2 style="font-size:18px;margin-bottom:4px;">Abra sua conta PJ</h2>
+            <p class="text-secondary" style="font-size:13px;margin-bottom:24px;">Informe o CNPJ da sua empresa para começarmos.</p>
+            <div class="form-group">
+              <label>CNPJ</label>
+              <input type="text" id="cnpj-input" placeholder="00.000.000/0000-00" value="12.345.678/0001-95">
+              <div class="hint">Buscaremos os dados automaticamente na Receita Federal.</div>
+              <div class="error-text" id="cnpj-error">CNPJ inválido. Verifique e tente novamente.</div>
+            </div>
+            <button class="btn btn-primary btn-block mt-8" onclick="onboardingFetchCNPJ()">Buscar dados</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 2: Onboarding Step 2                     -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-onboarding2" class="screen">
+        <div class="onboarding-wrap">
+          <div class="step-indicator">
+            <div class="step-dot done"></div>
+            <div class="step-dot done"></div>
+            <div class="step-dot"></div>
+          </div>
+          <div class="card">
+            <h2 style="font-size:18px;margin-bottom:4px;">Confirme os dados</h2>
+            <p class="text-secondary" style="font-size:13px;margin-bottom:24px;">Verifique se as informações estão corretas.</p>
+            <div class="form-group">
+              <label>CNPJ</label>
+              <input type="text" value="12.345.678/0001-95" disabled>
+            </div>
+            <div class="form-group">
+              <label>Razão Social</label>
+              <input type="text" value="AB Design Studio Ltda" disabled>
+            </div>
+            <div class="form-group">
+              <label>Nome Fantasia</label>
+              <input type="text" value="AB Design Studio">
+            </div>
+            <div class="form-group">
+              <label>Natureza Jurídica</label>
+              <input type="text" value="206-2 — Sociedade Limitada" disabled>
+            </div>
+            <div class="form-group">
+              <label>Data de Abertura</label>
+              <input type="text" value="15/03/2019" disabled>
+            </div>
+            <div class="form-group">
+              <label>E-mail de contato</label>
+              <input type="email" value="contato@abdesign.com.br">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="btn btn-secondary" style="flex:1;" onclick="go('onboarding1')">← Voltar</button>
+              <button class="btn btn-primary" style="flex:2;" onclick="go('onboarding3')">Confirmar e criar conta</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 3: Onboarding Step 3 — Success           -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-onboarding3" class="screen">
+        <div class="onboarding-wrap text-center">
+          <div class="card" style="padding:48px 32px;">
+            <div class="step-indicator" style="justify-content:center;">
+              <div class="step-dot done"></div>
+              <div class="step-dot done"></div>
+              <div class="step-dot done"></div>
+            </div>
+            <div class="success-icon">✓</div>
+            <h2 style="font-size:20px;margin-bottom:8px;">Conta PJ criada com sucesso!</h2>
+            <p class="text-secondary" style="font-size:13px;margin-bottom:8px;">AB Design Studio — 12.345.678/0001-95</p>
+            <p class="text-muted" style="font-size:12px;margin-bottom:28px;">Sua conta já está ativa. Deseja fazer um tour pelo app?</p>
+            <button class="btn btn-primary btn-block" onclick="enterApp()">Entrar no Dashboard</button>
+            <button class="btn btn-secondary btn-block mt-8" onclick="enterApp()" style="margin-top:10px;">Pular tour</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 4: Dashboard PJ                          -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-dashboard" class="screen">
+        <h1 class="page-title">Dashboard</h1>
+
+        <!-- Balance -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div class="card">
+            <div class="balance-label">Saldo Conta PJ</div>
+            <div class="balance-big">R$ 8.750,00</div>
+            <div class="text-muted mt-8" style="font-size:12px;">AB Design Studio</div>
+          </div>
+          <div class="card">
+            <div class="balance-label">Saldo Conta PF</div>
+            <div class="balance-big" style="font-size:22px;color:#555;">R$ 3.200,00</div>
+            <div class="text-muted mt-8" style="font-size:12px;">Marina Silva</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-title">Ações Rápidas</div>
+          <div class="quick-actions">
+            <button class="quick-action-btn" onclick="go('pix-enviar')"><span class="quick-action-icon">⚡</span>Pix</button>
+            <button class="quick-action-btn" onclick="go('nova-cobranca')"><span class="quick-action-icon">📄</span>Cobrar</button>
+            <button class="quick-action-btn" onclick="go('transferencia')"><span class="quick-action-icon">🔄</span>PF↔PJ</button>
+            <button class="quick-action-btn" onclick="go('extrato')"><span class="quick-action-icon">📊</span>Extrato</button>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+          <div class="flex-between mb-8">
+            <div class="card-title" style="margin-bottom:0;">Transações Recentes</div>
+            <button class="btn btn-sm btn-secondary" onclick="go('extrato')">Ver todas</button>
+          </div>
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td>27/03</td><td>Pix recebido — Loja Criativa Ltda</td><td style="color:#2a7d2a;">+ R$ 2.400,00</td></tr>
+              <tr><td>26/03</td><td>Pagamento fornecedor — Gráfica Rápida</td><td style="color:#c33;">- R$ 850,00</td></tr>
+              <tr><td>25/03</td><td>Pix recebido — João Mendes MEI</td><td style="color:#2a7d2a;">+ R$ 1.200,00</td></tr>
+              <tr><td>24/03</td><td>Cartão — Material de escritório</td><td style="color:#c33;">- R$ 189,90</td></tr>
+              <tr><td>23/03</td><td>Transferência PF→PJ — Marina Silva</td><td style="color:#2a7d2a;">+ R$ 500,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cash Flow + Invoice Summary -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title">Fluxo de Caixa (Março)</div>
+            <div class="mini-chart">[ Gráfico de barras — Entradas vs Saídas ]</div>
+            <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;">
+              <span style="color:#2a7d2a;">Entradas: R$ 12.350,00</span>
+              <span style="color:#c33;">Saídas: R$ 4.280,00</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="flex-between mb-8">
+              <div class="card-title" style="margin-bottom:0;">Cobranças</div>
+              <button class="btn btn-sm btn-secondary" onclick="go('lista-cobrancas')">Ver todas</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+              <div class="flex-between"><span>Pendentes</span><span style="font-weight:600;">2</span></div>
+              <div class="flex-between"><span>Pagas</span><span style="font-weight:600;color:#2a7d2a;">2</span></div>
+              <div class="flex-between"><span>Vencidas</span><span style="font-weight:600;color:#c33;">1</span></div>
+              <div class="flex-between"><span>Canceladas</span><span style="font-weight:600;color:#999;">0</span></div>
+            </div>
+            <button class="btn btn-primary btn-block btn-sm mt-16" onclick="go('nova-cobranca')">+ Nova Cobrança</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 5: Transferência PF↔PJ                  -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-transferencia" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <h1 class="page-title">Transferência PF ↔ PJ</h1>
+
+        <div class="card" style="max-width:520px;">
+          <!-- Dual balance -->
+          <div style="display:flex;gap:16px;margin-bottom:20px;">
+            <div style="flex:1;padding:12px;background:#fafafa;border-radius:6px;">
+              <div class="balance-label">Conta PF</div>
+              <div style="font-size:18px;font-weight:700;">R$ 3.200,00</div>
+              <div class="text-muted" style="font-size:11px;">Marina Silva</div>
+            </div>
+            <div style="flex:1;padding:12px;background:#fafafa;border-radius:6px;">
+              <div class="balance-label">Conta PJ</div>
+              <div style="font-size:18px;font-weight:700;">R$ 8.750,00</div>
+              <div class="text-muted" style="font-size:11px;">AB Design Studio</div>
+            </div>
+          </div>
+
+          <!-- Direction toggle -->
+          <label style="font-size:12px;color:#666;font-weight:500;margin-bottom:6px;display:block;">Direção da transferência</label>
+          <div class="direction-toggle" id="direction-toggle">
+            <button class="active" onclick="setDirection(this, 'pf-pj')">PF → PJ</button>
+            <button onclick="setDirection(this, 'pj-pf')">PJ → PF</button>
+          </div>
+
+          <div class="form-group">
+            <label>Valor</label>
+            <input type="text" id="transf-valor" placeholder="R$ 0,00" value="R$ 1.000,00">
+            <div class="error-text" id="transf-error">Saldo insuficiente para esta transferência.</div>
+          </div>
+          <div class="form-group">
+            <label>Descrição (opcional)</label>
+            <input type="text" placeholder="Ex: Capital de giro">
+          </div>
+          <button class="btn btn-primary btn-block mt-8" onclick="go('transferencia-confirm')">Continuar</button>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 6: Transferência Confirmação             -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-transferencia-confirm" class="screen">
+        <button class="back-btn" onclick="go('transferencia')">← Voltar</button>
+        <h1 class="page-title">Confirmar Transferência</h1>
+
+        <div class="card" style="max-width:520px;" id="transf-confirm-card">
+          <div style="font-size:13px;color:#666;margin-bottom:16px;">Revise os dados antes de confirmar.</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;">
+            <div class="flex-between"><span class="text-secondary">De</span><span style="font-weight:600;">Conta PF — Marina Silva</span></div>
+            <div class="flex-between"><span class="text-secondary">Para</span><span style="font-weight:600;">Conta PJ — AB Design Studio</span></div>
+            <div class="flex-between"><span class="text-secondary">Valor</span><span style="font-weight:700;font-size:18px;">R$ 1.000,00</span></div>
+          </div>
+          <div style="border-top:1px solid #eee;margin-top:16px;padding-top:16px;display:flex;gap:10px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="go('transferencia')">Cancelar</button>
+            <button class="btn btn-primary" style="flex:2;" onclick="showTransfSuccess()">Confirmar transferência</button>
+          </div>
+        </div>
+
+        <div class="card text-center" style="max-width:520px;display:none;padding:40px 32px;" id="transf-success-card">
+          <div class="success-icon">✓</div>
+          <h2 style="font-size:18px;margin-bottom:8px;">Transferência realizada!</h2>
+          <p class="text-secondary" style="font-size:13px;">R$ 1.000,00 transferidos de PF para PJ.</p>
+          <button class="btn btn-primary btn-block mt-24" onclick="go('dashboard')">Voltar ao Dashboard</button>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 7: Nova Cobrança Step 1                  -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-nova-cobranca" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <h1 class="page-title">Nova Cobrança</h1>
+
+        <div class="card" style="max-width:560px;">
+          <div class="step-indicator">
+            <div class="step-dot done"></div>
+            <div class="step-dot"></div>
+          </div>
+          <div class="card-title">Dados do cliente e valor</div>
+          <div class="form-group">
+            <label>Nome do cliente</label>
+            <input type="text" id="cob-nome" value="Pedro Almeida">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>CPF/CNPJ</label>
+              <input type="text" id="cob-doc" value="987.654.321-00">
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" id="cob-email" value="pedro@email.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Valor (R$)</label>
+              <input type="text" id="cob-valor" value="1.500,00">
+            </div>
+            <div class="form-group">
+              <label>Vencimento</label>
+              <input type="date" id="cob-venc" value="2026-04-15">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <input type="text" id="cob-desc" value="Projeto identidade visual — Parcela 2/3">
+          </div>
+          <button class="btn btn-primary btn-block mt-8" onclick="go('nova-cobranca-2')">Gerar cobrança</button>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 8: Nova Cobrança Step 2 — Preview        -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-nova-cobranca-2" class="screen">
+        <button class="back-btn" onclick="go('nova-cobranca')">← Voltar</button>
+        <h1 class="page-title">Preview da Cobrança</h1>
+
+        <div class="card" style="max-width:560px;" id="cobranca-preview-card">
+          <div class="step-indicator">
+            <div class="step-dot done"></div>
+            <div class="step-dot done"></div>
+          </div>
+
+          <div style="border:1px solid #ddd;border-radius:8px;padding:20px;background:#fafafa;">
+            <div style="font-size:11px;color:#999;text-transform:uppercase;font-weight:600;margin-bottom:12px;">Boleto / Pix</div>
+            <div class="flex-between mb-8">
+              <span class="text-secondary" style="font-size:13px;">Beneficiário</span>
+              <span style="font-size:13px;font-weight:600;">AB Design Studio</span>
+            </div>
+            <div class="flex-between mb-8">
+              <span class="text-secondary" style="font-size:13px;">Pagador</span>
+              <span style="font-size:13px;">Pedro Almeida — 987.654.321-00</span>
+            </div>
+            <div class="flex-between mb-8">
+              <span class="text-secondary" style="font-size:13px;">Valor</span>
+              <span style="font-size:16px;font-weight:700;">R$ 1.500,00</span>
+            </div>
+            <div class="flex-between mb-8">
+              <span class="text-secondary" style="font-size:13px;">Vencimento</span>
+              <span style="font-size:13px;">15/04/2026</span>
+            </div>
+            <div class="flex-between mb-16">
+              <span class="text-secondary" style="font-size:13px;">Descrição</span>
+              <span style="font-size:13px;">Projeto identidade visual — Parcela 2/3</span>
+            </div>
+            <div class="text-center">
+              <div class="qr-placeholder">QR Code Pix</div>
+              <div style="font-size:11px;color:#999;">Código Pix copia-e-cola</div>
+              <div style="font-size:11px;color:#666;margin-top:4px;word-break:break-all;background:#fff;padding:6px;border-radius:4px;border:1px solid #ddd;">00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="go('nova-cobranca')">Editar</button>
+            <button class="btn btn-primary" style="flex:2;" onclick="showCobrancaSuccess()">Enviar para o cliente</button>
+          </div>
+        </div>
+
+        <div class="card text-center" style="max-width:560px;display:none;padding:40px 32px;" id="cobranca-success-card">
+          <div class="success-icon">✓</div>
+          <h2 style="font-size:18px;margin-bottom:8px;">Cobrança enviada!</h2>
+          <p class="text-secondary" style="font-size:13px;margin-bottom:4px;">Boleto + QR Pix enviados para pedro@email.com</p>
+          <p class="text-muted" style="font-size:12px;">Valor: R$ 1.500,00 — Vencimento: 15/04/2026</p>
+          <div style="display:flex;gap:10px;margin-top:24px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="go('lista-cobrancas')">Ver cobranças</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="go('dashboard')">Dashboard</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 9: Lista de Cobranças                    -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-lista-cobrancas" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <div class="flex-between mb-16">
+          <h1 class="page-title" style="margin-bottom:0;">Cobranças</h1>
+          <button class="btn btn-primary btn-sm" onclick="go('nova-cobranca')">+ Nova Cobrança</button>
+        </div>
+
+        <div class="card">
+          <div class="filters-row">
+            <input type="text" placeholder="Buscar por nome ou documento..." id="cob-search" oninput="filterCobrancas()">
+            <select id="cob-status-filter" onchange="filterCobrancas()">
+              <option value="">Todos os status</option>
+              <option value="pending">Pendente</option>
+              <option value="paid">Pago</option>
+              <option value="overdue">Vencido</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="cobrancas-tbody">
+              <tr data-status="paid" data-name="loja criativa ltda"><td>Loja Criativa Ltda</td><td>R$ 3.200,00</td><td>10/03/2026</td><td><span class="badge badge-paid">Pago</span></td><td><button class="btn btn-sm btn-secondary">Ver</button></td></tr>
+              <tr data-status="paid" data-name="joão mendes mei"><td>João Mendes MEI</td><td>R$ 1.200,00</td><td>15/03/2026</td><td><span class="badge badge-paid">Pago</span></td><td><button class="btn btn-sm btn-secondary">Ver</button></td></tr>
+              <tr data-status="overdue" data-name="fernanda costa"><td>Fernanda Costa</td><td>R$ 800,00</td><td>20/02/2026</td><td><span class="badge badge-overdue">Vencido</span></td><td><button class="btn btn-sm btn-secondary">Ver</button></td></tr>
+              <tr data-status="pending" data-name="pedro almeida"><td>Pedro Almeida</td><td>R$ 1.500,00</td><td>15/04/2026</td><td><span class="badge badge-pending">Pendente</span></td><td><button class="btn btn-sm btn-secondary">Ver</button></td></tr>
+              <tr data-status="pending" data-name="maria oliveira"><td>Maria Oliveira</td><td>R$ 2.100,00</td><td>20/04/2026</td><td><span class="badge badge-pending">Pendente</span></td><td><button class="btn btn-sm btn-secondary">Ver</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 10: Extrato PJ                           -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-extrato" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <h1 class="page-title">Extrato PJ</h1>
+
+        <div class="card" style="display:flex;align-items:center;gap:24px;margin-bottom:16px;">
+          <div>
+            <div class="balance-label">Saldo atual</div>
+            <div class="balance-big">R$ 8.750,00</div>
+          </div>
+          <div style="margin-left:auto;font-size:12px;color:#666;">Atualizado em 28/03/2026 às 09:15</div>
+        </div>
+
+        <div class="card">
+          <div class="filters-row">
+            <input type="date" value="2026-03-01" style="width:150px;">
+            <span class="text-muted" style="font-size:13px;">até</span>
+            <input type="date" value="2026-03-28" style="width:150px;">
+            <select>
+              <option>Todas as categorias</option>
+              <option>Pix</option>
+              <option>Transferência</option>
+              <option>Boleto</option>
+              <option>Cartão</option>
+            </select>
+          </div>
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Saldo</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>27/03</td><td>Pix recebido — Loja Criativa Ltda</td>
+                <td><span class="badge badge-paid">Pix</span></td>
+                <td style="color:#2a7d2a;font-weight:600;">+ R$ 2.400,00</td>
+                <td>R$ 8.750,00</td>
+              </tr>
+              <tr>
+                <td>26/03</td><td>Pagamento — Gráfica Rápida ME</td>
+                <td><span class="badge badge-pending">Boleto</span></td>
+                <td style="color:#c33;font-weight:600;">- R$ 850,00</td>
+                <td>R$ 6.350,00</td>
+              </tr>
+              <tr>
+                <td>25/03</td><td>Pix recebido — João Mendes MEI</td>
+                <td><span class="badge badge-paid">Pix</span></td>
+                <td style="color:#2a7d2a;font-weight:600;">+ R$ 1.200,00</td>
+                <td>R$ 7.200,00</td>
+              </tr>
+              <tr>
+                <td>24/03</td><td>Compra cartão — Kalunga Papelaria</td>
+                <td><span class="badge" style="background:#e8e0f0;color:#5a3d7a;">Cartão</span></td>
+                <td style="color:#c33;font-weight:600;">- R$ 189,90</td>
+                <td>R$ 6.000,00</td>
+              </tr>
+              <tr>
+                <td>23/03</td><td>Transferência PF→PJ — Marina Silva</td>
+                <td><span class="badge" style="background:#d6eaf8;color:#1a5276;">Transf.</span></td>
+                <td style="color:#2a7d2a;font-weight:600;">+ R$ 500,00</td>
+                <td>R$ 6.189,90</td>
+              </tr>
+              <tr>
+                <td>22/03</td><td>Pix enviado — Studio Print Ltda</td>
+                <td><span class="badge badge-paid">Pix</span></td>
+                <td style="color:#c33;font-weight:600;">- R$ 1.320,00</td>
+                <td>R$ 5.689,90</td>
+              </tr>
+              <tr>
+                <td>20/03</td><td>Pix recebido — Maria Oliveira</td>
+                <td><span class="badge badge-paid">Pix</span></td>
+                <td style="color:#2a7d2a;font-weight:600;">+ R$ 2.100,00</td>
+                <td>R$ 7.009,90</td>
+              </tr>
+              <tr>
+                <td>18/03</td><td>Mensalidade — Software CRM</td>
+                <td><span class="badge badge-pending">Boleto</span></td>
+                <td style="color:#c33;font-weight:600;">- R$ 149,00</td>
+                <td>R$ 4.909,90</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 11: Pix Enviar                           -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-pix-enviar" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <h1 class="page-title">Pix Enviar</h1>
+
+        <!-- Step: Input -->
+        <div class="card" style="max-width:520px;" id="pix-input-card">
+          <div class="form-group">
+            <label>Chave Pix do destinatário</label>
+            <input type="text" id="pix-key-input" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória" value="contato@graficaexpress.com.br">
+          </div>
+          <div id="pix-recipient-info" style="background:#fafafa;border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:14px;display:none;">
+            <div style="font-size:13px;font-weight:600;">Gráfica Express Ltda</div>
+            <div style="font-size:12px;color:#666;">Banco Digital S.A. — Ag 0001 Cc 987654-3</div>
+          </div>
+          <button class="btn btn-secondary btn-block mb-16" onclick="lookupPixKey()" id="pix-lookup-btn">Buscar destinatário</button>
+          <div class="form-group">
+            <label>Valor</label>
+            <input type="text" id="pix-valor" placeholder="R$ 0,00" value="R$ 650,00">
+          </div>
+          <div class="form-group">
+            <label>Descrição (opcional)</label>
+            <input type="text" id="pix-desc" value="Pagamento impressões março">
+          </div>
+          <button class="btn btn-primary btn-block mt-8" id="pix-continue-btn" onclick="showPixConfirm()" style="display:none;">Continuar</button>
+        </div>
+
+        <!-- Step: Confirm -->
+        <div class="card" style="max-width:520px;display:none;" id="pix-confirm-card">
+          <div style="font-size:13px;color:#666;margin-bottom:16px;">Confira os dados do Pix.</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;">
+            <div class="flex-between"><span class="text-secondary">Para</span><span style="font-weight:600;">Gráfica Express Ltda</span></div>
+            <div class="flex-between"><span class="text-secondary">Chave</span><span>contato@graficaexpress.com.br</span></div>
+            <div class="flex-between"><span class="text-secondary">Valor</span><span style="font-weight:700;font-size:18px;">R$ 650,00</span></div>
+            <div class="flex-between"><span class="text-secondary">Descrição</span><span>Pagamento impressões março</span></div>
+          </div>
+          <div style="border-top:1px solid #eee;margin-top:16px;padding-top:16px;display:flex;gap:10px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="resetPixForm()">Cancelar</button>
+            <button class="btn btn-primary" style="flex:2;" onclick="showPixSuccess()">Enviar Pix</button>
+          </div>
+        </div>
+
+        <!-- Step: Success -->
+        <div class="card text-center" style="max-width:520px;display:none;padding:40px 32px;" id="pix-success-card">
+          <div class="success-icon">✓</div>
+          <h2 style="font-size:18px;margin-bottom:8px;">Pix enviado com sucesso!</h2>
+          <p class="text-secondary" style="font-size:13px;margin-bottom:4px;">R$ 650,00 para Gráfica Express Ltda</p>
+          <p class="text-muted" style="font-size:12px;">28/03/2026 às 09:22 — ID: PIX8374920</p>
+          <div style="display:flex;gap:10px;margin-top:24px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="resetPixForm(); go('pix-enviar');">Novo Pix</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="go('dashboard')">Dashboard</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- SCREEN 12: Pix Chaves                           -->
+      <!-- ════════════════════════════════════════════════ -->
+      <section id="screen-pix-chaves" class="screen">
+        <button class="back-btn" onclick="go('dashboard')">← Voltar</button>
+        <div class="flex-between mb-16">
+          <h1 class="page-title" style="margin-bottom:0;">Minhas Chaves Pix</h1>
+          <button class="btn btn-primary btn-sm" id="add-key-toggle-btn" onclick="toggleAddKeyForm()">+ Nova Chave</button>
+        </div>
+
+        <!-- Add key form -->
+        <div class="card" style="max-width:520px;display:none;margin-bottom:16px;" id="add-key-form">
+          <div class="card-title">Cadastrar nova chave</div>
+          <div class="form-group">
+            <label>Tipo de chave</label>
+            <select id="new-key-type">
+              <option value="">Selecione...</option>
+              <option value="cpf">CPF</option>
+              <option value="email">E-mail</option>
+              <option value="telefone">Telefone</option>
+              <option value="aleatoria">Chave aleatória</option>
+            </select>
+          </div>
+          <div class="form-group" id="new-key-value-group">
+            <label>Valor da chave</label>
+            <input type="text" id="new-key-value" placeholder="Informe o valor da chave">
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="toggleAddKeyForm()">Cancelar</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="addPixKey()">Cadastrar</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:520px;">
+          <div class="card-title">Chaves cadastradas (3)</div>
+          <div id="pix-keys-list">
+            <div class="key-item">
+              <div>
+                <div class="key-type">CNPJ</div>
+                <div class="key-value">12.345.678/0001-95</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="confirmDeleteKey(this)">Excluir</button>
+            </div>
+            <div class="key-item">
+              <div>
+                <div class="key-type">E-mail</div>
+                <div class="key-value">contato@abdesign.com.br</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="confirmDeleteKey(this)">Excluir</button>
+            </div>
+            <div class="key-item">
+              <div>
+                <div class="key-type">Aleatória</div>
+                <div class="key-value">a1b2c3d4-e5f6-7890-abcd-ef1234567890</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="confirmDeleteKey(this)">Excluir</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Navigation ──
+var currentScreen = 'onboarding1';
+var onboardingScreens = ['onboarding1', 'onboarding2', 'onboarding3'];
+
+function go(screen) {
+  // Hide all
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  // Show target
+  var el = document.getElementById('screen-' + screen);
+  if (el) el.classList.add('active');
+  currentScreen = screen;
+
+  // Toggle onboarding mode (hide sidebar/topbar)
+  if (onboardingScreens.indexOf(screen) !== -1) {
+    document.body.classList.add('onboarding-mode');
+  } else {
+    document.body.classList.remove('onboarding-mode');
+  }
+
+  // Reset success states when navigating to form screens
+  if (screen === 'transferencia-confirm') {
+    document.getElementById('transf-confirm-card').style.display = '';
+    document.getElementById('transf-success-card').style.display = 'none';
+  }
+  if (screen === 'nova-cobranca-2') {
+    document.getElementById('cobranca-preview-card').style.display = '';
+    document.getElementById('cobranca-success-card').style.display = 'none';
+  }
+  if (screen === 'pix-enviar') {
+    resetPixForm();
+  }
+
+  // Update sidebar active state
+  document.querySelectorAll('.sidebar-nav button[data-nav]').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-nav') === screen);
+  });
+
+  window.scrollTo(0, 0);
+}
+
+function enterApp() {
+  go('dashboard');
+}
+
+// ── Onboarding ──
+function onboardingFetchCNPJ() {
+  var val = document.getElementById('cnpj-input').value.trim();
+  if (!val || val.length < 14) {
+    document.getElementById('cnpj-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('cnpj-error').style.display = 'none';
+  go('onboarding2');
+}
+
+// ── Direction toggle ──
+function setDirection(btn, dir) {
+  document.querySelectorAll('#direction-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+// ── Transfer success ──
+function showTransfSuccess() {
+  document.getElementById('transf-confirm-card').style.display = 'none';
+  document.getElementById('transf-success-card').style.display = '';
+}
+
+// ── Cobranca success ──
+function showCobrancaSuccess() {
+  document.getElementById('cobranca-preview-card').style.display = 'none';
+  document.getElementById('cobranca-success-card').style.display = '';
+}
+
+// ── Cobrancas filter ──
+function filterCobrancas() {
+  var search = document.getElementById('cob-search').value.toLowerCase();
+  var status = document.getElementById('cob-status-filter').value;
+  var rows = document.querySelectorAll('#cobrancas-tbody tr');
+  rows.forEach(function(row) {
+    var nameMatch = !search || row.getAttribute('data-name').indexOf(search) !== -1;
+    var statusMatch = !status || row.getAttribute('data-status') === status;
+    row.style.display = (nameMatch && statusMatch) ? '' : 'none';
+  });
+}
+
+// ── Pix Enviar flow ──
+function lookupPixKey() {
+  var key = document.getElementById('pix-key-input').value.trim();
+  if (!key) return;
+  document.getElementById('pix-recipient-info').style.display = '';
+  document.getElementById('pix-continue-btn').style.display = '';
+  document.getElementById('pix-lookup-btn').style.display = 'none';
+}
+
+function showPixConfirm() {
+  document.getElementById('pix-input-card').style.display = 'none';
+  document.getElementById('pix-confirm-card').style.display = '';
+}
+
+function showPixSuccess() {
+  document.getElementById('pix-confirm-card').style.display = 'none';
+  document.getElementById('pix-success-card').style.display = '';
+}
+
+function resetPixForm() {
+  document.getElementById('pix-input-card').style.display = '';
+  document.getElementById('pix-confirm-card').style.display = 'none';
+  document.getElementById('pix-success-card').style.display = 'none';
+  document.getElementById('pix-recipient-info').style.display = 'none';
+  document.getElementById('pix-continue-btn').style.display = 'none';
+  document.getElementById('pix-lookup-btn').style.display = '';
+}
+
+// ── Pix Chaves ──
+function toggleAddKeyForm() {
+  var form = document.getElementById('add-key-form');
+  form.style.display = form.style.display === 'none' ? '' : 'none';
+}
+
+function addPixKey() {
+  var type = document.getElementById('new-key-type').value;
+  var value = document.getElementById('new-key-value').value.trim();
+  if (!type) { showToast('Selecione o tipo de chave.'); return; }
+  if (type !== 'aleatoria' && !value) { showToast('Informe o valor da chave.'); return; }
+  if (type === 'aleatoria') value = 'f9e8d7c6-b5a4-3210-fedc-ba9876543210';
+
+  var typeLabels = { cpf: 'CPF', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Aleatória' };
+  var list = document.getElementById('pix-keys-list');
+  var item = document.createElement('div');
+  item.className = 'key-item';
+  item.innerHTML = '<div><div class="key-type">' + typeLabels[type] + '</div><div class="key-value">' + value + '</div></div><button class="btn btn-sm btn-secondary" onclick="confirmDeleteKey(this)">Excluir</button>';
+  list.appendChild(item);
+
+  // Update count
+  var count = list.querySelectorAll('.key-item').length;
+  list.parentElement.querySelector('.card-title').textContent = 'Chaves cadastradas (' + count + ')';
+
+  toggleAddKeyForm();
+  document.getElementById('new-key-type').value = '';
+  document.getElementById('new-key-value').value = '';
+  showToast('Chave cadastrada com sucesso!');
+}
+
+function confirmDeleteKey(btn) {
+  if (confirm('Tem certeza que deseja excluir esta chave Pix?')) {
+    var item = btn.closest('.key-item');
+    var list = item.parentElement;
+    item.remove();
+    var count = list.querySelectorAll('.key-item').length;
+    list.parentElement.querySelector('.card-title').textContent = 'Chaves cadastradas (' + count + ')';
+    showToast('Chave excluída.');
+  }
+}
+
+// ── Toast ──
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+// ── PF/PJ Toggle (visual only) ──
+document.getElementById('toggle-pf').addEventListener('click', function() {
+  this.classList.add('active');
+  document.getElementById('toggle-pj').classList.remove('active');
+  showToast('Modo PF — apenas visualização neste protótipo');
+});
+document.getElementById('toggle-pj').addEventListener('click', function() {
+  this.classList.add('active');
+  document.getElementById('toggle-pf').classList.remove('active');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+{
+  "agent": "product-manager",
+  "phase": "01-strategic-context",
+  "product": "ECP Emps",
+  "session_id": "ecp-emps-20260328",
+  "generated_at": "2026-03-28",
+
+  "deliverables": {
+
+    "objective": "Tornar o ECP Emps o banco digital que MEIs freelancers confiam para separar, organizar e cobrar — substituindo planilhas, bancos ruins e a bagunça financeira PF/PJ.",
+
+    "vision": {
+      "vision_statement": "Para microempreendedores brasileiros que perdem tempo e dinheiro com bancos que ignoram as necessidades do seu negócio, o ECP Emps é o banco digital web-first que automatiza a gestão financeira empresarial com inteligência, diferente dos bancos digitais PJ existentes porque é o único que integra conta PF e PJ em um só lugar com categorização automática por IA e experiência nativa de desktop.",
+      "time_horizon": "3-5 anos",
+      "who": "MEIs e microempresas brasileiras (23.5M de empresas)",
+      "problem": "Pagam caro por serviços bancários ruins, não separam PF/PJ, perdem horas com burocracia financeira",
+      "solution_category": "Banco digital web-first para empresas",
+      "differentiation": "Único banco PJ com integração PF-PJ nativa + categorização IA + experiência desktop-first",
+      "why_now": "12-18 meses de first-mover advantage no web-first PJ; PIX ecosystem maduro; Open Finance PJ APIs emergindo"
+    },
+
+    "north_star": {
+      "name": "EFAS — Empresas Financeiramente Ativas por Semana",
+      "definition": "Número de empresas com 3+ operações financeiras nos últimos 7 dias",
+      "formula": "COUNT(DISTINCT company_id FROM pj_transactions WHERE created_at >= 7 days ago GROUP BY company_id HAVING COUNT >= 3)",
+      "current_baseline": 0,
+      "rationale": "Captura o momento em que a empresa está usando o ECP Emps como banco principal do negócio, não apenas como conta secundária",
+      "input_metrics": [
+        { "name": "Activation Rate", "target": "35%+", "influences": "north_star" },
+        { "name": "Boletos/empresa/mês", "target": "2+", "influences": "north_star" },
+        { "name": "Toggle PF-PJ/sessão", "target": "2+", "influences": "north_star" },
+        { "name": "ARPAC", "target": "R$ 70/mês", "influences": "north_star" },
+        { "name": "Retention D30", "target": "45%+", "influences": "north_star" }
+      ]
+    },
+
+    "key_results": [
+      {
+        "kr_id": "KR-01",
+        "description": "Alcançar taxa de ativação de 35% (empresas com 3+ operações em 7 dias após abertura)",
+        "metric": "Activation Rate",
+        "baseline": 0,
+        "target": 35,
+        "unit": "%",
+        "measurement_frequency": "weekly",
+        "measurement_method": "COUNT(companies 3+ tx in 7d) / COUNT(companies created) * 100",
+        "measurability_verdict": "MEASURABLE",
+        "linked_opportunities": ["OPP-01", "OPP-02", "OPP-03"]
+      },
+      {
+        "kr_id": "KR-02",
+        "description": "Atingir média de 2+ boletos emitidos por empresa ativa por mês",
+        "metric": "Boletos/empresa/mês",
+        "baseline": 0,
+        "target": 2,
+        "unit": "boletos/empresa/mês",
+        "measurement_frequency": "weekly",
+        "measurement_method": "COUNT(invoices WHERE status != cancelled AND parent_invoice_id IS NULL) / COUNT(active companies)",
+        "measurability_verdict": "MEASURABLE (com refinamento: filtrar parent_invoice_id IS NULL para evitar inflação por parcelamentos)",
+        "linked_opportunities": ["OPP-04", "OPP-05", "OPP-06"]
+      },
+      {
+        "kr_id": "KR-03",
+        "description": "Atingir média de 2+ toggles PF/PJ por sessão",
+        "metric": "Toggle PF↔PJ/sessão",
+        "baseline": 0,
+        "target": 2,
+        "unit": "toggles/sessão",
+        "measurement_frequency": "weekly",
+        "measurement_method": "COUNT(toggle events) / COUNT(sessions with 1+ toggle)",
+        "measurability_verdict": "NOT DIRECTLY MEASURABLE — requer tabela analytics_events e definição de sessão (30min inactivity window)",
+        "remediation": "Adicionar tabela analytics_events ao tech_spec ou estender pj_audit_logs com action='profile_switch'",
+        "linked_opportunities": ["OPP-07", "OPP-08", "OPP-09"]
+      },
+      {
+        "kr_id": "KR-04",
+        "description": "Alcançar retenção D30 de 45%",
+        "metric": "Retention D30",
+        "baseline": 0,
+        "target": 45,
+        "unit": "%",
+        "measurement_frequency": "monthly",
+        "measurement_method": "COUNT(companies com atividade no dia 28-32 após criação) / COUNT(companies criadas 30d atrás) * 100",
+        "measurability_verdict": "MEASURABLE via pj_audit_logs como proxy de atividade",
+        "linked_opportunities": ["OPP-01", "OPP-04", "OPP-07", "OPP-10"]
+      }
+    ],
+
+    "opportunity_solution_tree": {
+      "objective": "Tornar o ECP Emps o banco digital que MEIs freelancers confiam para separar, organizar e cobrar",
+      "key_results": [
+        {
+          "kr_id": "KR-01",
+          "description": "Activation Rate 35%",
+          "opportunities": [
+            {
+              "opp_id": "OPP-01",
+              "type": "dor",
+              "description": "MEIs não conseguem abrir conta PJ rapidamente porque os bancos exigem documentação excessiva e processos burocráticos demorados",
+              "persona_source": "P-01 (Ana Beatriz), P-02 (Lucas)",
+              "evidence": "73% dos MEIs não têm controle financeiro formal; processos de abertura em bancos tradicionais levam dias"
+            },
+            {
+              "opp_id": "OPP-02",
+              "type": "necessidade",
+              "description": "Empreendedores precisam entender imediatamente o valor da conta PJ na primeira sessão para justificar a mudança de banco",
+              "persona_source": "P-01 (Ana Beatriz)",
+              "evidence": "Ana: 'conta PJ do Inter não funciona bem no desktop' — se não vê valor rápido, abandona"
+            },
+            {
+              "opp_id": "OPP-03",
+              "type": "desejo",
+              "description": "MEIs desejam que a conta PJ já venha configurada com as ferramentas que precisam, sem setup manual",
+              "persona_source": "P-01, P-02",
+              "evidence": "Princípio: Automação vence configuração"
+            }
+          ]
+        },
+        {
+          "kr_id": "KR-02",
+          "description": "2+ boletos/empresa/mês",
+          "opportunities": [
+            {
+              "opp_id": "OPP-04",
+              "type": "dor",
+              "description": "Emitir boleto de cobrança é burocrático e caro nos bancos atuais, fazendo o MEI desistir de cobrar formalmente",
+              "persona_source": "P-01 (Ana Beatriz)",
+              "evidence": "Ana paga R$ 2/boleto no Inter e considera burocrático; Lucas acha boletos B2B complicados"
+            },
+            {
+              "opp_id": "OPP-05",
+              "type": "necessidade",
+              "description": "Freelancers precisam cobrar clientes de forma profissional (com dados da empresa) sem perder tempo configurando cada cobrança",
+              "persona_source": "P-01, P-03 (Mariana e Thiago)",
+              "evidence": "8-12 clientes ativos por mês para Ana; agência com múltiplos clientes"
+            },
+            {
+              "opp_id": "OPP-06",
+              "type": "dor",
+              "description": "MEIs não sabem quando um cliente pagou ou deixou de pagar porque a conciliação entre cobrança e extrato é manual",
+              "persona_source": "P-02 (Lucas)",
+              "evidence": "Lucas: conciliação do iFood com o extrato é manual; não sabe o status das cobranças"
+            }
+          ]
+        },
+        {
+          "kr_id": "KR-03",
+          "description": "2+ toggles PF↔PJ/sessão",
+          "opportunities": [
+            {
+              "opp_id": "OPP-07",
+              "type": "dor",
+              "description": "MEIs misturam gastos pessoais e empresariais porque ter duas contas em apps separados é inconveniente demais",
+              "persona_source": "P-01 (Ana Beatriz), P-02 (Lucas)",
+              "evidence": "42% não separam PF/PJ; Ana mistura gastos no cartão PF"
+            },
+            {
+              "opp_id": "OPP-08",
+              "type": "necessidade",
+              "description": "Empreendedores precisam ver a situação financeira completa (pessoal + negócio) para decisões como retiradas de pró-labore",
+              "persona_source": "P-01, P-02",
+              "evidence": "Gap de mercado: nenhum concorrente oferece dashboard consolidado PF+PJ"
+            },
+            {
+              "opp_id": "OPP-09",
+              "type": "desejo",
+              "description": "MEIs desejam transferir dinheiro entre conta pessoal e do negócio instantaneamente sem burocracia",
+              "persona_source": "P-01 (Ana Beatriz)",
+              "evidence": "RN-13 transferência instantânea PF-PJ mesma titularidade"
+            }
+          ]
+        },
+        {
+          "kr_id": "KR-04",
+          "description": "Retention D30 45%",
+          "opportunities": [
+            {
+              "opp_id": "OPP-10",
+              "type": "dor",
+              "description": "MEIs não sabem quanto o negócio realmente lucra por mês porque não têm ferramenta acessível de fluxo de caixa",
+              "persona_source": "P-01, P-02",
+              "evidence": "Ana não sabe quanto lucra; Lucas sente que perde dinheiro; 58% usam planilhas"
+            },
+            {
+              "opp_id": "OPP-11",
+              "type": "necessidade",
+              "description": "Empreendedores que trabalham no computador precisam de banco que funcione plenamente no desktop",
+              "persona_source": "P-01, P-03",
+              "evidence": "Nenhum concorrente PJ oferece experiência completa no desktop; Ana trabalha 100% do computador"
+            },
+            {
+              "opp_id": "OPP-12",
+              "type": "dor",
+              "description": "Empresas com mais de uma pessoa não conseguem dar acesso parcial à conta sem compartilhar senha",
+              "persona_source": "P-03 (Mariana e Thiago)",
+              "evidence": "Cora não deixa dar acesso parcial para assistente administrativa"
+            }
+          ]
+        }
+      ]
+    },
+
+    "product_principles": [
+      {
+        "name": "Desktop primeiro, mobile sempre",
+        "description": "A experiência principal é projetada para desktop (1280px+), com mobile como acompanhamento, nunca ao contrário",
+        "in_practice": "Toda feature é desenhada first para tela grande; mobile recebe versão simplificada, nunca bloqueia",
+        "trade_off": "Abrimos mão de market share mobile-only para ganhar produtividade no público que trabalha no computador"
+      },
+      {
+        "name": "Automação vence configuração",
+        "description": "Sempre que possível, o sistema faz a escolha certa automaticamente em vez de pedir configuração ao usuário",
+        "in_practice": "Categorização de gastos é automática; chave Pix CNPJ é registrada na abertura; boleto tem defaults inteligentes",
+        "trade_off": "Abrimos mão de flexibilidade para power users em prol de simplicidade para a maioria"
+      },
+      {
+        "name": "Clareza financeira acima de tudo",
+        "description": "O empreendedor deve saber exatamente quanto tem, quanto entra e quanto sai — sem cálculo mental",
+        "in_practice": "Dashboard mostra lucro real, não apenas saldo; categorias empresariais claras; gráficos de cash flow sempre visíveis",
+        "trade_off": "Priorizamos transparência mesmo que revele que o negócio vai mal — não escondemos más notícias"
+      },
+      {
+        "name": "PF e PJ são um só empreendedor",
+        "description": "A pessoa e o negócio coexistem; o banco deve refletir essa realidade, não forçar separação artificial",
+        "in_practice": "Toggle PF/PJ no mesmo app; transferência instantânea PF-PJ; visão consolidada; alerta de gastos misturados",
+        "trade_off": "Abrimos mão de independência total entre PF e PJ em prol de uma experiência integrada e fluida"
+      },
+      {
+        "name": "Gratuito no core, premium no extra",
+        "description": "Operações financeiras essenciais (Pix, boletos, conta) são gratuitas; funcionalidades avançadas podem ser premium",
+        "in_practice": "Pix ilimitado gratuito, boletos gratuitos, conta sem mensalidade; dashboards avançados e relatórios podem ser pagos",
+        "trade_off": "Abrimos mão de receita imediata por operação em prol de adoção e volume"
+      },
+      {
+        "name": "Dados do empreendedor pertencem ao empreendedor",
+        "description": "O empreendedor tem acesso total e export dos seus dados financeiros, sem lock-in",
+        "in_practice": "Export de extrato em CSV/PDF, relatórios downloadáveis, API aberta (futuro)",
+        "trade_off": "Facilitamos a saída do cliente, apostando que a experiência superior garante retenção"
+      },
+      {
+        "name": "Segurança sem fricção desnecessária",
+        "description": "Proteger o empreendedor sem que ele sinta que está lutando contra o próprio banco",
+        "in_practice": "Confirmação adicional só acima de R$ 5K (RN-03); limite noturno automático (RN-02); RBAC por perfil",
+        "trade_off": "Aceitamos que limites menores passem sem confirmação extra em prol de fluidez operacional"
+      }
+    ],
+
+    "outcome_roadmap": {
+      "now": {
+        "period": "Abril-Maio 2026",
+        "theme": "O empreendedor abre a conta PJ, faz as primeiras operações e sente que o banco entende seu negócio",
+        "outcomes": [
+          "MEIs abrem conta PJ em < 3 min e fazem primeira operação no mesmo dia",
+          "Empreendedores cobram clientes com boleto+Pix sem precisar de outro sistema",
+          "O empreendedor percebe a conexão PF-PJ no mesmo ambiente"
+        ],
+        "linked_krs": ["KR-01", "KR-02", "KR-03"]
+      },
+      "next": {
+        "period": "Junho-Julho 2026",
+        "theme": "O empreendedor entende para onde vai o dinheiro e toma decisões melhores sem esforço",
+        "outcomes": [
+          "MEIs sabem quanto lucraram sem planilha",
+          "Categorização automática por IA elimina trabalho manual",
+          "Empreendedores com sócios delegam acesso com confiança"
+        ],
+        "linked_krs": ["KR-01", "KR-02", "KR-04"]
+      },
+      "later": {
+        "period": "Agosto-Outubro 2026",
+        "theme": "ECP Emps se torna indispensável para a saúde financeira do negócio",
+        "outcomes": [
+          "Empreendedores confiam no ECP Emps para antecipar problemas de fluxo de caixa",
+          "ARPAC atinge R$ 70/mês via serviços premium adotados voluntariamente",
+          "Contadores recomendam o ECP Emps como melhor conta PJ para MEIs"
+        ],
+        "linked_krs": ["KR-02", "KR-04"]
+      }
+    },
+
+    "critical_assumptions": [
+      {
+        "id": "A-01",
+        "opportunity": "OPP-07 — MEIs misturam PF/PJ",
+        "assumption": "MEIs freelancers realmente querem separar gastos PF/PJ (não apenas dizem)",
+        "risk": "high",
+        "category": "desirability",
+        "validation_method": "Entrevista com 10 MEIs freelancers digitais",
+        "success_criteria": "7/10 demonstram comportamento ativo de separação nos últimos 3 meses"
+      },
+      {
+        "id": "A-03",
+        "opportunity": "OPP-04 — Boleto burocrático e caro",
+        "assumption": "MEIs preferem cobrar via boleto se o processo for simples e gratuito",
+        "risk": "high",
+        "category": "desirability",
+        "validation_method": "Survey com 30 MEIs freelancers",
+        "success_criteria": "60%+ usariam para 2+ clientes/mês"
+      },
+      {
+        "id": "A-05",
+        "opportunity": "OPP-10 — Não sabem quanto lucram",
+        "assumption": "MEIs tomariam decisões diferentes se tivessem visibilidade de fluxo de caixa",
+        "risk": "high",
+        "category": "desirability",
+        "validation_method": "Entrevista com 8 MEIs mostrando mock de dashboard",
+        "success_criteria": "6/8 identificam decisão concreta que mudariam"
+      },
+      {
+        "id": "A-08",
+        "opportunity": "OPP-01 — Burocracia na abertura",
+        "assumption": "MEIs com conta PF no ECP abririam conta PJ no mesmo ecossistema",
+        "risk": "high",
+        "category": "desirability",
+        "validation_method": "Banner de interesse no ecp-digital-bank PF",
+        "success_criteria": "5%+ da base clica; 30%+ preenchem pré-cadastro"
+      }
+    ],
+
+    "metrics_issues": [
+      {
+        "kr": "KR-03",
+        "severity": "BLOCKING",
+        "issue": "Sem tabela de analytics_events para rastrear toggles PF/PJ. Sem definição de sessão no schema.",
+        "remediation": "Adicionar tabela analytics_events ou estender pj_audit_logs com action='profile_switch'. Definir sessão como 30min de inatividade."
+      }
+    ]
+  },
+
+  "open_questions": [
+    "KR-03 requer tabela analytics_events não prevista no tech_spec. Incluir na Fase 03?",
+    "Premissas de desejabilidade (A-01, A-03, A-05, A-08) devem ser validadas antes do desenvolvimento ou assumimos o risco?",
+    "O target de 2+ toggles PF/PJ por sessão pode ser agressivo demais — revisar após primeiros dados?"
+  ],
+
+  "next_hitl": 1
+}

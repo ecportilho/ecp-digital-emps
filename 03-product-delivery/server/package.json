@@ -1,0 +1,31 @@
+{
+  "name": "ecp-digital-emps-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "migrate": "tsx src/database/migrations/run.ts",
+    "seed": "tsx src/database/seed.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/helmet": "^12.0.0",
+    "better-sqlite3": "^11.0.0",
+    "zod": "^3.23.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.19.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/bcryptjs": "^2.4.0",
+    "@types/uuid": "^10.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

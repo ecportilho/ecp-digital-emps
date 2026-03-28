@@ -1,0 +1,943 @@
+{
+  "metadata": {
+    "agent": "market-research-subagent",
+    "phase": "01-contexto-estrategico",
+    "product": "ECP Emps",
+    "generated_at": "2026-03-28T00:00:00Z",
+    "version": "1.0",
+    "status": "completed"
+  },
+
+  "market_sizing": {
+    "geography": "Brazil",
+    "segment": "MEI + Microempresas (ME)",
+    "base_year": 2026,
+    "projection_horizon_years": 3,
+
+    "market_population": {
+      "meis_ativos": {
+        "value": 16300000,
+        "source": "Portal do Empreendedor, 2025",
+        "notes": "Crescimento médio de 15% a.a. nos últimos 5 anos; projeção 2026 pode atingir ~18M"
+      },
+      "microempresas_ativas_me": {
+        "value": 7200000,
+        "source": "IBGE/Receita Federal, 2024",
+        "notes": "Inclui ME com faturamento até R$ 360.000/ano"
+      },
+      "total_publico_alvo": {
+        "value": 23500000,
+        "calculation": "16.3M MEI + 7.2M ME"
+      },
+      "percentual_com_conta_pj_digital": {
+        "value": 0.35,
+        "source": "Estimativa Banco Central 2025",
+        "notes": "65% ainda usa bancos tradicionais ou não tem conta PJ"
+      },
+      "percentual_insatisfeitos_com_banco_atual": {
+        "value": 0.48,
+        "source": "SEBRAE 2024"
+      }
+    },
+
+    "tam": {
+      "value_brl": 42000000000,
+      "value_display": "R$ 42 bilhões",
+      "definition": "Receita potencial total de serviços financeiros para o universo MEI + ME no Brasil",
+      "methodology": "Bottom-up: 23.5M empresas x ARPAC médio de R$ 1.787/ano (tarifas bancárias + crédito + seguros + serviços financeiros)",
+      "assumptions": [
+        "Inclui receitas de tarifas bancárias, crédito, float, seguros e serviços de valor agregado",
+        "ARPAC médio de mercado estimado em R$ 1.787/ano para MEI+ME",
+        "Baseado em dados de receita média por cliente PJ de fintechs e bancos digitais"
+      ]
+    },
+
+    "sam": {
+      "value_brl": 16800000000,
+      "value_display": "R$ 16,8 bilhões",
+      "percentage_of_tam": 0.40,
+      "definition": "Parcela do TAM composta por empreendedores digitalmente ativos, insatisfeitos com soluções atuais e acessíveis via canais digitais",
+      "methodology": "TAM x 40% (interseção de digitalmente ativos + insatisfeitos + perfil web-first)",
+      "qualifying_criteria": [
+        "Digitalmente ativo: usa internet banking ou fintech regularmente",
+        "Insatisfeito: troca de banco nos últimos 24 meses ou declara insatisfação",
+        "Perfil web-first: trabalha predominantemente no computador (designers, devs, consultores, e-commerce)",
+        "Faturamento compatível: MEI até R$ 81K/ano, ME até R$ 360K/ano"
+      ]
+    },
+
+    "som": {
+      "value_brl_low": 84000000,
+      "value_brl_high": 168000000,
+      "value_display": "R$ 84–168 milhões",
+      "percentage_of_sam_low": 0.005,
+      "percentage_of_sam_high": 0.01,
+      "target_customers_low": 100000,
+      "target_customers_high": 200000,
+      "arpac_annual_brl": 840,
+      "timeline": "3 anos pós-lançamento",
+      "methodology": "SAM x 0.5-1% de penetração, validado pelo benchmark de fintechs PJ brasileiras em estágio similar",
+      "growth_trajectory": {
+        "year_1": {
+          "customers": 15000,
+          "revenue_brl": 12600000,
+          "notes": "Foco em MEIs do ecossistema ECP (base PF existente). CAC baixo por alavancagem da base."
+        },
+        "year_2": {
+          "customers": 60000,
+          "revenue_brl": 50400000,
+          "notes": "Expansão para MEIs fora do ecossistema + primeiras MEs. Produto com NF-e e crédito."
+        },
+        "year_3": {
+          "customers": 150000,
+          "revenue_brl": 126000000,
+          "notes": "Consolidação. ARPAC cresce com upsell de crédito, seguros e Cora-like Pro features."
+        }
+      },
+      "benchmarks": [
+        {
+          "company": "Cora",
+          "metric": "1.4M clientes em ~5 anos",
+          "relevance": "PJ-first, segmento similar, crescimento de referência"
+        },
+        {
+          "company": "Conta Simples",
+          "metric": "200K+ clientes em ~4 anos",
+          "relevance": "Foco PME, web-first parcial, baseline conservador"
+        }
+      ]
+    },
+
+    "revenue_model": {
+      "primary_streams": [
+        {
+          "stream": "Float (rendimento sobre depósitos)",
+          "estimated_share": 0.35,
+          "notes": "Saldo médio parado na conta PJ rende CDI para a plataforma"
+        },
+        {
+          "stream": "Interchange de cartão corporativo",
+          "estimated_share": 0.25,
+          "notes": "Receita de interchange Visa/Mastercard nas compras com cartão virtual"
+        },
+        {
+          "stream": "Crédito PJ (pós-MVP)",
+          "estimated_share": 0.20,
+          "notes": "Antecipação de recebíveis, capital de giro para MEI/ME"
+        },
+        {
+          "stream": "Boletos e cobranças",
+          "estimated_share": 0.10,
+          "notes": "Gratuito no MVP, monetizável via volume alto e funcionalidades premium"
+        },
+        {
+          "stream": "Plano premium (pós-MVP)",
+          "estimated_share": 0.10,
+          "notes": "Funcionalidades avançadas de gestão, relatórios, API, multi-empresa"
+        }
+      ]
+    },
+
+    "risks_and_assumptions": [
+      {
+        "risk": "Crescimento de MEIs desacelera com mudanças regulatórias",
+        "impact": "medium",
+        "mitigation": "Diversificar para ME e EPP como segmento secundário"
+      },
+      {
+        "risk": "ARPAC real menor que estimado por baixo engajamento",
+        "impact": "high",
+        "mitigation": "Investir em features de engajamento (gestão financeira, alertas, IA) para aumentar stickiness"
+      },
+      {
+        "risk": "Competição intensa reduz capacidade de aquisição",
+        "impact": "medium",
+        "mitigation": "Diferenciação web-first + integração PF-PJ como moat"
+      }
+    ]
+  },
+
+  "competitor_analysis": {
+    "analysis_date": "2026-03-28",
+    "market": "Bancos Digitais PJ — Brasil",
+    "total_competitors_mapped": 7,
+
+    "competitive_landscape_summary": "O mercado de bancos digitais PJ no Brasil é altamente competitivo, com Nubank PJ liderando em base de clientes (15M+) e PagBank PJ em segundo (8M+). A maioria dos players adaptou produtos PF para PJ, resultando em experiências subótimas para empreendedores. Nenhum competidor oferece experiência web-first completa, gestão financeira inteligente com IA, ou integração PF-PJ com visão consolidada real. Os gaps são claros e exploráveis.",
+
+    "competitors": [
+      {
+        "name": "Nubank PJ",
+        "type": "direct",
+        "customers_pj": "15M+",
+        "focus": "MEI, EI, LTDA",
+        "tier": "market_leader",
+        "strengths": [
+          "Maior base de clientes PJ do Brasil",
+          "Marca forte e confiança do consumidor",
+          "Pix ilimitado e gratuito",
+          "Boletos gratuitos",
+          "Toggle PF/PJ no mesmo app (referência de UX)",
+          "NuTap (maquininha no celular)",
+          "Zero taxas na conta básica",
+          "Ecossistema completo com crédito PJ"
+        ],
+        "weaknesses": [
+          "Sem gestão de fluxo de caixa",
+          "Sem emissão de NF-e",
+          "Sem categorização inteligente de despesas",
+          "Sem integração com sistemas contábeis",
+          "Web desktop extremamente limitado",
+          "Produto PJ é adaptação do PF, não foi desenhado para empreendedor",
+          "Suporte PJ genérico, não especializado"
+        ],
+        "pricing": "Gratuito (monetização via crédito e float)",
+        "web_desktop": "Parcial",
+        "nfe_integrada": false,
+        "gestao_financeira": "Básica",
+        "threat_level": "high",
+        "strategic_notes": "Principal ameaça por escala e marca. Porém a experiência PJ é superficial — oportunidade de diferenciação por profundidade de funcionalidades PJ."
+      },
+      {
+        "name": "Cora",
+        "type": "direct",
+        "customers_pj": "1.4M+",
+        "focus": "PMEs (Simples Nacional)",
+        "tier": "strong_challenger",
+        "strengths": [
+          "Nasceu exclusivamente PJ — cultura e produto PJ-native",
+          "Gestão de cobranças avançada (boleto + QR Code Pix + carnê + recorrência)",
+          "NF-e integrada (único player com isso no MVP)",
+          "Programa Coraliados (contadores como canal de aquisição)",
+          "Perfil de acesso para contador",
+          "Cora Pro com automações e dashboards avançados",
+          "Maior volume de depósitos entre SCDs (BCB)",
+          "Receita crescendo 74% a.a."
+        ],
+        "weaknesses": [
+          "Base menor que concorrentes (1.4M vs 15M Nubank)",
+          "NF-e é paga (não gratuita)",
+          "Cora Pro é plano pago — funcionalidades avançadas não são gratuitas",
+          "Sem integração PF-PJ (é exclusivamente PJ)",
+          "CoraWeb existe mas não é web-first",
+          "Sem categorização automática com IA",
+          "Sem detecção de gastos misturados PF/PJ"
+        ],
+        "pricing": "Gratuito (básico) + Cora Pro (pago)",
+        "web_desktop": "App + CoraWeb",
+        "nfe_integrada": true,
+        "gestao_financeira": "Cora Pro (pago)",
+        "threat_level": "high",
+        "strategic_notes": "Principal referência de produto PJ-first. A Cora prova que o mercado valoriza produto nativo PJ. ECP Emps pode capturar MEIs que a Cora não atende bem (foco Cora é PME Simples Nacional, não MEI individual)."
+      },
+      {
+        "name": "Inter PJ",
+        "type": "direct",
+        "customers_pj": "5M+",
+        "focus": "MEI a grande empresa",
+        "tier": "established_player",
+        "strengths": [
+          "Ecossistema completo (banco, investimentos, seguros, shopping)",
+          "Base grande (5M+)",
+          "Pix e boletos gratuitos",
+          "Super App com múltiplos serviços",
+          "Crédito PJ diversificado"
+        ],
+        "weaknesses": [
+          "Experiência PJ genérica — não é especializada para MEI",
+          "Sem NF-e integrada",
+          "Gestão financeira básica",
+          "Web desktop parcial e lento",
+          "Interface complexa por excesso de funcionalidades",
+          "Suporte PJ misturado com PF"
+        ],
+        "pricing": "Gratuito",
+        "web_desktop": "Parcial",
+        "nfe_integrada": false,
+        "gestao_financeira": "Básica",
+        "threat_level": "medium",
+        "strategic_notes": "Competidor por amplitude, não por profundidade PJ. Ana Beatriz (persona) já usa Inter PJ e está insatisfeita — validação direta do gap."
+      },
+      {
+        "name": "C6 Bank PJ",
+        "type": "direct",
+        "customers_pj": "3M+",
+        "focus": "MEI a média empresa",
+        "tier": "established_player",
+        "strengths": [
+          "Conta global (câmbio)",
+          "CDB com liquidez diária",
+          "Programa de pontos Átomos",
+          "Cartão com ampla aceitação"
+        ],
+        "weaknesses": [
+          "Boletos são pagos",
+          "Sem NF-e integrada",
+          "Gestão financeira básica",
+          "Sem experiência web desktop",
+          "Não tem diferenciação PJ clara",
+          "Sem integração PF-PJ real"
+        ],
+        "pricing": "Gratuito (conta) + tarifas avulsas",
+        "web_desktop": "Não",
+        "nfe_integrada": false,
+        "gestao_financeira": "Básica",
+        "threat_level": "low",
+        "strategic_notes": "Competidor fraco no segmento MEI. Sem foco em empreendedor, sem web desktop."
+      },
+      {
+        "name": "Stone (Ton)",
+        "type": "direct",
+        "customers_pj": "2M+",
+        "focus": "MEI, autônomos",
+        "tier": "niche_player",
+        "strengths": [
+          "Integração com maquininha (ecossistema de pagamentos)",
+          "Pix integrado à maquininha",
+          "Boletos gratuitos",
+          "Gestão integrada a vendas",
+          "Forte presença no varejo físico"
+        ],
+        "weaknesses": [
+          "Dependente de maquininha — não serve empreendedor digital",
+          "Sem experiência web desktop",
+          "Conta bancária é secundária ao produto de adquirência",
+          "Sem NF-e integrada",
+          "Sem integração PF-PJ",
+          "Foco excessivo em varejo físico"
+        ],
+        "pricing": "Taxas de adquirência + conta gratuita",
+        "web_desktop": "Não",
+        "nfe_integrada": false,
+        "gestao_financeira": "Integrada a vendas",
+        "threat_level": "low",
+        "strategic_notes": "Irrelevante para o público web-first do ECP Emps. Stone/Ton é para varejo físico com maquininha."
+      },
+      {
+        "name": "PagBank PJ",
+        "type": "direct",
+        "customers_pj": "8M+",
+        "focus": "MEI, micro",
+        "tier": "established_player",
+        "strengths": [
+          "Base enorme (8M+), segunda maior depois do Nubank",
+          "Pix e boletos gratuitos",
+          "Ecossistema PagSeguro (maquininha + e-commerce)",
+          "Conta com rendimento automático"
+        ],
+        "weaknesses": [
+          "UX considerada inferior aos neobancos",
+          "Gestão financeira básica",
+          "Web desktop parcial",
+          "Cartão PJ com limite baixo (mencionado pela persona Lucas)",
+          "Sem NF-e integrada",
+          "Sem categorização inteligente",
+          "Herança de marca PagSeguro gera percepção de 'maquininha, não banco'"
+        ],
+        "pricing": "Gratuito + taxas de adquirência",
+        "web_desktop": "Parcial",
+        "nfe_integrada": false,
+        "gestao_financeira": "Básica",
+        "threat_level": "medium",
+        "strategic_notes": "Lucas (persona) usa PagBank e está insatisfeito — limite de cartão baixo e sem gestão financeira. Validação direta de gap."
+      },
+      {
+        "name": "Conta Simples",
+        "type": "direct",
+        "customers_pj": "200K+",
+        "focus": "PMEs",
+        "tier": "niche_player",
+        "strengths": [
+          "Gestão financeira avançada com categorias",
+          "Experiência web (único concorrente com web real)",
+          "Pix e boletos gratuitos",
+          "Multi-cartões com controle de limite",
+          "Foco em gestão, não apenas transações"
+        ],
+        "weaknesses": [
+          "Base pequena (200K+)",
+          "Foco em PME, não em MEI individual",
+          "Sem integração PF-PJ",
+          "Sem NF-e integrada",
+          "Sem categorização com IA (manual)",
+          "Sem visão por ciclo de faturamento",
+          "Pricing pode ser barreira para MEI"
+        ],
+        "pricing": "Planos pagos",
+        "web_desktop": "Sim (web)",
+        "nfe_integrada": false,
+        "gestao_financeira": "Avançada (categorias)",
+        "threat_level": "medium",
+        "strategic_notes": "Mais próximo do posicionamento ECP Emps em gestão + web. Porém foco em PME maior, não MEI. A Conta Simples valida que existe demanda por gestão financeira PJ na web."
+      }
+    ],
+
+    "competitive_matrix": {
+      "dimensions": ["pix_pj_gratuito", "boleto_gratuito", "nfe_integrada", "gestao_financeira_inteligente", "web_desktop_completo", "integracao_pf_pj", "categorizacao_ia", "visao_ciclo_faturamento", "multi_usuarios_rbac", "deteccao_gastos_misturados"],
+      "scores": {
+        "nubank_pj":       [1, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+        "cora":            [1, 1, 1, 0, 0, 0, 0, 0, 1, 0],
+        "inter_pj":        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "c6_bank_pj":      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "stone_ton":       [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "pagbank_pj":      [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "conta_simples":   [1, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+        "ecp_emps":        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      },
+      "legend": "1 = oferece, 0 = não oferece. ECP Emps é o único com pontuação máxima (10/10)."
+    },
+
+    "key_gaps_exploitable": [
+      {
+        "gap": "Web-first completo",
+        "description": "Nenhum concorrente PJ oferece experiência bancária completa no desktop. Conta Simples é o mais próximo, mas não é web-first.",
+        "ecp_emps_advantage": "Dashboard financeiro empresarial nativo para 1280px+. Empreendedores digitais (designers, devs, consultores) trabalham no computador o dia todo.",
+        "addressable_segment": "MEIs de serviços digitais (~4M empreendedores)",
+        "priority": "critical"
+      },
+      {
+        "gap": "Gestão financeira inteligente com IA",
+        "description": "Nenhum concorrente oferece categorização automática de gastos PJ com inteligência artificial. Conta Simples tem categorias manuais.",
+        "ecp_emps_advantage": "Auto-categorização por merchant category + IA. Insights automáticos de gastos.",
+        "addressable_segment": "73% dos MEIs sem controle financeiro formal",
+        "priority": "high"
+      },
+      {
+        "gap": "Visão por ciclo de faturamento",
+        "description": "Todos os bancos organizam extrato por mês-calendário. MEIs têm ciclos irregulares de recebimento.",
+        "ecp_emps_advantage": "Visão por ciclo de recebimento do MEI, não por mês-calendário.",
+        "addressable_segment": "MEIs com faturamento variável (freelancers, prestadores de serviço)",
+        "priority": "high"
+      },
+      {
+        "gap": "Integração PF-PJ com visão consolidada",
+        "description": "Nubank tem toggle PF/PJ, mas sem dashboard consolidado de 'quanto sobra depois do negócio e do pessoal'.",
+        "ecp_emps_advantage": "Dashboard unificado PF+PJ, transferência instantânea, visão consolidada de patrimônio.",
+        "addressable_segment": "42% dos MEIs que não separam conta PF da PJ",
+        "priority": "critical"
+      },
+      {
+        "gap": "Detecção de gastos misturados PF/PJ",
+        "description": "Nenhum concorrente detecta quando um gasto pessoal é feito na conta PJ (ou vice-versa).",
+        "ecp_emps_advantage": "Alerta automático de gasto pessoal na conta PJ baseado em merchant category.",
+        "addressable_segment": "MEIs que misturam gastos — problema universal do segmento",
+        "priority": "medium"
+      }
+    ],
+
+    "strategic_positioning": {
+      "category": "Banco digital PJ web-first para MEIs",
+      "positioning_statement": "ECP Emps é o primeiro banco digital brasileiro desenhado para MEIs que trabalham no computador, oferecendo gestão financeira inteligente com IA, integração real entre vida pessoal e negócio, e uma experiência web-first que nenhum concorrente entrega.",
+      "primary_differentiators": [
+        "Web-first (único no mercado PJ)",
+        "Integração PF-PJ com visão consolidada (único além do Nubank, mas com mais profundidade)",
+        "Categorização automática com IA (único no mercado PJ)"
+      ],
+      "competitive_moat": "A combinação web-first + integração PF-PJ + IA de categorização cria um moat triplo que nenhum concorrente pode replicar rapidamente. Nubank teria que redesenhar a experiência web. Cora teria que criar produto PF. Conta Simples teria que adicionar IA e integração PF."
+    }
+  },
+
+  "trend_scanning": {
+    "scan_date": "2026-03-28",
+    "horizon": "1-3 anos (2026-2029)",
+    "focus_areas": ["fintech_pj", "open_finance", "ia", "pix_ecosystem"],
+
+    "macro_trends": [
+      {
+        "id": "MT-01",
+        "trend": "Explosão do MEI como força econômica",
+        "category": "market",
+        "horizon": "ongoing",
+        "description": "O Brasil caminha para 20M+ de MEIs até 2027. O novo limite de faturamento MEI (proposta de R$ 130K/ano em discussão no Congresso) ampliaria ainda mais o segmento. MEIs já representam 70% dos CNPJs ativos.",
+        "impact_on_ecp_emps": "high",
+        "implication": "TAM cresce organicamente. Mais MEIs = mais demanda por bancos digitais PJ simples e baratos. O timing de lançamento é favorável.",
+        "sources": ["Portal do Empreendedor", "SEBRAE", "Projetos de lei em tramitação"]
+      },
+      {
+        "id": "MT-02",
+        "trend": "Open Finance Brasil — fase de maturidade",
+        "category": "regulation",
+        "horizon": "1-2 anos",
+        "description": "Open Finance brasileiro entra na fase de produtos de crédito e portabilidade automática em 2026-2027. Iniciação de pagamentos via Open Finance cresce 300% a.a. Compartilhamento de dados PJ será obrigatório para grandes bancos.",
+        "impact_on_ecp_emps": "high",
+        "implication": "ECP Emps pode consumir dados financeiros do cliente de outros bancos para oferecer gestão financeira consolidada. Portabilidade de crédito PJ reduz lock-in dos incumbentes. Oportunidade de ser 'agregador financeiro' do MEI.",
+        "sources": ["Banco Central do Brasil", "Open Finance Brasil"]
+      },
+      {
+        "id": "MT-03",
+        "trend": "Pix como infraestrutura de pagamentos B2B",
+        "category": "technology",
+        "horizon": "1-2 anos",
+        "description": "Pix Automático (débito recorrente) lançado em 2025, Pix por Aproximação em expansão, Pix Garantido (crédito) em piloto. Volume de Pix PJ cresce 150% a.a. Pix se torna infraestrutura padrão para cobrança B2B, substituindo boletos em muitos cenários.",
+        "impact_on_ecp_emps": "high",
+        "implication": "Funcionalidades de Pix empresarial (QR dinâmico, Pix Automático, cobranças recorrentes via Pix) se tornam diferenciais-chave. Boleto não morre, mas Pix complementa e em alguns casos substitui. ECP Emps deve ser Pix-first nas cobranças.",
+        "sources": ["BCB", "FEBRABAN relatórios de pagamentos"]
+      },
+      {
+        "id": "MT-04",
+        "trend": "IA generativa aplicada a finanças de pequenos negócios",
+        "category": "technology",
+        "horizon": "1-3 anos",
+        "description": "LLMs e modelos de IA aplicados a: categorização automática de transações (precisão >95%), previsão de fluxo de caixa, assistentes financeiros conversacionais, detecção de anomalias em gastos, geração automática de relatórios contábeis.",
+        "impact_on_ecp_emps": "critical",
+        "implication": "A categorização automática com IA planejada para o ECP Emps está na tendência certa. Próximos passos naturais: assistente financeiro com LLM ('Quanto gastei com fornecedores este mês?'), previsão de fluxo de caixa, e relatórios contábeis automatizados.",
+        "sources": ["Gartner Fintech Trends 2026", "McKinsey Global Banking Review"]
+      },
+      {
+        "id": "MT-05",
+        "trend": "Embedded Finance e Banking-as-a-Service para PJ",
+        "category": "market",
+        "horizon": "2-3 anos",
+        "description": "Plataformas de e-commerce, marketplaces e ERPs integram serviços financeiros diretamente. Shopify Balance, iFood Conta, Mercado Pago são exemplos. A fronteira entre 'plataforma de negócios' e 'banco' se dissolve.",
+        "impact_on_ecp_emps": "medium",
+        "implication": "Risco de plataformas como iFood e Mercado Livre oferecerem serviços bancários PJ integrados. Oportunidade: ECP Emps pode se posicionar como banco-base que agrega receitas de múltiplas plataformas, oferecendo visão consolidada.",
+        "sources": ["a16z Fintech Report", "Relatórios de mercado BaaS"]
+      },
+      {
+        "id": "MT-06",
+        "trend": "Regulação de IA e proteção de dados no setor financeiro",
+        "category": "regulation",
+        "horizon": "1-2 anos",
+        "description": "Marco Legal da IA (PL 2338/2023) avança no Brasil com regras para IA em decisões financeiras. LGPD enforcement crescente. BCB exige explicabilidade em modelos de crédito com IA.",
+        "impact_on_ecp_emps": "medium",
+        "implication": "A IA de categorização do ECP Emps deve ser explicável e auditável desde o MVP. Investir em compliance de IA desde o início evita retrabalho regulatório.",
+        "sources": ["Senado Federal - PL 2338/2023", "ANPD", "BCB Resolução"]
+      },
+      {
+        "id": "MT-07",
+        "trend": "Reforma tributária e simplificação fiscal para MEI",
+        "category": "regulation",
+        "horizon": "2-3 anos",
+        "description": "Reforma tributária (EC 132/2023) com IBS e CBS substitui tributos atuais a partir de 2026-2033. Impacto direto na vida fiscal do MEI. Novos sistemas de emissão de NF-e com integração digital obrigatória.",
+        "impact_on_ecp_emps": "medium",
+        "implication": "Oportunidade de se tornar o banco que 'traduz' a complexidade tributária para o MEI. Feature de estimativa de imposto, alertas de DAS, e preparação automática para declaração anual.",
+        "sources": ["Emenda Constitucional 132/2023", "Receita Federal"]
+      },
+      {
+        "id": "MT-08",
+        "trend": "Web-first e progressive web apps no setor bancário",
+        "category": "technology",
+        "horizon": "1-2 anos",
+        "description": "Movimento crescente de experiências bancárias web-first, especialmente para B2B/PJ. Mercury (EUA), Brex, Ramp e outros produtos B2B financeiros são web-first. No Brasil, Conta Simples é o pioneiro parcial.",
+        "impact_on_ecp_emps": "high",
+        "implication": "O posicionamento web-first do ECP Emps está alinhado com a tendência global de produtos financeiros B2B. Enquanto bancos brasileiros insistem no mobile-first para PJ, há espaço claro para quem entrega desktop-first.",
+        "sources": ["Mercury.com growth metrics", "Brex product strategy"]
+      }
+    ],
+
+    "technology_signals": [
+      {
+        "signal": "Pix Automático em produção",
+        "maturity": "early_adoption",
+        "relevance": "Cobranças recorrentes de MEI (mensalidades, assinaturas) via Pix sem boleto",
+        "action": "Implementar Pix Automático no roadmap pós-MVP para cobranças recorrentes"
+      },
+      {
+        "signal": "IA de categorização transacional atinge 95%+ de precisão",
+        "maturity": "mainstream",
+        "relevance": "Viabiliza a proposta de auto-categorização do ECP Emps",
+        "action": "Implementar no MVP com modelo simples (rules + ML), evoluir para LLM no pós-MVP"
+      },
+      {
+        "signal": "Open Finance APIs para PJ em obrigatoriedade",
+        "maturity": "early_majority",
+        "relevance": "Acesso a dados financeiros de clientes em outros bancos",
+        "action": "Planejar integração Open Finance para year 2, como diferencial de gestão consolidada"
+      },
+      {
+        "signal": "DREX (Real Digital) em piloto expandido",
+        "maturity": "innovators",
+        "relevance": "Potencial para contratos inteligentes em cobranças PJ e pagamentos condicionais",
+        "action": "Monitorar evolução. Não investir no MVP, mas manter arquitetura extensível."
+      }
+    ],
+
+    "opportunity_windows": [
+      {
+        "window": "2026 H2 — Lançamento antes da obrigatoriedade de NF-e digital unificada",
+        "description": "A reforma tributária exigirá NF-e integrada digitalmente. Bancos que oferecerem isso primeiro capturam MEIs em transição.",
+        "urgency": "high"
+      },
+      {
+        "window": "2026-2027 — Open Finance PJ madura o suficiente para agregação",
+        "description": "APIs de dados PJ permitem que ECP Emps ofereça visão consolidada de todas as contas do empreendedor.",
+        "urgency": "medium"
+      },
+      {
+        "window": "2026 — Vazio de web-first PJ no Brasil",
+        "description": "Nenhum concorrente investindo em web-first PJ. First-mover advantage real. Janela de 12-18 meses antes que alguém reaja.",
+        "urgency": "critical"
+      }
+    ]
+  },
+
+  "customer_segmentation": {
+    "segmentation_methodology": "Behavioral segmentation based on JTBD (Jobs To Be Done), pain intensity, and digital maturity",
+    "total_segments": 4,
+
+    "segments": [
+      {
+        "id": "SEG-01",
+        "name": "Freelancer Digital (MEI de Serviços)",
+        "size_estimate": "~4 milhões de MEIs",
+        "representative_persona": "Ana Beatriz Rodrigues, 29 anos, designer freelancer",
+        "demographics": {
+          "age_range": "22-38",
+          "income_range": "R$ 3.000–7.000/mês",
+          "location": "Capitais e cidades médias, home office predominante",
+          "education": "Superior completo ou em andamento",
+          "gender_split": "55% feminino, 45% masculino"
+        },
+        "psychographics": {
+          "digital_maturity": "alta",
+          "financial_literacy": "média",
+          "brand_preference": "Design e UX importam. Preferem fintechs a bancos tradicionais.",
+          "adoption_profile": "Early adopter para ferramentas digitais"
+        },
+        "activities": ["Design gráfico", "Desenvolvimento de software", "Marketing digital", "Consultoria", "Redação/conteúdo", "Fotografia", "Tradução"],
+        "jobs_to_be_done": [
+          {
+            "job": "Separar finanças pessoais das do negócio sem esforço manual",
+            "importance": "critical",
+            "current_solution": "Tenta separar mentalmente, desiste em poucos dias. Usa conta PF para tudo.",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Cobrar clientes de forma profissional e rápida",
+            "importance": "high",
+            "current_solution": "Pix com chave aleatória + mensagem no WhatsApp. Boleto é burocrático demais.",
+            "satisfaction_with_current": "low"
+          },
+          {
+            "job": "Saber em tempo real quanto o negócio lucra por mês",
+            "importance": "high",
+            "current_solution": "Planilha esporádica ou nada. 73% não têm controle financeiro formal.",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Gerenciar finanças do negócio pelo computador (web)",
+            "importance": "high",
+            "current_solution": "Tenta usar Internet Banking pelo browser, experiência ruim. Volta para o celular.",
+            "satisfaction_with_current": "low"
+          }
+        ],
+        "pain_points": [
+          {
+            "pain": "Mistura gastos PF/PJ constantemente",
+            "intensity": "high",
+            "frequency": "daily",
+            "financial_impact": "Não sabe o lucro real. Pode estar perdendo dinheiro sem perceber."
+          },
+          {
+            "pain": "Emitir boleto custa dinheiro e tempo",
+            "intensity": "medium",
+            "frequency": "weekly",
+            "financial_impact": "R$ 2-5 por boleto. R$ 50-100/mês em tarifas."
+          },
+          {
+            "pain": "Conta PJ do banco não funciona no desktop",
+            "intensity": "high",
+            "frequency": "daily",
+            "financial_impact": "Perda de produtividade. Troca de contexto celular/computador."
+          },
+          {
+            "pain": "Não sabe quanto pode gastar sem comprometer o negócio",
+            "intensity": "medium",
+            "frequency": "weekly",
+            "financial_impact": "Gastos impulsivos na conta errada."
+          }
+        ],
+        "willingness_to_pay": {
+          "monthly_fee": "R$ 0 (espera conta gratuita, mas pagaria R$ 19-29/mês por gestão financeira inteligente)",
+          "per_transaction": "R$ 0 (Pix e boleto devem ser gratuitos)",
+          "premium_features": "Pagaria por relatórios contábeis automáticos e integração com ferramentas de gestão"
+        },
+        "acquisition_channels": ["Instagram", "LinkedIn", "YouTube (creators de finanças para freelancers)", "Comunidades de design/dev", "Word of mouth"],
+        "priority_for_mvp": "primary",
+        "estimated_ltv_annual": "R$ 720",
+        "estimated_cac": "R$ 35-50"
+      },
+      {
+        "id": "SEG-02",
+        "name": "Empreendedor de Varejo Local (MEI/ME de Alimentação e Comércio)",
+        "size_estimate": "~6 milhões de MEIs + MEs",
+        "representative_persona": "Lucas Ferreira, 34 anos, dono de hamburgueria artesanal",
+        "demographics": {
+          "age_range": "25-45",
+          "income_range": "R$ 4.000–12.000/mês",
+          "location": "Cidades de todos os portes, foco em bairros comerciais",
+          "education": "Ensino médio a superior incompleto",
+          "gender_split": "60% masculino, 40% feminino"
+        },
+        "psychographics": {
+          "digital_maturity": "média",
+          "financial_literacy": "baixa a média",
+          "brand_preference": "Praticidade acima de tudo. Usa o que funciona.",
+          "adoption_profile": "Early majority — adota quando vê outros usando"
+        },
+        "activities": ["Alimentação (restaurantes, lanchonetes, food trucks)", "Comércio local (roupas, acessórios)", "Beleza (salões, barbearias)", "Serviços automotivos"],
+        "jobs_to_be_done": [
+          {
+            "job": "Saber quanto entra vs. quanto sai por categoria (fornecedores, fixos, variáveis)",
+            "importance": "critical",
+            "current_solution": "Planilha no celular ou caderninho. 58% usam planilhas, 42% nada.",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Cobrar clientes B2B (buffets, eventos) com boleto profissional",
+            "importance": "high",
+            "current_solution": "Emite boleto pelo PagBank com dificuldade. Prefere Pix mas precisa de comprovante formal.",
+            "satisfaction_with_current": "low"
+          },
+          {
+            "job": "Ter cartão PJ com limite suficiente para comprar insumos",
+            "importance": "high",
+            "current_solution": "Cartão PJ do PagBank com limite baixo. Usa cartão PF para compras do negócio.",
+            "satisfaction_with_current": "low"
+          },
+          {
+            "job": "Conciliar vendas de múltiplos canais (Pix, iFood, maquininha)",
+            "importance": "medium",
+            "current_solution": "Manual. Confere extrato bancário contra relatório do iFood.",
+            "satisfaction_with_current": "very_low"
+          }
+        ],
+        "pain_points": [
+          {
+            "pain": "Sente que está perdendo dinheiro mas não consegue identificar onde",
+            "intensity": "critical",
+            "frequency": "daily",
+            "financial_impact": "Margens apertadas sem visibilidade real."
+          },
+          {
+            "pain": "Cartão PJ com limite insuficiente para comprar insumos",
+            "intensity": "high",
+            "frequency": "weekly",
+            "financial_impact": "Usa cartão PF, misturando ainda mais as contas."
+          },
+          {
+            "pain": "Conciliação manual de iFood/delivery com extrato bancário",
+            "intensity": "medium",
+            "frequency": "daily",
+            "financial_impact": "Horas perdidas por semana."
+          },
+          {
+            "pain": "NF-e pelo portal da prefeitura é lento e confuso",
+            "intensity": "medium",
+            "frequency": "weekly",
+            "financial_impact": "Atraso na emissão impacta recebimentos."
+          }
+        ],
+        "willingness_to_pay": {
+          "monthly_fee": "R$ 0-19/mês (sensível a preço, mas valoriza praticidade)",
+          "per_transaction": "R$ 0 para Pix. Até R$ 1 por boleto se for muito fácil.",
+          "premium_features": "Pagaria por integração com delivery apps e relatório de DRE simplificado"
+        },
+        "acquisition_channels": ["WhatsApp (comunidades de empreendedores)", "SEBRAE", "Instagram", "Indicação de contadores", "YouTube"],
+        "priority_for_mvp": "primary",
+        "estimated_ltv_annual": "R$ 960",
+        "estimated_cac": "R$ 60-80"
+      },
+      {
+        "id": "SEG-03",
+        "name": "Micro-Agência / Prestador de Serviços com Sócios (ME/LTDA)",
+        "size_estimate": "~2 milhões de MEs",
+        "representative_persona": "Mariana e Thiago, 31/33 anos, sócios de agência de marketing",
+        "demographics": {
+          "age_range": "28-45",
+          "income_range": "R$ 15.000–50.000/mês (faturamento empresa)",
+          "location": "Capitais e cidades médias",
+          "education": "Superior completo",
+          "gender_split": "50/50"
+        },
+        "psychographics": {
+          "digital_maturity": "alta",
+          "financial_literacy": "média a alta",
+          "brand_preference": "Valorizam ferramentas profissionais. Dispostos a pagar por qualidade.",
+          "adoption_profile": "Early adopter para ferramentas de gestão"
+        },
+        "activities": ["Agências de marketing/publicidade", "Consultorias", "Escritórios de arquitetura/design", "Escritórios de contabilidade", "Agências de turismo"],
+        "jobs_to_be_done": [
+          {
+            "job": "Dar acesso à conta com permissões diferentes para cada sócio/funcionário",
+            "importance": "critical",
+            "current_solution": "Cora não permite acesso parcial. Compartilham login ou admin dá acesso total.",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Ter cartões separados por sócio com limites independentes",
+            "importance": "high",
+            "current_solution": "Um cartão para a empresa. Sócios usam cartão pessoal e pedem reembolso.",
+            "satisfaction_with_current": "low"
+          },
+          {
+            "job": "Categorizar gastos por projeto/centro de custo",
+            "importance": "high",
+            "current_solution": "Planilha manual de fluxo de caixa paralela ao banco.",
+            "satisfaction_with_current": "low"
+          },
+          {
+            "job": "Ter visão consolidada de caixa com projeção de 30-60-90 dias",
+            "importance": "medium",
+            "current_solution": "Planilha com projeção manual que quase nunca é atualizada.",
+            "satisfaction_with_current": "low"
+          }
+        ],
+        "pain_points": [
+          {
+            "pain": "Sem controle de acesso granular na conta PJ",
+            "intensity": "critical",
+            "frequency": "daily",
+            "financial_impact": "Risco de segurança. Assistente administrativa com acesso total."
+          },
+          {
+            "pain": "Impossível separar gastos fixos de gastos de projeto",
+            "intensity": "high",
+            "frequency": "weekly",
+            "financial_impact": "Não sabe a rentabilidade real de cada cliente/projeto."
+          },
+          {
+            "pain": "Gestão financeira paralela ao banco (planilha + banco = duplo trabalho)",
+            "intensity": "high",
+            "frequency": "daily",
+            "financial_impact": "Horas de trabalho administrativo que poderiam ser produtivas."
+          }
+        ],
+        "willingness_to_pay": {
+          "monthly_fee": "R$ 29-79/mês (disposta a pagar por funcionalidades avançadas)",
+          "per_transaction": "R$ 0 para Pix e boleto",
+          "premium_features": "Multi-usuários RBAC, relatórios por projeto, API de integração, acesso contador"
+        },
+        "acquisition_channels": ["LinkedIn", "Indicação de contadores", "Comunidades de empreendedores", "Conteúdo B2B (blog, webinars)", "Parcerias com escritórios de contabilidade"],
+        "priority_for_mvp": "secondary",
+        "estimated_ltv_annual": "R$ 1.440",
+        "estimated_cac": "R$ 80-120"
+      },
+      {
+        "id": "SEG-04",
+        "name": "MEI em Transição para ME",
+        "size_estimate": "~1.5 milhões (MEIs prestes a desenquadrar)",
+        "representative_persona": "Lucas Ferreira (variante — momento de transição MEI→ME)",
+        "demographics": {
+          "age_range": "28-42",
+          "income_range": "R$ 6.000–10.000/mês (crescendo rápido)",
+          "location": "Distribuído nacionalmente",
+          "education": "Variado",
+          "gender_split": "55% masculino, 45% feminino"
+        },
+        "psychographics": {
+          "digital_maturity": "média",
+          "financial_literacy": "baixa a média (está aprendendo na marra)",
+          "brand_preference": "Busca banco que 'cresça junto' com o negócio",
+          "adoption_profile": "Pragmatic adopter — muda quando a dor é grande"
+        },
+        "activities": ["Qualquer atividade MEI em crescimento acelerado", "Prestes a contratar primeiro funcionário", "Migrando de informalidade para formalização completa"],
+        "jobs_to_be_done": [
+          {
+            "job": "Transicionar de MEI para ME sem trocar de banco ou perder histórico",
+            "importance": "critical",
+            "current_solution": "Abre conta nova em outro banco. Perde histórico financeiro.",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Entender se está ganhando ou perdendo dinheiro à medida que cresce",
+            "importance": "critical",
+            "current_solution": "Intuição. 'Tá entrando mais do que sai, acho.'",
+            "satisfaction_with_current": "very_low"
+          },
+          {
+            "job": "Começar a pagar funcionários e fornecedores de forma organizada",
+            "importance": "high",
+            "current_solution": "Pix manual para cada um. Sem comprovação de pagamento formal.",
+            "satisfaction_with_current": "low"
+          }
+        ],
+        "pain_points": [
+          {
+            "pain": "Medo de desenquadrar MEI e não saber o que muda financeiramente",
+            "intensity": "critical",
+            "frequency": "constant_anxiety",
+            "financial_impact": "Pode continuar como MEI irregular ou perder benefícios por ignorância."
+          },
+          {
+            "pain": "Crescimento do negócio sem estrutura financeira",
+            "intensity": "high",
+            "frequency": "daily",
+            "financial_impact": "Escala sem margem. Revenue cresce mas profit não."
+          },
+          {
+            "pain": "Banco atual não escala com o negócio",
+            "intensity": "medium",
+            "frequency": "monthly",
+            "financial_impact": "Limites de Pix, cartão e boleto insuficientes para o novo volume."
+          }
+        ],
+        "willingness_to_pay": {
+          "monthly_fee": "R$ 0-19/mês agora, R$ 29-49/mês quando faturar mais",
+          "per_transaction": "R$ 0",
+          "premium_features": "Guia de transição MEI→ME, alertas de limite de faturamento, folha simplificada"
+        },
+        "acquisition_channels": ["SEBRAE (cursos de formalização)", "Contadores", "YouTube (conteúdo de MEI)", "Google Search (dúvidas sobre desenquadramento)"],
+        "priority_for_mvp": "primary_adjacent",
+        "estimated_ltv_annual": "R$ 1.080 (crescente ao longo do tempo)",
+        "estimated_cac": "R$ 50-70"
+      }
+    ],
+
+    "segment_prioritization_matrix": {
+      "criteria": ["market_size", "pain_intensity", "willingness_to_pay", "acquisition_cost", "product_fit_mvp", "strategic_value"],
+      "weights": [0.15, 0.25, 0.15, 0.10, 0.20, 0.15],
+      "scores": {
+        "SEG-01_freelancer_digital": {
+          "scores": [7, 9, 6, 9, 10, 9],
+          "weighted_total": 8.55,
+          "rank": 1
+        },
+        "SEG-02_varejo_local": {
+          "scores": [10, 9, 5, 7, 7, 7],
+          "weighted_total": 7.60,
+          "rank": 2
+        },
+        "SEG-04_mei_transicao": {
+          "scores": [5, 10, 6, 8, 7, 9],
+          "weighted_total": 7.70,
+          "rank": 3
+        },
+        "SEG-03_micro_agencia": {
+          "scores": [6, 8, 9, 6, 6, 7],
+          "weighted_total": 7.10,
+          "rank": 4
+        }
+      },
+      "recommendation": "MVP deve priorizar SEG-01 (Freelancer Digital) como beachhead segment: alta afinidade com web-first, alta dor, baixo CAC, e efeito viral em comunidades digitais. SEG-02 e SEG-04 são expansão natural no Year 1. SEG-03 é Year 2 com funcionalidades premium."
+    },
+
+    "jtbd_summary": {
+      "universal_jobs": [
+        {
+          "job": "Separar finanças pessoais das do negócio automaticamente",
+          "segments_affected": ["SEG-01", "SEG-02", "SEG-04"],
+          "current_satisfaction": "very_low",
+          "ecp_emps_solution": "Toggle PF-PJ + detecção automática de gastos misturados + dashboard consolidado"
+        },
+        {
+          "job": "Saber em tempo real quanto o negócio lucra",
+          "segments_affected": ["SEG-01", "SEG-02", "SEG-03", "SEG-04"],
+          "current_satisfaction": "very_low",
+          "ecp_emps_solution": "Dashboard com entradas vs. saídas + categorização automática com IA + visão por ciclo"
+        },
+        {
+          "job": "Cobrar clientes de forma profissional e fácil",
+          "segments_affected": ["SEG-01", "SEG-02", "SEG-03"],
+          "current_satisfaction": "low",
+          "ecp_emps_solution": "Boletos com QR Code Pix + cobranças recorrentes + régua automática"
+        },
+        {
+          "job": "Gerenciar o negócio financeiramente pelo computador",
+          "segments_affected": ["SEG-01", "SEG-03"],
+          "current_satisfaction": "low",
+          "ecp_emps_solution": "Web-first com dashboard nativo para 1280px+"
+        }
+      ]
+    }
+  }
+}

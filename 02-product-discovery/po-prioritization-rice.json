@@ -1,0 +1,344 @@
+{
+  "agent": "product-owner",
+  "phase": "02-discovery",
+  "sub_phase": "prioritization",
+  "product": "ECP Emps",
+  "session_id": "ecp-emps-20260328",
+  "generated_at": "2026-03-28",
+  "methodology": "RICE Scoring (Reach x Impact x Confidence / Effort) — scale 1-10",
+  "beachhead_segment": "Freelancer Digital MEI (22-35 anos)",
+  "input_reference": "01-strategic-context/phase-01-output.json",
+
+  "scoring_criteria": {
+    "reach": "Quantos usuários do beachhead segment (Freelancer Digital MEI 22-35) são impactados. 10 = todos, 1 = nicho muito restrito.",
+    "impact": "Quanto a oportunidade move diretamente o KR vinculado. 10 = é o driver principal do KR, 1 = impacto marginal.",
+    "confidence": "Quanto temos de evidência concreta (personas, dados de mercado, validação). 10 = validado com dados, 1 = pura especulação.",
+    "effort": "Esforço estimado de desenvolvimento para endereçar a oportunidade. 1 = trivial (horas), 10 = muito complexo (semanas). Menor effort = melhor RICE.",
+    "formula": "(Reach x Impact x Confidence) / Effort"
+  },
+
+  "prioritized_opportunities": [
+    {
+      "rank": 1,
+      "opp_id": "OPP-11",
+      "description": "Banco que funcione plenamente no desktop",
+      "linked_kr": "KR-04",
+      "type": "necessidade",
+      "rice": {
+        "reach": 9,
+        "impact": 7,
+        "confidence": 9,
+        "effort": 2,
+        "score": 283.5
+      },
+      "rationale": "O produto é web-first por definição (princípio #1). Freelancers digitais trabalham 100% no computador (Ana Beatriz). Nenhum concorrente PJ oferece experiência desktop completa — é diferencial estrutural. Effort baixo porque a stack já é React web SPA; o desktop é o default, não um extra."
+    },
+    {
+      "rank": 2,
+      "opp_id": "OPP-01",
+      "description": "MEIs não conseguem abrir conta PJ rapidamente — burocracia excessiva",
+      "linked_kr": "KR-01",
+      "type": "dor",
+      "rice": {
+        "reach": 10,
+        "impact": 9,
+        "confidence": 9,
+        "effort": 3,
+        "score": 270.0
+      },
+      "rationale": "Gate obrigatório: 100% dos usuários passam pela abertura. Se for lento ou burocrático, activation rate cai a zero. Evidência forte: 73% dos MEIs não têm controle financeiro formal, burocracia é citada por ambas as personas primárias. Effort relativamente baixo porque o fluxo aproveita KYC já feito no ecp-digital-bank PF (RN-12) — apenas consulta CNPJ e confirma dados."
+    },
+    {
+      "rank": 3,
+      "opp_id": "OPP-03",
+      "description": "Conta PJ pré-configurada sem setup manual",
+      "linked_kr": "KR-01",
+      "type": "desejo",
+      "rice": {
+        "reach": 10,
+        "impact": 6,
+        "confidence": 7,
+        "effort": 2,
+        "score": 210.0
+      },
+      "rationale": "Alinhado com princípio 'Automação vence configuração'. Implementação simples: registrar chave Pix CNPJ automaticamente na abertura, defaults inteligentes para boletos, categorias pré-definidas. Reduz friction do onboarding e complementa OPP-01. Confidence 7 porque a evidência vem mais de princípio de design que de validação direta."
+    },
+    {
+      "rank": 4,
+      "opp_id": "OPP-09",
+      "description": "Transferir PF↔PJ instantaneamente",
+      "linked_kr": "KR-03",
+      "type": "desejo",
+      "rice": {
+        "reach": 8,
+        "impact": 7,
+        "confidence": 8,
+        "effort": 3,
+        "score": 149.3
+      },
+      "rationale": "Driver direto do toggle PF/PJ (KR-03) — se transferir é fácil, o toggle tem utilidade real. RN-13 já prevê gratuidade e instantaneidade. Tech spec já tem o endpoint /pj/accounts/transfer-pf. Effort moderado: single endpoint com validação de mesma titularidade (CPF owner match)."
+    },
+    {
+      "rank": 5,
+      "opp_id": "OPP-02",
+      "description": "Entender valor na 1a sessão para justificar mudança",
+      "linked_kr": "KR-01",
+      "type": "necessidade",
+      "rice": {
+        "reach": 10,
+        "impact": 8,
+        "confidence": 7,
+        "effort": 4,
+        "score": 140.0
+      },
+      "rationale": "Essencial para conversão: se o MEI não vê valor imediato, abandona. Ana citou que a conta PJ do Inter 'não funciona bem no desktop' — sinal de que expectativas são altas na primeira sessão. Effort=4 porque requer tour guiado + dashboard com dados reais (mesmo que seed) + quick actions bem desenhadas."
+    },
+    {
+      "rank": 6,
+      "opp_id": "OPP-06",
+      "description": "Não sabe quando cliente pagou — conciliação manual",
+      "linked_kr": "KR-02",
+      "type": "dor",
+      "rice": {
+        "reach": 7,
+        "impact": 7,
+        "confidence": 8,
+        "effort": 3,
+        "score": 130.7
+      },
+      "rationale": "A conciliação automática (boleto pago = baixa + notificação) é o que transforma boleto de burocracia em ferramenta útil. Lucas cita conciliação manual como frustração direta. Effort baixo: é lógica backend que vincula pagamento a invoice e dispara notificação — spec já prevê status change + notification."
+    },
+    {
+      "rank": 7,
+      "opp_id": "OPP-04",
+      "description": "Emitir boleto é burocrático e caro — MEI desiste de cobrar",
+      "linked_kr": "KR-02",
+      "type": "dor",
+      "rice": {
+        "reach": 8,
+        "impact": 9,
+        "confidence": 8,
+        "effort": 5,
+        "score": 115.2
+      },
+      "rationale": "Driver principal do KR-02. Ana paga R$ 2/boleto, Lucas acha boletos B2B complicados. Premissa A-03 indica que 60%+ usariam se simples e gratuito. Effort=5 porque módulo invoices é robusto: código FEBRABAN, QR Pix embutido, régua de cobrança, notificações. Mas é o core do produto PJ."
+    },
+    {
+      "rank": 8,
+      "opp_id": "OPP-07",
+      "description": "Misturam gastos PF/PJ — apps separados inconvenientes",
+      "linked_kr": "KR-03",
+      "type": "dor",
+      "rice": {
+        "reach": 9,
+        "impact": 9,
+        "confidence": 7,
+        "effort": 5,
+        "score": 113.4
+      },
+      "rationale": "42% dos MEIs não separam PF/PJ. É a premissa fundacional do produto (princípio #4). Confidence=7 porque A-01 nota que é 'high risk' e não está validado se MEIs realmente querem separar ou apenas dizem. Effort=5: toggle PF/PJ requer auth compartilhada, ProfileSwitcher component, e estado de sessão cross-API."
+    },
+    {
+      "rank": 9,
+      "opp_id": "OPP-05",
+      "description": "Cobrar clientes profissionalmente sem esforço",
+      "linked_kr": "KR-02",
+      "type": "necessidade",
+      "rice": {
+        "reach": 7,
+        "impact": 8,
+        "confidence": 8,
+        "effort": 4,
+        "score": 112.0
+      },
+      "rationale": "Complementar ao OPP-04: não basta o boleto ser gratuito, precisa ser profissional (CNPJ, razão social, dados fiscais). Ana com 8-12 clientes/mês precisa cobrar em escala. Effort=4 porque boa parte é template/UI sobre o módulo invoices (que OPP-04 já constrói)."
+    },
+    {
+      "rank": 10,
+      "opp_id": "OPP-10",
+      "description": "Não sabem quanto o negócio lucra — sem fluxo de caixa",
+      "linked_kr": "KR-04",
+      "type": "dor",
+      "rice": {
+        "reach": 8,
+        "impact": 8,
+        "confidence": 7,
+        "effort": 5,
+        "score": 89.6
+      },
+      "rationale": "Ana e Lucas ambos citam não saber quanto lucram. 58% usam planilhas. A-05 indica que MEIs mudariam decisões com visibilidade. Effort=5: requer dashboard com entradas vs saídas, categorização automática, gráfico de cash flow (30/60/90d). É funcionalidade de retenção, não ativação."
+    },
+    {
+      "rank": 11,
+      "opp_id": "OPP-08",
+      "description": "Ver situação financeira completa PF+PJ",
+      "linked_kr": "KR-03",
+      "type": "necessidade",
+      "rice": {
+        "reach": 8,
+        "impact": 7,
+        "confidence": 6,
+        "effort": 6,
+        "score": 56.0
+      },
+      "rationale": "Gap de mercado claro (nenhum concorrente faz), mas confidence=6 porque não há validação direta de que MEIs querem ver PF+PJ consolidado. Effort=6 porque requer cross-API call (porta 3333 PF + 3334 PJ), unificação de formatos, e dashboard consolidado com dados de dois bancos diferentes."
+    },
+    {
+      "rank": 12,
+      "opp_id": "OPP-12",
+      "description": "Não dão acesso parcial à conta sem compartilhar senha",
+      "linked_kr": "KR-04",
+      "type": "dor",
+      "rice": {
+        "reach": 4,
+        "impact": 5,
+        "confidence": 7,
+        "effort": 5,
+        "score": 28.0
+      },
+      "rationale": "Reach=4 porque o beachhead é MEI freelancer (sócio único, sem equipe). Esta dor é da persona P-03 (LTDA com sócios), que é secundária. Importante para expansão pós-beachhead, mas não move o MEI freelancer solo no MVP. Effort=5 porque RBAC completo (admin/financial/viewer) + convites + team management é um módulo inteiro."
+    }
+  ],
+
+  "priority_groups": {
+    "P0_must_address": {
+      "description": "Oportunidades essenciais para o MVP. Sem elas, o produto não entrega a proposta de valor mínima para o beachhead.",
+      "opportunities": [
+        {
+          "opp_id": "OPP-01",
+          "rice_score": 270.0,
+          "summary": "Abertura de conta PJ em < 3 min aproveitando KYC do PF",
+          "mvp_scope": "Fluxo completo: CNPJ → consulta Receita (mock) → confirmação → conta ativa com agência 0001. MEI sócio único = aprovação imediata."
+        },
+        {
+          "opp_id": "OPP-03",
+          "rice_score": 210.0,
+          "summary": "Conta pré-configurada: chave Pix CNPJ automática, defaults de boleto, categorias PJ prontas",
+          "mvp_scope": "Na criação da conta: registrar Pix CNPJ automaticamente, criar categorias padrão, preencher defaults de juros/multa para boletos."
+        },
+        {
+          "opp_id": "OPP-11",
+          "rice_score": 283.5,
+          "summary": "Experiência desktop-first completa (1280px+) para todas as funcionalidades",
+          "mvp_scope": "Toda a UI é projetada para desktop primeiro. Dashboard, extrato, boletos, Pix — tudo otimizado para tela grande. Mobile funcional mas não prioritário."
+        },
+        {
+          "opp_id": "OPP-04",
+          "rice_score": 115.2,
+          "summary": "Emissão de boleto simples e gratuito com QR Pix embutido",
+          "mvp_scope": "Módulo invoices completo: emissão avulsa, QR Pix no boleto, envio por e-mail/link, ilimitado e gratuito. Regime de cobrança D+1/D+3/D+7."
+        },
+        {
+          "opp_id": "OPP-07",
+          "rice_score": 113.4,
+          "summary": "Toggle PF/PJ no mesmo app eliminando necessidade de apps separados",
+          "mvp_scope": "ProfileSwitcher no header, auth compartilhada via JWT com activeProfile, sidebar e dashboard mudam conforme perfil selecionado."
+        },
+        {
+          "opp_id": "OPP-09",
+          "rice_score": 149.3,
+          "summary": "Transferência instantânea e gratuita PF↔PJ de mesma titularidade",
+          "mvp_scope": "Endpoint /pj/accounts/transfer-pf: validação de titularidade por CPF, transferência atômica, saldo atualizado em ambas as contas."
+        }
+      ],
+      "total_rice": 1141.4,
+      "linked_krs": ["KR-01", "KR-02", "KR-03", "KR-04"],
+      "rationale": "Cobre os 3 pilares da proposta de valor: separar (OPP-07, OPP-09), organizar (OPP-11, OPP-01, OPP-03) e cobrar (OPP-04). Sem essas 6 oportunidades, o produto não se diferencia de uma conta PJ genérica."
+    },
+
+    "P1_should_address": {
+      "description": "Oportunidades importantes que amplificam o valor do MVP. Podem ser entregues em versão simplificada ou na segunda sprint.",
+      "opportunities": [
+        {
+          "opp_id": "OPP-02",
+          "rice_score": 140.0,
+          "summary": "Tour guiado + first-session value demonstration",
+          "simplified_scope": "Tour guiado de 3-4 steps no primeiro login PJ. Quick actions no dashboard (emitir boleto, fazer Pix, ver extrato). Pode ser implementado após o core funcionar."
+        },
+        {
+          "opp_id": "OPP-06",
+          "rice_score": 130.7,
+          "summary": "Conciliação automática: boleto pago → notificação + baixa no extrato",
+          "simplified_scope": "Status change automático (pending → paid) quando pagamento detectado. Notificação in-app. Régua de cobrança pode vir simplificada (apenas D+1)."
+        },
+        {
+          "opp_id": "OPP-05",
+          "rice_score": 112.0,
+          "summary": "Cobranças profissionais com dados fiscais da empresa",
+          "simplified_scope": "Template de boleto com CNPJ, razão social e dados fiscais. Link de pagamento compartilhável. Boletos recorrentes e carnês podem ser P2."
+        },
+        {
+          "opp_id": "OPP-10",
+          "rice_score": 89.6,
+          "summary": "Dashboard de fluxo de caixa básico (entradas vs saídas)",
+          "simplified_scope": "Dashboard com: total entradas, total saídas, saldo do período. Gráfico de 30 dias. Categorias automáticas básicas (7 categorias fixas). Sem IA, apenas rules-based."
+        }
+      ],
+      "total_rice": 472.3,
+      "linked_krs": ["KR-01", "KR-02", "KR-04"],
+      "rationale": "Amplificam ativação (OPP-02), completam o ciclo de cobrança (OPP-05, OPP-06) e iniciam a proposta de clareza financeira (OPP-10). Podem ser simplificados sem perder o valor central."
+    },
+
+    "P2_nice_to_have": {
+      "description": "Oportunidades que podem ser diferidas para pós-MVP sem comprometer a proposta de valor inicial para o beachhead.",
+      "opportunities": [
+        {
+          "opp_id": "OPP-08",
+          "rice_score": 56.0,
+          "summary": "Dashboard consolidado PF+PJ (visão financeira completa)",
+          "deferral_reason": "Requer integração cross-API complexa (2 bancos). O toggle PF/PJ (P0) já permite ver cada um separadamente. Consolidação é enhancement, não blocker."
+        },
+        {
+          "opp_id": "OPP-12",
+          "rice_score": 28.0,
+          "summary": "Acesso parcial multi-usuários com RBAC",
+          "deferral_reason": "Beachhead é MEI freelancer solo — não tem equipe. RBAC é essencial para a persona P-03 (LTDA com sócios), que é secundária. Implementar quando expandir para MEs."
+        }
+      ],
+      "total_rice": 84.0,
+      "linked_krs": ["KR-03", "KR-04"],
+      "rationale": "OPP-08 é desejável mas o toggle já resolve o caso básico. OPP-12 atende persona secundária fora do beachhead. Ambos são roadmap 'next' (Jun-Jul) não 'now'."
+    }
+  },
+
+  "summary": {
+    "total_opportunities": 12,
+    "p0_count": 6,
+    "p1_count": 4,
+    "p2_count": 2,
+    "top_3_rice": [
+      { "opp_id": "OPP-11", "score": 283.5, "description": "Desktop-first experience" },
+      { "opp_id": "OPP-01", "score": 270.0, "description": "Abertura rápida de conta PJ" },
+      { "opp_id": "OPP-03", "score": 210.0, "description": "Conta pré-configurada" }
+    ],
+    "kr_coverage": {
+      "KR-01_activation": { "p0": ["OPP-01", "OPP-03"], "p1": ["OPP-02"], "p2": [] },
+      "KR-02_boletos": { "p0": ["OPP-04"], "p1": ["OPP-05", "OPP-06"], "p2": [] },
+      "KR-03_toggle": { "p0": ["OPP-07", "OPP-09"], "p1": [], "p2": ["OPP-08"] },
+      "KR-04_retention": { "p0": ["OPP-11"], "p1": ["OPP-10"], "p2": ["OPP-12"] }
+    },
+    "key_insight": "Os 3 maiores scores RICE (OPP-11, OPP-01, OPP-03) compartilham uma característica: são de esforço baixo (2-3) com alcance altíssimo (9-10). Isso indica que o MVP deve priorizar a experiência de onboarding e o ambiente desktop antes de features complexas como RBAC ou dashboard consolidado PF+PJ."
+  },
+
+  "risks_and_notes": [
+    {
+      "risk": "OPP-07 é P0 mas tem premissa não validada (A-01)",
+      "mitigation": "É risco aceitável porque o toggle PF/PJ é identidade do produto. Se a premissa falhar, o toggle ainda serve como conveniência; apenas o KR-03 target precisa ser revisado."
+    },
+    {
+      "risk": "OPP-04 é P0 com effort=5 (o maior entre os P0)",
+      "mitigation": "É inegociável: 'cobrar' é 1 dos 3 verbos do objetivo. O módulo invoices é complexo mas já está totalmente especificado no tech_spec (schema, rotas, regras). Paralelizar backend e frontend."
+    },
+    {
+      "risk": "KR-04 tem cobertura P0 fraca (apenas OPP-11)",
+      "mitigation": "OPP-10 (fluxo de caixa) é P1 e deve ser priorizado na segunda sprint. A retenção D30 depende mais da soma de todas as features do que de uma oportunidade isolada."
+    },
+    {
+      "risk": "KR-03 medição bloqueada (metrics_issues do Phase 01)",
+      "mitigation": "Reforçar na Phase 03 a necessidade de tabela analytics_events ou extensão de pj_audit_logs para rastrear toggles."
+    }
+  ],
+
+  "next_hitl": 2,
+  "status": "awaiting_hitl_approval"
+}

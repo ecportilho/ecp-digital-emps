@@ -1,0 +1,309 @@
+{
+  "metadata": {
+    "document": "A/B Test Results — Simulated 30-Day Analysis",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-05-07",
+    "analysis_period": "2026-04-07 to 2026-05-07",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "results": [
+    {
+      "id": "EXP-001",
+      "name": "Onboarding Guiado",
+      "status": "completed",
+      "verdict": "SHIP_VARIANT",
+      "duration_days": 30,
+      "sample": {
+        "control": {
+          "name": "Self-Discovery",
+          "users": 412,
+          "sessions": 1847
+        },
+        "variant": {
+          "name": "Guided Tour",
+          "users": 408,
+          "sessions": 2103
+        },
+        "total_users": 820
+      },
+      "primary_metric": {
+        "name": "Activation Rate (3+ ops in 7 days)",
+        "control_value": "22.8%",
+        "variant_value": "34.8%",
+        "absolute_lift": "+12.0 pp",
+        "relative_lift": "+52.6%",
+        "p_value": 0.0003,
+        "confidence_interval_95": ["+7.2 pp", "+16.8 pp"],
+        "statistically_significant": true,
+        "practically_significant": true
+      },
+      "secondary_metrics": [
+        {
+          "name": "Time to First Operation",
+          "control_value": "4.2 hours (median)",
+          "variant_value": "1.1 hours (median)",
+          "lift": "-73.8%",
+          "p_value": 0.00001,
+          "significant": true
+        },
+        {
+          "name": "Tour Completion Rate",
+          "variant_only": true,
+          "value": "68.4%",
+          "note": "68% completam os 4 passos. 89% completam ao menos 2 passos. Drop-off principal no passo 3 (Pix PJ)."
+        },
+        {
+          "name": "7-Day Retention",
+          "control_value": "41.2%",
+          "variant_value": "53.7%",
+          "lift": "+12.5 pp",
+          "p_value": 0.001,
+          "significant": true
+        }
+      ],
+      "guardrail_check": {
+        "error_rate_delta": "+0.02%",
+        "latency_delta": "+45ms",
+        "all_guardrails_passed": true
+      },
+      "kr_impact": {
+        "KR-01_activation_rate": {
+          "target": "35%",
+          "projected_with_variant": "34.8%",
+          "assessment": "Variante sozinha quase atinge o target. Com otimizações adicionais no tour (melhorar step 3), KR-01 será atingido."
+        }
+      },
+      "learning": "O onboarding guiado tem impacto massivo na ativação de MEIs. A barreira principal não é funcionalidade, mas orientação. O drop-off no passo 3 (Pix PJ) sugere que essa funcionalidade precisa de simplificação adicional. A retenção de 7 dias também melhora significativamente, indicando que ativação precoce cria hábito.",
+      "recommendation": "Ship variant para 100% dos novos usuários. Priorizar melhoria do passo 3 do tour (Pix PJ) para aumentar completion rate de 68% para 80%+. Monitorar impacto na D30 retention (KR-04).",
+      "next_steps": [
+        "Rollout da variante para 100% — deploy na sprint 2026-S19",
+        "Criar EXP-004: otimização do passo 3 do tour (Pix PJ simplificado)",
+        "Instrumentar funnel detalhado do tour para identificar micro-frictions"
+      ]
+    },
+    {
+      "id": "EXP-002",
+      "name": "Quick Actions Position",
+      "status": "completed",
+      "verdict": "NO_SIGNIFICANT_DIFFERENCE",
+      "duration_days": 30,
+      "sample": {
+        "control": {
+          "name": "Side Panel",
+          "users": 523,
+          "sessions": 3415
+        },
+        "variant": {
+          "name": "Top Dashboard",
+          "users": 519,
+          "sessions": 3502
+        },
+        "total_users": 1042
+      },
+      "primary_metric": {
+        "name": "Operations per Session",
+        "control_value": "1.82 ops/sessão",
+        "variant_value": "1.91 ops/sessão",
+        "absolute_lift": "+0.09 ops",
+        "relative_lift": "+4.9%",
+        "p_value": 0.287,
+        "confidence_interval_95": ["-0.08 ops", "+0.26 ops"],
+        "statistically_significant": false,
+        "practically_significant": false
+      },
+      "secondary_metrics": [
+        {
+          "name": "Quick Action Click Rate",
+          "control_value": "34.2%",
+          "variant_value": "38.1%",
+          "lift": "+3.9 pp",
+          "p_value": 0.142,
+          "significant": false
+        },
+        {
+          "name": "Time to First Action",
+          "control_value": "28s (median)",
+          "variant_value": "24s (median)",
+          "lift": "-14.3%",
+          "p_value": 0.089,
+          "significant": false
+        },
+        {
+          "name": "PF/PJ Toggle Rate",
+          "control_value": "1.9 toggles/sessão",
+          "variant_value": "2.0 toggles/sessão",
+          "lift": "+5.3%",
+          "p_value": 0.412,
+          "significant": false
+        }
+      ],
+      "guardrail_check": {
+        "mobile_layout_issues": 0,
+        "cwv_lcp_delta": "+30ms",
+        "cwv_cls_delta": "+0.01",
+        "all_guardrails_passed": true
+      },
+      "kr_impact": {
+        "KR-03_toggle_rate": {
+          "target": "2+ toggles PF↔PJ/sessão",
+          "projected_with_variant": "2.0 toggles/sessão",
+          "assessment": "Nenhuma diferença significativa. KR-03 já próximo do target em ambos os grupos. Posição dos quick actions não é o driver principal."
+        }
+      },
+      "learning": "A posição dos quick actions (topo vs. side panel) não é um fator determinante para o volume de operações por sessão. A diferença de 4.9% está dentro da margem de erro. Isso sugere que os usuários que querem realizar operações as encontram independente da posição. O problema pode não ser de discoverability mas de motivação/necessidade.",
+      "recommendation": "Manter layout atual (Side Panel) para evitar custo de mudança sem benefício comprovado. Investigar outras alavancas para aumentar ops/sessão — possivelmente notificações contextuais ou lembretes de boletos a vencer.",
+      "next_steps": [
+        "Manter controle (Side Panel) como padrão",
+        "Explorar notificações push como driver de reengagement (potencial EXP-005)",
+        "Investigar se o problema de ops/sessão é de awareness ou de necessidade real do usuário"
+      ]
+    },
+    {
+      "id": "EXP-003",
+      "name": "Boleto Smart Defaults",
+      "status": "completed",
+      "verdict": "SHIP_VARIANT",
+      "duration_days": 30,
+      "sample": {
+        "control": {
+          "name": "Empty Fields",
+          "users": 445,
+          "sessions": 2890
+        },
+        "variant": {
+          "name": "Smart Defaults",
+          "users": 438,
+          "sessions": 2967
+        },
+        "total_users": 883
+      },
+      "primary_metric": {
+        "name": "Boletos per Company per Month",
+        "control_value": "1.38 boletos/empresa/mês",
+        "variant_value": "1.63 boletos/empresa/mês",
+        "absolute_lift": "+0.25 boletos",
+        "relative_lift": "+18.1%",
+        "p_value": 0.0021,
+        "confidence_interval_95": ["+0.09 boletos", "+0.41 boletos"],
+        "statistically_significant": true,
+        "practically_significant": true
+      },
+      "secondary_metrics": [
+        {
+          "name": "Form Completion Rate",
+          "control_value": "62.3%",
+          "variant_value": "78.9%",
+          "lift": "+16.6 pp",
+          "p_value": 0.00005,
+          "significant": true
+        },
+        {
+          "name": "Time to Complete Form",
+          "control_value": "142s (median)",
+          "variant_value": "87s (median)",
+          "lift": "-38.7%",
+          "p_value": 0.00001,
+          "significant": true
+        },
+        {
+          "name": "Juros/Multa Adoption",
+          "control_value": "28.4%",
+          "variant_value": "71.2%",
+          "lift": "+42.8 pp",
+          "p_value": 0.00001,
+          "significant": true
+        }
+      ],
+      "guardrail_check": {
+        "dispute_rate_delta": "+0.1%",
+        "complaints_about_prefill": 3,
+        "complaints_percentage": "0.7%",
+        "all_guardrails_passed": true
+      },
+      "kr_impact": {
+        "KR-02_boletos_per_company": {
+          "target": "2+ boletos/empresa/mês",
+          "projected_with_variant": "1.63 boletos/empresa/mês",
+          "assessment": "Melhora significativa de 18%, mas ainda abaixo do target de 2.0. Necessário combinar com outras iniciativas (ex: lembretes de cobrança recorrente, templates de boleto) para atingir KR-02."
+        }
+      },
+      "learning": "Smart defaults eliminam a principal barreira de emissão de boletos: a dúvida sobre juros e multa. A form completion rate saltou 16.6pp, confirmando que o abandono era causado por incerteza, não desinteresse. A adoção de juros/multa subiu de 28% para 71%, o que melhora o fluxo de caixa dos MEIs. Apenas 0.7% dos usuários reclamaram do pré-preenchimento — risco baixo.",
+      "recommendation": "Ship variant para 100% dos usuários. Adicionar funcionalidade de templates de boleto recorrente para atacar o gap restante até KR-02 (2.0 boletos/empresa/mês). Considerar smart defaults para outros formulários (Pix, transferências).",
+      "next_steps": [
+        "Rollout da variante para 100% — deploy na sprint 2026-S19",
+        "Priorizar feature de boleto recorrente (templates) para atingir KR-02",
+        "Aplicar padrão de smart defaults no formulário de Pix (EXP-006 potencial)",
+        "Monitorar taxa de disputas por 60 dias pós-rollout"
+      ]
+    }
+  ],
+  "retroalimentacao": {
+    "cycle_summary": "Dos 3 experimentos, 2 produziram resultados acionáveis (EXP-001 e EXP-003) e 1 foi inconclusivo (EXP-002). O ciclo de experimentação validou hipóteses sobre onboarding e UX de formulários como principais alavancas de ativação e adoção.",
+    "kr_status_update": {
+      "KR-01_activation_rate": {
+        "target": "35%",
+        "current": "34.8% (com guided tour)",
+        "status": "ON_TRACK",
+        "gap": "0.2 pp — atingível com otimização do tour step 3"
+      },
+      "KR-02_boletos_per_company": {
+        "target": "2+ boletos/empresa/mês",
+        "current": "1.63 (com smart defaults)",
+        "status": "AT_RISK",
+        "gap": "0.37 boletos — necessita feature de boleto recorrente"
+      },
+      "KR-03_toggles_pf_pj": {
+        "target": "2+ toggles/sessão",
+        "current": "1.95",
+        "status": "ON_TRACK",
+        "gap": "0.05 toggles — tendência natural de crescimento conforme mais usuários criam conta PJ"
+      },
+      "KR-04_d30_retention": {
+        "target": "45%",
+        "current": "Dados parciais: 7-day retention em 53.7% (grupo tour) — projeção otimista para D30",
+        "status": "MONITORING",
+        "gap": "Aguardando 30 dias completos de dados"
+      },
+      "north_star_efas": {
+        "metric": "Empresas Financeiramente Ativas por Semana",
+        "current": "Crescendo 8% semana-a-semana desde o launch",
+        "status": "HEALTHY",
+        "note": "EXP-001 e EXP-003 combinados devem acelerar o crescimento de EFAS"
+      }
+    },
+    "product_decisions": [
+      {
+        "decision": "Ship Guided Tour (EXP-001) para 100%",
+        "impact": "KR-01 quase atingido, D30 retention potencialmente beneficiada",
+        "priority": "P0 — deploy imediato"
+      },
+      {
+        "decision": "Ship Smart Defaults (EXP-003) para 100%",
+        "impact": "KR-02 melhora 18%, gap restante atacado via boleto recorrente",
+        "priority": "P0 — deploy imediato"
+      },
+      {
+        "decision": "Manter Side Panel (EXP-002 controle)",
+        "impact": "Sem custo de mudança, sem benefício comprovado",
+        "priority": "N/A"
+      },
+      {
+        "decision": "Priorizar boleto recorrente como próxima feature",
+        "impact": "Fechar gap de KR-02 (1.63 → 2.0+)",
+        "priority": "P1 — sprint 2026-S20"
+      },
+      {
+        "decision": "Criar EXP-004: otimização do tour step 3 (Pix PJ)",
+        "impact": "Aumentar tour completion de 68% para 80%+, consolidar KR-01",
+        "priority": "P1 — sprint 2026-S20"
+      }
+    ],
+    "next_experiment_cycle": {
+      "planned_experiments": ["EXP-004: Tour Step 3 Optimization", "EXP-005: Push Notifications for Reengagement", "EXP-006: Smart Defaults for Pix"],
+      "start_date": "2026-05-12",
+      "focus": "Consolidar KR-01 e KR-02, começar a atacar KR-04 (D30 retention)"
+    }
+  }
+}

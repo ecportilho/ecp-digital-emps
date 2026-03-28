@@ -1,0 +1,261 @@
+{
+  "metadata": {
+    "document": "GMUD — Gestão de Mudança",
+    "id": "GMUD-001",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "change_request": {
+    "title": "Deploy Inicial — ECP Emps v1.0 em Produção",
+    "type": "Normal",
+    "priority": "Alta",
+    "requester": "Product Manager — ECP Emps Squad",
+    "approver": "Operations Engineer + Tech Lead",
+    "scheduled_date": "2026-04-05",
+    "scheduled_window": "06:00 - 08:00 UTC-3 (sábado, janela de baixo tráfego)",
+    "estimated_duration_minutes": 90,
+    "max_duration_minutes": 120
+  },
+  "description": {
+    "summary": "Primeiro deploy do ECP Emps (banco digital PJ para MEIs e microempresas) em ambiente de produção. Inclui backend Fastify 5, frontend React 18.3, banco SQLite3 e todos os módulos core: companies, invoices (boletos), pj-pix, pj-transactions, pj-accounts, corporate-cards, team e pj-dashboard.",
+    "justification": "O produto completou as fases de Discovery (02) e Delivery (03), com todos os critérios de aceitação aprovados nos HITLs #7 a #10. O deploy inicial é necessário para iniciar a operação do produto, coletar dados reais de uso e executar os experimentos A/B planejados (EXP-001, EXP-002, EXP-003) que alimentam os KRs do ciclo.",
+    "business_impact": "Permite início da aquisição de clientes MEI/ME, ativação das funcionalidades core (Pix PJ, boletos, dashboard) e medição dos KRs: activation rate 35%, 2+ boletos/empresa/mês, toggle PF-PJ e D30 retention 45%.",
+    "scope": {
+      "included": [
+        "Deploy do backend Fastify 5 (API na porta 3334)",
+        "Deploy do frontend React 18.3 + Vite 5.4 (porta 5175)",
+        "Criação do banco SQLite3 em WAL mode (database-emps.sqlite)",
+        "Execução de todas as migrations (tabelas: companies, invoices, pix_transfers, corporate_cards, team_members, pj_accounts, pj_transactions, dashboard_metrics)",
+        "Configuração de variáveis de ambiente de produção",
+        "Setup de feature flags para A/B tests (EXP-001, EXP-002, EXP-003)",
+        "Configuração de monitoring e alertas",
+        "Setup de backup automatizado do SQLite"
+      ],
+      "excluded": [
+        "Migração de dados de outros sistemas",
+        "Integração com gateway de pagamentos real (fase 2)",
+        "App mobile (web-first na v1.0)",
+        "Módulo de empréstimos (roadmap Q3)"
+      ]
+    }
+  },
+  "risk_assessment": {
+    "dimensions": [
+      {
+        "dimension": "Impacto",
+        "score": 4,
+        "max": 5,
+        "justification": "Deploy inicial afeta toda a plataforma. Porém, como é a primeira versão, não há base de usuários existente em risco."
+      },
+      {
+        "dimension": "Probabilidade de Falha",
+        "score": 2,
+        "max": 5,
+        "justification": "Pipeline CI/CD validado em staging. Testes de integração com cobertura > 80%. Stack já estabilizada no ecp-digital-bank (PF) com a mesma arquitetura."
+      },
+      {
+        "dimension": "Complexidade",
+        "score": 3,
+        "max": 5,
+        "justification": "Múltiplos componentes (API + Web + DB + feature flags) mas arquitetura simples (monolito modular, SQLite em arquivo). Sem microservices ou dependências externas complexas."
+      },
+      {
+        "dimension": "Reversibilidade",
+        "score": 2,
+        "max": 5,
+        "justification": "Deploy inicial é facilmente reversível — basta desligar os serviços. Não há dados de produção para preservar no rollback. Procedimento de rollback documentado e testado."
+      },
+      {
+        "dimension": "Dependência Externa",
+        "score": 2,
+        "max": 5,
+        "justification": "Stack self-contained (Node.js + SQLite). Sem dependência de bancos externos, filas ou serviços de terceiros no core path. Único ponto externo: CDN para assets estáticos."
+      },
+      {
+        "dimension": "Janela de Execução",
+        "score": 2,
+        "max": 5,
+        "justification": "Sábado às 6h, janela de 2 horas. Sem tráfego de usuários (produto novo). Tempo estimado de 90 minutos com 30 minutos de buffer."
+      }
+    ],
+    "overall_risk_score": {
+      "sum": 15,
+      "max": 30,
+      "percentage": "50%",
+      "classification": "Risco Médio",
+      "interpretation": "Risco aceitável para deploy inicial. Mitigações adequadas em place."
+    }
+  },
+  "rollback_plan": {
+    "trigger_criteria": [
+      "Smoke tests pós-deploy falham em 2+ endpoints críticos",
+      "Error rate > 5% nos primeiros 30 minutos",
+      "API não responde em /health por mais de 2 minutos",
+      "Banco SQLite corrompido ou inacessível"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Acionar alerta no canal #ecp-emps-incidents",
+        "responsible": "Operations Engineer",
+        "time_estimate": "1 minuto"
+      },
+      {
+        "order": 2,
+        "action": "Desativar DNS/routing para o ECP Emps",
+        "responsible": "Operations Engineer",
+        "time_estimate": "2 minutos"
+      },
+      {
+        "order": 3,
+        "action": "Parar processo do backend Fastify",
+        "responsible": "Operations Engineer",
+        "time_estimate": "1 minuto"
+      },
+      {
+        "order": 4,
+        "action": "Remover assets do frontend do CDN",
+        "responsible": "Operations Engineer",
+        "time_estimate": "3 minutos"
+      },
+      {
+        "order": 5,
+        "action": "Preservar logs e banco SQLite para análise post-mortem",
+        "responsible": "Operations Engineer",
+        "time_estimate": "5 minutos"
+      },
+      {
+        "order": 6,
+        "action": "Comunicar stakeholders sobre rollback e próximos passos",
+        "responsible": "Product Manager",
+        "time_estimate": "10 minutos"
+      }
+    ],
+    "total_rollback_time": "< 25 minutos",
+    "post_rollback": "Análise de root cause obrigatória em 48h. Novo GMUD necessário para re-deploy."
+  },
+  "execution_plan": {
+    "pre_deploy": [
+      {
+        "order": 1,
+        "action": "Validar que CI/CD pipeline está green na branch main",
+        "responsible": "Operations Engineer"
+      },
+      {
+        "order": 2,
+        "action": "Confirmar backup do ambiente de staging",
+        "responsible": "Operations Engineer"
+      },
+      {
+        "order": 3,
+        "action": "Validar variáveis de ambiente de produção",
+        "responsible": "Operations Engineer"
+      },
+      {
+        "order": 4,
+        "action": "Notificar equipe no Slack que deploy será iniciado",
+        "responsible": "Operations Engineer"
+      }
+    ],
+    "deploy": [
+      {
+        "order": 1,
+        "action": "Provisionar ambiente de produção (servidor + CDN)",
+        "time_estimate": "15 minutos"
+      },
+      {
+        "order": 2,
+        "action": "Deploy do banco SQLite — criar database-emps.sqlite com WAL mode",
+        "time_estimate": "5 minutos"
+      },
+      {
+        "order": 3,
+        "action": "Executar migrations de schema",
+        "time_estimate": "5 minutos"
+      },
+      {
+        "order": 4,
+        "action": "Deploy do backend Fastify na porta 3334",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 5,
+        "action": "Deploy do frontend React no CDN",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 6,
+        "action": "Configurar feature flags para A/B tests",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 7,
+        "action": "Ativar monitoring e alertas",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 8,
+        "action": "Configurar backup automatizado do SQLite (a cada 6h)",
+        "time_estimate": "5 minutos"
+      }
+    ],
+    "post_deploy": [
+      {
+        "order": 1,
+        "action": "Executar smoke tests completos",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 2,
+        "action": "Validar health check: GET /health retorna 200",
+        "time_estimate": "1 minuto"
+      },
+      {
+        "order": 3,
+        "action": "Testar fluxo completo: login → dashboard → gerar boleto → Pix",
+        "time_estimate": "10 minutos"
+      },
+      {
+        "order": 4,
+        "action": "Confirmar que feature flags estão respondendo corretamente",
+        "time_estimate": "5 minutos"
+      },
+      {
+        "order": 5,
+        "action": "Validar que monitoring está coletando métricas",
+        "time_estimate": "5 minutos"
+      },
+      {
+        "order": 6,
+        "action": "Comunicar sucesso do deploy no canal #ecp-emps-deploys",
+        "time_estimate": "2 minutos"
+      }
+    ]
+  },
+  "success_criteria": [
+    "Health check (GET /health) retorna HTTP 200 com uptime > 0",
+    "Login de usuário empresa retorna JWT válido",
+    "Criação de empresa MEI via POST /companies retorna 201",
+    "Geração de boleto via POST /invoices retorna código de barras válido",
+    "Transferência Pix via POST /pix/transfer processa com status COMPLETED",
+    "Dashboard carrega em < 3 segundos com dados da empresa",
+    "Toggle PF/PJ funciona sem erro",
+    "Feature flags para EXP-001, EXP-002 e EXP-003 retornam valores corretos",
+    "Error rate < 1% nos primeiros 30 minutos pós-deploy",
+    "Zero erros críticos (5xx) nos smoke tests"
+  ],
+  "verdict": {
+    "decision": "APPROVED",
+    "approved_by": "Operations Engineer + Tech Lead",
+    "approved_at": "2026-03-28T14:00:00-03:00",
+    "conditions": [
+      "CI/CD pipeline deve estar green no momento do deploy",
+      "Engenheiro de plantão disponível durante toda a janela",
+      "Canal de comunicação com stakeholders aberto"
+    ],
+    "next_review": "Post-deploy review em 48h (2026-04-07)"
+  }
+}

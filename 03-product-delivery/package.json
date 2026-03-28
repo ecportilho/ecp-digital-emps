@@ -1,0 +1,19 @@
+{
+  "name": "ecp-digital-emps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ECP Emps — Digital Bank for PJ (Pessoa Jurídica)",
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "cd server && npx tsx watch src/server.ts",
+    "dev:web": "cd web && npx vite --port 5175",
+    "build": "cd web && npx vite build",
+    "db:migrate": "cd server && npx tsx src/database/migrations/run.ts",
+    "db:seed": "cd server && npx tsx src/database/seed.ts",
+    "test": "npx vitest run",
+    "lint": "npx eslint . --ext .ts,.tsx"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

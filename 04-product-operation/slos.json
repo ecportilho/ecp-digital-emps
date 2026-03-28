@@ -1,0 +1,179 @@
+{
+  "metadata": {
+    "document": "Service Level Objectives",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "review_cadence": "monthly",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "slos": [
+    {
+      "id": "SLO-001",
+      "name": "API Availability",
+      "description": "Disponibilidade da API Fastify do ECP Emps medida como proporção de requisições bem-sucedidas (não-5xx) sobre o total de requisições",
+      "target": "99.9%",
+      "target_numeric": 0.999,
+      "window": "30 days rolling",
+      "sli": {
+        "formula": "(total_requests - 5xx_responses) / total_requests * 100",
+        "data_source": "access logs + health check endpoint /health",
+        "excludes": ["scheduled maintenance windows", "requests from internal monitoring"]
+      },
+      "error_budget": {
+        "total_minutes_per_month": 43.2,
+        "description": "Com 99.9% de target em 30 dias, o error budget permite ~43 minutos de downtime por mês",
+        "burn_rate_alerts": [
+          {
+            "severity": "warning",
+            "condition": "burn_rate > 2x em janela de 6h",
+            "action": "Notificar canal Slack #ecp-emps-oncall"
+          },
+          {
+            "severity": "critical",
+            "condition": "burn_rate > 10x em janela de 1h",
+            "action": "Acionar PagerDuty e iniciar incident response"
+          }
+        ]
+      },
+      "measurement_method": "Contagem de respostas HTTP agrupadas por status code no load balancer, excluindo health checks internos. Medição a cada 1 minuto, agregação rolling de 30 dias.",
+      "alert_thresholds": {
+        "warning": "99.95% (budget consumption > 50% no período)",
+        "critical": "99.9% (budget consumption > 80% no período)",
+        "emergency": "99.5% (budget esgotado, congelar deploys)"
+      }
+    },
+    {
+      "id": "SLO-002",
+      "name": "API Latency",
+      "description": "Tempo de resposta da API para requisições de leitura (GET) e escrita (POST/PUT/PATCH) medido nos percentis p50, p95 e p99",
+      "target": {
+        "p50": "50ms",
+        "p95": "200ms",
+        "p99": "500ms"
+      },
+      "window": "30 days rolling",
+      "sli": {
+        "formula": "percentile(response_time_ms, [50, 95, 99]) por tipo de operação",
+        "data_source": "Application Performance Monitoring (APM) + request duration headers",
+        "segmentation": {
+          "read_operations": "GET /companies, GET /dashboard, GET /transactions",
+          "write_operations": "POST /invoices, POST /pix/transfer, POST /companies",
+          "heavy_operations": "GET /reports/*, POST /invoices/batch (excluídas do p50)"
+        }
+      },
+      "error_budget": {
+        "p95_budget": "5% das requisições podem exceder 200ms",
+        "p99_budget": "1% das requisições podem exceder 500ms",
+        "description": "Requisições que excedam os thresholds consomem error budget proporcionalmente"
+      },
+      "measurement_method": "Histograma de latência capturado via middleware Fastify onResponse hook. Buckets: 10ms, 25ms, 50ms, 100ms, 200ms, 500ms, 1000ms, 2000ms. Agregação rolling de 30 dias com granularidade de 5 minutos.",
+      "alert_thresholds": {
+        "warning": "p95 > 300ms por 10 minutos consecutivos",
+        "critical": "p95 > 500ms por 5 minutos consecutivos",
+        "emergency": "p99 > 2000ms por 2 minutos consecutivos"
+      }
+    },
+    {
+      "id": "SLO-003",
+      "name": "Error Rate",
+      "description": "Taxa de erros da API medida como proporção de respostas 5xx sobre o total, excluindo erros de validação (4xx) que são comportamento esperado",
+      "target": "< 0.1%",
+      "target_numeric": 0.001,
+      "window": "30 days rolling",
+      "sli": {
+        "formula": "count(status >= 500) / count(all_requests) * 100",
+        "data_source": "Access logs do Fastify + error tracking (Sentry)",
+        "excludes": ["4xx client errors", "rate limiting responses (429)", "health check failures during deploy"]
+      },
+      "error_budget": {
+        "total_allowed_errors_per_10k": 10,
+        "description": "Para cada 10.000 requisições, no máximo 10 podem resultar em erro de servidor",
+        "burn_rate_alerts": [
+          {
+            "severity": "warning",
+            "condition": "error_rate > 0.05% em janela de 30min",
+            "action": "Investigar logs e alertar engenheiro de plantão"
+          },
+          {
+            "severity": "critical",
+            "condition": "error_rate > 0.5% em janela de 10min",
+            "action": "Acionar incident response, considerar rollback"
+          }
+        ]
+      },
+      "measurement_method": "Contagem de respostas com status >= 500 no middleware de error handling do Fastify. Erros categorizados por rota e tipo (AppError vs unhandled). Agregação a cada 1 minuto.",
+      "alert_thresholds": {
+        "warning": "error_rate > 0.05% em 30 minutos",
+        "critical": "error_rate > 0.1% em 15 minutos",
+        "emergency": "error_rate > 1% em 5 minutos (possível incidente grave)"
+      }
+    },
+    {
+      "id": "SLO-004",
+      "name": "Pix Processing Time",
+      "description": "Tempo total de processamento de uma transferência Pix, desde o recebimento da requisição até a confirmação de execução (status COMPLETED)",
+      "target": {
+        "p50": "800ms",
+        "p95": "2000ms",
+        "p99": "5000ms"
+      },
+      "window": "30 days rolling",
+      "sli": {
+        "formula": "percentile(pix_completion_time_ms, [50, 95, 99])",
+        "data_source": "Timestamps de pj-pix module: created_at → completed_at na tabela pix_transfers",
+        "includes": ["Validação Zod", "Verificação de saldo", "Registro no SQLite", "Processamento simulado do PSP", "Atualização de status"]
+      },
+      "error_budget": {
+        "p95_budget": "5% das transferências Pix podem exceder 2s",
+        "timeout_threshold": "10s — acima disso, a transação é marcada como TIMEOUT e entra em fila de retry",
+        "description": "Pix é operação crítica para o North Star (EFAS). Degradação impacta diretamente KR-01 (activation rate)."
+      },
+      "measurement_method": "Duração calculada entre created_at e completed_at na tabela pix_transfers. Medição inclui todo o ciclo server-side. Timeouts registrados como falha de SLI. Agregação horária com dashboard de 30 dias.",
+      "alert_thresholds": {
+        "warning": "p95 > 3000ms por 15 minutos",
+        "critical": "p95 > 5000ms por 5 minutos",
+        "emergency": "Taxa de timeout Pix > 2% em 10 minutos"
+      }
+    },
+    {
+      "id": "SLO-005",
+      "name": "Invoice (Boleto) Generation Time",
+      "description": "Tempo de geração de boleto bancário, desde a requisição POST /invoices até o retorno com código de barras e linha digitável",
+      "target": {
+        "p50": "300ms",
+        "p95": "1000ms",
+        "p99": "2000ms"
+      },
+      "window": "30 days rolling",
+      "sli": {
+        "formula": "percentile(invoice_generation_time_ms, [50, 95, 99])",
+        "data_source": "Timestamps do módulo invoices: request_received → response_sent medido via Fastify onResponse hook para rota POST /invoices",
+        "includes": ["Validação Zod do payload", "Cálculo de juros e multa", "Geração do código de barras", "Persistência no SQLite", "Retorno do boleto formatado"]
+      },
+      "error_budget": {
+        "p95_budget": "5% dos boletos podem levar mais de 1s para gerar",
+        "failure_threshold": "Boleto que falha na geração conta como violação total de SLI",
+        "description": "Boleto é core para KR-02 (2+ boletos/empresa/mês). Lentidão na geração reduz adoção."
+      },
+      "measurement_method": "Duração da requisição POST /invoices medida end-to-end no servidor Fastify. Inclui validação, cálculo e persistência. Medição a cada requisição, agregação em janelas de 5 minutos.",
+      "alert_thresholds": {
+        "warning": "p95 > 1500ms por 10 minutos",
+        "critical": "p95 > 2500ms por 5 minutos",
+        "emergency": "Taxa de falha de geração > 1% em 10 minutos"
+      }
+    }
+  ],
+  "governance": {
+    "review_meeting": "Primeira segunda-feira de cada mês",
+    "attendees": ["PM", "Tech Lead", "Operations Engineer", "QA Lead"],
+    "escalation_policy": "SLO violado 2 meses consecutivos → revisão de arquitetura obrigatória",
+    "error_budget_policy": {
+      "budget_remaining_above_50": "Deploys liberados normalmente",
+      "budget_remaining_25_to_50": "Deploys requerem aprovação do Tech Lead",
+      "budget_remaining_below_25": "Congelar deploys de features, priorizar reliability",
+      "budget_exhausted": "Congelar todos os deploys até restaurar SLO"
+    }
+  }
+}

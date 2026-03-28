@@ -1,0 +1,337 @@
+{
+  "metadata": {
+    "agent": "product-vision-subagent",
+    "phase": "01-contexto-estrategico",
+    "product": "ECP Emps",
+    "generated_at": "2026-03-28T00:00:00Z",
+    "version": "1.0",
+    "status": "completed"
+  },
+
+  "vision": {
+    "vision_statement": "Para microempreendedores brasileiros (MEIs e MEs), que perdem tempo e dinheiro com serviços bancários caros, burocracia financeira sem valor e a confusão constante entre finanças pessoais e do negócio, o ECP Emps é um banco digital web-first que automatiza a gestão financeira empresarial com inteligência artificial, diferente de Nubank PJ, Cora e Inter PJ porque é o único que combina experiência bancária completa no desktop, visão consolidada PF-PJ com toggle instantâneo, categorização automática de gastos por IA e organização por ciclo de faturamento do MEI — tudo sem taxas escondidas.",
+
+    "vision_horizon": "3-5 anos (2026-2031)",
+
+    "long_term_aspiration": "Até 2031, o ECP Emps será a plataforma financeira de referência para micro e pequenos negócios brasileiros — o lugar onde o empreendedor entende seu negócio em segundos, cobra seus clientes sem fricção, e toma decisões financeiras com confiança, sem precisar de contador ou planilha.",
+
+    "strategic_bets": [
+      {
+        "bet": "Web-first como diferencial defensável",
+        "rationale": "73% dos MEIs de serviços digitais (beachhead) trabalham no computador. Nenhum concorrente PJ oferece experiência desktop completa. Isso cria um hábito de uso diário que mobile-first não captura para esse público.",
+        "risk": "Se concorrentes lançarem versões web competentes em 12-18 meses, o diferencial erode. Mitigation: construir densidade de features e dados no dashboard que gerem lock-in."
+      },
+      {
+        "bet": "IA como motor de retenção",
+        "rationale": "Categorização automática de gastos, detecção PF/PJ e insights de ciclo criam valor cumulativo — quanto mais dados, melhor a IA. Isso gera switching cost crescente ao longo do tempo.",
+        "risk": "Precisão baixa nos primeiros meses pode frustrar early adopters. Mitigation: permitir correção manual que retroalimenta o modelo."
+      },
+      {
+        "bet": "Integração PF-PJ como moat",
+        "rationale": "42% dos MEIs não separam PF/PJ. O toggle instantâneo + dashboard consolidado resolve a dor #1 do público. Competidores PJ-only (Cora, Conta Simples) não conseguem replicar sem construir um banco PF.",
+        "risk": "Depende do ecp-digital-bank (PF) estar maduro e estável. Mitigation: o PJ herda sessão e componentes do PF, então evolução é conjunta."
+      }
+    ],
+
+    "what_success_looks_like": {
+      "year_1": "15.000 MEIs de serviços digitais usam o ECP Emps semanalmente pelo desktop, com 35%+ de ativação e NPS > 50. O toggle PF-PJ é usado 2+ vezes por sessão.",
+      "year_2": "60.000 clientes ativos. Categorização por IA atinge 90%+ de precisão. Boletos e cobranças representam 40% do engajamento. Receita de float + interchange cobre custos operacionais.",
+      "year_3": "150.000 clientes. Crédito PJ lançado com base em dados transacionais. ARPAC de R$ 840/ano. Expansão para MEs com múltiplos sócios. Plataforma reconhecida como referência em banking PJ web-first."
+    }
+  },
+
+  "north_star": {
+    "metric_name": "Empresas Financeiramente Ativas por Semana (EFAS)",
+    "definition": "Número de empresas que realizaram pelo menos 3 operações financeiras significativas (Pix enviado/recebido, boleto emitido/pago, compra no cartão ou transferência PF-PJ) nos últimos 7 dias.",
+    "why_this_metric": "O momento de valor real acontece quando o empreendedor usa o ECP Emps como seu banco principal do negócio — não apenas abre a conta, mas opera por ele. 3 operações/semana indica que o produto substituiu o banco anterior. Essa métrica é leading indicator de retenção, receita (float + interchange) e satisfação.",
+    "current_baseline": 0,
+    "targets": {
+      "month_3": 1500,
+      "month_6": 5000,
+      "month_12": 15000,
+      "month_24": 60000,
+      "month_36": 150000
+    },
+
+    "input_metrics": [
+      {
+        "name": "Taxa de Ativação PJ (7 dias)",
+        "definition": "Percentual de contas PJ abertas que realizam 3+ operações nos primeiros 7 dias",
+        "target": ">= 35%",
+        "causal_link": "Ativação rápida é o preditor mais forte de retenção. Se o MEI não usa nos primeiros 7 dias, a probabilidade de se tornar EFAS cai 80%. Cada ponto percentual de ativação adiciona ~150 EFAS no mês seguinte.",
+        "leading_indicator": true
+      },
+      {
+        "name": "Boletos Emitidos por Empresa Ativa / Mês",
+        "definition": "Média de boletos com status != cancelled emitidos por empresa ativa no mês",
+        "target": ">= 2 boletos/empresa/mês",
+        "causal_link": "Boletos criam fluxo recorrente de receita na conta (clientes pagam → saldo aumenta → mais operações). Cada boleto emitido gera em média 1.3 operações adicionais (recebimento + transferência ou pagamento). É o feature mais sticky para MEIs B2B.",
+        "leading_indicator": true
+      },
+      {
+        "name": "Toggle PF-PJ por Sessão",
+        "definition": "Média de alternâncias entre perfil PF e PJ por sessão de usuário",
+        "target": ">= 2 toggles/sessão",
+        "causal_link": "O toggle indica que o usuário vê valor na visão consolidada e usa ambas as contas ativamente. Usuários que alternam 2+ vezes/sessão têm retenção D30 2.5x maior que os que não alternam. É o proxy do diferencial PF-PJ.",
+        "leading_indicator": true
+      },
+      {
+        "name": "Receita Transacional por Empresa (ARPAC mensal)",
+        "definition": "Receita média por empresa ativa por mês, incluindo float, interchange, boletos e fees",
+        "target": ">= R$ 70/mês (R$ 840/ano) até mês 18",
+        "causal_link": "ARPAC crescente confirma que empresas estão concentrando volume financeiro no ECP Emps. É o lagging indicator que valida que EFAS está se traduzindo em negócio sustentável.",
+        "leading_indicator": false
+      },
+      {
+        "name": "Retenção D30 PJ",
+        "definition": "Percentual de empresas que fazem login e pelo menos 1 operação no dia 30 após abertura da conta",
+        "target": ">= 45%",
+        "causal_link": "Retenção de 30 dias valida que o produto entregou valor suficiente para criar hábito. Cada 1pp de melhoria em D30 se traduz em ~3% mais EFAS no trimestre seguinte. É o termômetro de product-market fit.",
+        "leading_indicator": false
+      }
+    ],
+
+    "metric_governance": {
+      "measured_by": "Contagem semanal automatizada via query no database-emps.sqlite (tabela pj_transactions, agrupado por company_id, janela de 7 dias rolling)",
+      "reviewed": "Weekly — review do PM com squad toda segunda-feira",
+      "alert_threshold": "Se EFAS cair 10%+ semana-sobre-semana, trigger de investigação imediata"
+    }
+  },
+
+  "product_principles": {
+    "description": "Princípios de decisão que orientam o squad quando prioridades entram em conflito. Cada princípio tem um trade-off explícito — o que escolhemos NÃO fazer quando aplicamos esse princípio.",
+
+    "principles": [
+      {
+        "number": 1,
+        "name": "Desktop primeiro, mobile sempre",
+        "statement": "Desenhamos e otimizamos toda feature primeiro para 1280px+, garantindo experiência produtiva no desktop. Mobile funciona, mas nunca dita a arquitetura da interface.",
+        "tradeoff": "Aceitamos que a experiência mobile será funcional mas não best-in-class. Recursos de desenvolvimento vão para polir o desktop. Não lançamos features que existam apenas no mobile.",
+        "when_to_apply": "Quando houver dúvida se um layout deve priorizar touch ou teclado/mouse, sempre teclado/mouse. Quando o time quiser simplificar uma tela removendo informação para caber no mobile, a informação fica e o mobile adapta."
+      },
+      {
+        "number": 2,
+        "name": "Automação vence configuração",
+        "statement": "Se o sistema pode decidir automaticamente (categorizar, detectar, alertar), ele decide. Não pedimos ao MEI para fazer trabalho que a IA pode fazer por ele.",
+        "tradeoff": "Aceitamos precisão imperfeita no início (80%+ é suficiente para lançar) em troca de reduzir a carga cognitiva do usuário. Preferimos um erro corrigível a uma tela de configuração a mais.",
+        "when_to_apply": "Quando o PO quiser adicionar uma tela de configuração de categorias, pergunte: a IA pode fazer isso em 80%+ dos casos? Se sim, automatize e ofereça correção manual como fallback."
+      },
+      {
+        "number": 3,
+        "name": "Clareza financeira acima de tudo",
+        "statement": "O empreendedor deve entender sua situação financeira em 5 segundos ao abrir o dashboard. Nunca escondemos saldo, não adicionamos passos entre o login e a visão de caixa.",
+        "tradeoff": "Sacrificamos estética e espaço em tela para exibir números. Não usamos animações que atrasem a exibição de dados financeiros. Não colocamos marketing ou upsell antes dos números do negócio.",
+        "when_to_apply": "Quando o designer quiser um dashboard mais limpo com cards colapsados, ou quando marketing quiser um banner no dashboard, a resposta é: os números vêm primeiro."
+      },
+      {
+        "number": 4,
+        "name": "PF e PJ são um só empreendedor",
+        "statement": "Tratamos o MEI como uma pessoa que tem um negócio, não como dois perfis separados. A integração PF-PJ deve ser instantânea, sem relogin, sem fricção.",
+        "tradeoff": "Aceitamos maior complexidade técnica (JWT compartilhado, estado dual, proxy entre APIs) para manter a experiência fluida. Não lançamos features PJ que quebrem ou ignorem a conta PF.",
+        "when_to_apply": "Quando o arquiteto sugerir separar completamente as bases/sessões por simplicidade, ou quando uma feature PJ for projetada sem considerar o impacto na visão consolidada."
+      },
+      {
+        "number": 5,
+        "name": "Gratuito no core, premium no extra",
+        "statement": "Conta, Pix, boletos e gestão básica são gratuitos para sempre. Monetização vem de float, interchange, crédito e features premium de produtividade — nunca de tarifas sobre operações básicas.",
+        "tradeoff": "Aceitamos menor receita por usuário no curto prazo. Nunca cobramos por features que o mercado já dá de graça (Pix, TED). Isso significa que precisamos de volume (15K+ empresas) antes de break-even.",
+        "when_to_apply": "Quando o time financeiro pressionar para cobrar por boletos ou Pix para antecipar receita, a resposta é não. Quando quisermos monetizar, criamos features novas de alto valor, não cobramos pelo básico."
+      },
+      {
+        "number": 6,
+        "name": "Dados do empreendedor pertencem ao empreendedor",
+        "statement": "Toda informação financeira deve ser exportável, compreensível e transparente. Nunca criamos lock-in por opacidade de dados. O MEI entende cada centavo que entra e sai.",
+        "tradeoff": "Investimos tempo de engenharia em exports, relatórios e transparência mesmo que isso não gere receita direta. Aceitamos que alguns usuários usem os dados para migrar, porque os que ficam, ficam por valor — não por aprisionamento.",
+        "when_to_apply": "Quando alguém sugerir dificultar exportação de dados para aumentar retenção, ou quando um relatório parecer 'bom o suficiente' sem detalhe granular."
+      },
+      {
+        "number": 7,
+        "name": "Segurança sem fricção desnecessária",
+        "statement": "Protegemos o dinheiro do empreendedor com rigor (RBAC, audit log, limites), mas não adicionamos passos de segurança que não reduzam risco real. Se uma confirmação não previne fraude, ela não existe.",
+        "tradeoff": "Aceitamos o risco de parecer 'menos seguro' visualmente em troca de velocidade operacional. Não adicionamos modais de confirmação por padrão — apenas quando o valor ou a irreversibilidade justificam.",
+        "when_to_apply": "Quando QA ou compliance sugerir adicionar confirmação em toda operação, avaliamos: essa confirmação previne um cenário real de perda? Se não, removemos. Confirmação reforçada apenas acima de R$ 5.000 (RN-03)."
+      }
+    ]
+  },
+
+  "opportunity_brief": {
+    "title": "ECP Emps — Opportunity Brief: Banco Digital Web-First para MEIs e Microempresas",
+
+    "executive_summary": "Existe uma janela de 12-18 meses para capturar o segmento de MEIs digitais (freelancers, desenvolvedores, designers, consultores) que trabalham predominantemente no computador e estão insatisfeitos com bancos PJ mobile-first. Nenhum concorrente oferece a combinação de experiência web completa + integração PF-PJ + inteligência financeira automatizada. O ECP Emps entra nesse espaço com custo de aquisição baixo (alavancagem da base PF do ecp-digital-bank) e proposta de valor clara: o banco PJ que funciona como ferramenta de trabalho, não como app de celular.",
+
+    "problem_statement": {
+      "core_problem": "Microempreendedores brasileiros pagam caro por serviços bancários ruins, não conseguem separar finanças pessoais das empresariais, e perdem horas semanais com burocracia financeira que não gera valor para o negócio.",
+      "evidence": [
+        "48% dos MEIs estão insatisfeitos com seu banco atual (SEBRAE 2024)",
+        "73% dos MEIs não têm controle financeiro formal",
+        "42% dos MEIs não separam conta PF da PJ",
+        "65% usam o computador como ferramenta principal de trabalho, mas nenhum banco PJ prioriza desktop"
+      ],
+      "who_feels_it_most": "Freelancers digitais MEI (22-35 anos) que prestam serviços de design, desenvolvimento, marketing e consultoria. Trabalham no computador, recebem por Pix e boleto, e precisam de visão financeira em tempo real enquanto trabalham.",
+      "cost_of_inaction": "O empreendedor continua misturando PF/PJ, pagando tarifas desnecessárias, e não tem visibilidade real do lucro do negócio. Resultado: decisões financeiras ruins, inadimplência fiscal e estagnação do negócio."
+    },
+
+    "market_context": {
+      "tam": "R$ 42 bilhões — receita total de serviços financeiros para MEI + ME no Brasil",
+      "sam": "R$ 16,8 bilhões — 40% do TAM (digitalmente ativos + insatisfeitos)",
+      "som_3_years": "R$ 84-168 milhões — 0,5-1% do SAM, equivalente a 100K-200K clientes com ARPAC de R$ 840/ano",
+      "growth_drivers": [
+        "MEIs crescem 15% a.a. no Brasil — base de 16.3M em 2025, projeção de 18M+ em 2026",
+        "Migração acelerada de bancos tradicionais para digitais no segmento PJ",
+        "Regulamentação Pix PJ (BCB) reduzindo barreiras de entrada",
+        "Remote work permanente aumenta demanda por ferramentas financeiras desktop"
+      ]
+    },
+
+    "competitive_landscape": {
+      "direct_competitors": [
+        {
+          "name": "Nubank PJ",
+          "customers": "15M+",
+          "strength": "Base PF massiva, marca forte, zero taxas",
+          "weakness": "Desktop limitado, sem gestão financeira inteligente, sem categorização IA"
+        },
+        {
+          "name": "Cora",
+          "customers": "1.4M+",
+          "strength": "PJ-first, NF-e integrada, boletos com QR Pix",
+          "weakness": "Sem conta PF, desktop funcional mas não web-first, sem IA"
+        },
+        {
+          "name": "Inter PJ",
+          "customers": "5M+",
+          "strength": "Marketplace completo, super app",
+          "weakness": "Desktop muito limitado, experiência PJ genérica, sem foco em MEI"
+        },
+        {
+          "name": "Conta Simples",
+          "customers": "200K+",
+          "strength": "Web completa, categorização de gastos, foco em PMEs",
+          "weakness": "Público é PME maior (não MEI), sem conta PF, pricing mais alto"
+        }
+      ],
+      "key_differentiators": [
+        "Unico banco PJ com experiência web-first completa otimizada para 1280px+",
+        "Toggle PF-PJ instantâneo no mesmo app com dashboard consolidado",
+        "Categorização automática de gastos empresariais por IA",
+        "Visão por ciclo de faturamento do MEI (não mês-calendário)",
+        "Detecção automática de gastos pessoais na conta PJ"
+      ],
+      "window_of_opportunity": "12-18 meses. Nenhum competidor sinalizou investimento em web-first PJ. Nubank foca em mobile + crédito. Cora foca em CoraWeb incremental. Janela fecha quando qualquer incumbente priorizar desktop seriamente."
+    },
+
+    "beachhead_segment": {
+      "name": "Freelancer Digital MEI",
+      "profile": "22-35 anos, serviços digitais (design, dev, marketing, consultoria), faturamento R$ 3-7K/mês, trabalha 100% no computador",
+      "size": "~2.5M de MEIs em serviços digitais no Brasil",
+      "why_beachhead": [
+        "Web-first é ressonância natural — já trabalham o dia inteiro no browser",
+        "Alta willingness to pay por produtividade financeira",
+        "Influenciadores naturais em comunidades tech/design (viral orgânico)",
+        "Dor de separação PF/PJ é aguda — recebem de clientes PJ, pagam despesas pessoais da mesma conta",
+        "Ciclo de venda curto — decisor é o próprio MEI, sem procurement"
+      ],
+      "acquisition_strategy": "Alavancagem da base PF do ecp-digital-bank (mesmo modelo do Nubank). Custo de aquisição próximo de zero para quem já é cliente PF. Abertura de conta PJ em 2 minutos com CNPJ, sem documentação adicional para MEI.",
+      "expansion_path": "Freelancer Digital MEI → MEI serviços gerais → ME com sócios → PME com time"
+    },
+
+    "product_scope_mvp": {
+      "in_scope": [
+        "Conta digital PJ com rendimento automático (CDI)",
+        "Pix empresarial ilimitado e gratuito (chaves CNPJ, QR Code, copia-cola)",
+        "Emissão de boletos com QR Code Pix (avulso, parcelado, recorrente)",
+        "Cartão corporativo virtual (até 5 por empresa)",
+        "Toggle PF-PJ instantâneo com dashboard consolidado",
+        "Extrato com categorização automática de gastos",
+        "Dashboard de fluxo de caixa (entradas vs saídas, 30/60/90 dias)",
+        "Multi-usuários com RBAC (Admin, Financeiro, Visualizador)",
+        "Transferência instantânea e gratuita PF-PJ (mesma titularidade)",
+        "Alerta de gasto pessoal na conta PJ"
+      ],
+      "out_of_scope_mvp": [
+        "Crédito PJ (empréstimos, antecipação de recebíveis) — roadmap ano 2",
+        "Emissão de NF-e — roadmap pós-MVP",
+        "Maquininha virtual (NuTap-like) — avaliação futura",
+        "Integração com ERPs e sistemas contábeis — roadmap ano 2",
+        "Conta internacional / câmbio — não planejado",
+        "Seguros empresariais — não planejado"
+      ]
+    },
+
+    "revenue_model": {
+      "primary_streams": [
+        {
+          "stream": "Float (rendimento sobre saldo em conta)",
+          "percentage_of_revenue": "35%",
+          "mechanism": "Saldo PJ aplicado em CDI. Banco retém spread entre CDI cheio e rendimento oferecido ao cliente."
+        },
+        {
+          "stream": "Interchange (cartão corporativo)",
+          "percentage_of_revenue": "25%",
+          "mechanism": "Taxa de interchange sobre compras no cartão virtual. PJ tipicamente tem ticket médio maior que PF."
+        },
+        {
+          "stream": "Crédito PJ",
+          "percentage_of_revenue": "20%",
+          "mechanism": "Empréstimos e antecipação de recebíveis baseados em dados transacionais. Lançamento previsto para ano 2.",
+          "status": "roadmap"
+        },
+        {
+          "stream": "Boletos e cobranças",
+          "percentage_of_revenue": "10%",
+          "mechanism": "Fee por boleto emitido acima de cota gratuita generosa. No MVP, ilimitado e gratuito para gerar volume."
+        },
+        {
+          "stream": "Plano Premium",
+          "percentage_of_revenue": "10%",
+          "mechanism": "Features avançadas: API de integração, dashboards customizados, automações, múltiplos cartões além de 5.",
+          "status": "roadmap"
+        }
+      ],
+      "arpac_target": "R$ 840/ano (R$ 70/mês) até mês 18",
+      "break_even_estimate": "15.000+ empresas ativas"
+    },
+
+    "risks_and_mitigations": [
+      {
+        "risk": "Adoção lenta — MEIs são conservadores com finanças",
+        "impact": "high",
+        "probability": "medium",
+        "mitigation": "Abertura em 2 minutos via base PF existente. Zero custo de troca. Trial natural: abrir conta PJ não cancela a PF."
+      },
+      {
+        "risk": "Precisão da IA de categorização abaixo do aceitável no lançamento",
+        "impact": "medium",
+        "probability": "medium",
+        "mitigation": "Lançar com categorização baseada em MCC (Merchant Category Code) + regras. IA como upgrade progressivo. Correção manual retroalimenta modelo."
+      },
+      {
+        "risk": "Concorrente lança web-first PJ antes",
+        "impact": "high",
+        "probability": "low",
+        "mitigation": "Velocidade de execução. MVP em 12 semanas. Dashboard denso com dados que criam stickiness. Integração PF-PJ é moat difícil de replicar."
+      },
+      {
+        "risk": "Regulamentação bancária muda (BCB)",
+        "impact": "high",
+        "probability": "low",
+        "mitigation": "Produto opera como plataforma sobre infraestrutura de SCD parceira. Monitorar pautas do BCB trimestralmente."
+      },
+      {
+        "risk": "Dependência do ecp-digital-bank (PF) para integração",
+        "impact": "medium",
+        "probability": "medium",
+        "mitigation": "Stack idêntica, JWT compartilhado, times alinhados. PJ pode operar standalone se necessário (fallback: login independente)."
+      }
+    ],
+
+    "success_criteria_phase_01": {
+      "definition_of_done": "O squad compartilha entendimento claro de: quem é o cliente (beachhead), qual o problema (#1), como medimos sucesso (NSM + input metrics), e quais são os limites do MVP.",
+      "artifacts_produced": [
+        "market-research.json — pesquisa de mercado completa",
+        "product-vision.json — visão, north star, princípios e opportunity brief (este documento)"
+      ],
+      "next_phase": "02-product-discovery — PO define épicos, features e histórias. Designer cria protótipos. PM valida alinhamento com visão."
+    }
+  }
+}

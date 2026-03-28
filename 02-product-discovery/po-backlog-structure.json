@@ -1,0 +1,488 @@
+{
+  "agent": "product-owner",
+  "phase": "02-discovery",
+  "sub_phase": "backlog-structuring",
+  "product": "ECP Emps",
+  "session_id": "ecp-emps-20260328",
+  "generated_at": "2026-03-28",
+  "methodology": "SAFe — Portfolio (Epics) > Program (Features) > Team (Stories)",
+  "beachhead_segment": "Freelancer Digital MEI (22-35 anos)",
+  "input_references": [
+    "01-strategic-context/phase-01-output.json",
+    "02-discovery/po-prioritization-rice.json",
+    "02-discovery/designer-ideation.json",
+    "product_briefing_spec.md",
+    "tech_spec.md"
+  ],
+
+  "epics": [
+    {
+      "epic_id": "EPIC-01",
+      "title": "Onboarding Expressa PJ",
+      "opportunity_ids": ["OPP-01", "OPP-03"],
+      "hypothesis_ids": ["H-03", "H-04"],
+      "value_statement": "Para MEIs freelancers que precisam de uma conta PJ funcional sem burocracia, a abertura de conta expressa vai permitir que comecem a operar em menos de 3 minutos, diferente dos bancos que exigem dias de análise e documentação, nossa abordagem aproveita o KYC do PF já validado e pré-configura tudo automaticamente (Pix CNPJ, categorias, defaults de boleto).",
+      "linked_krs": ["KR-01"],
+      "priority": "P0",
+      "total_rice": 480.0
+    },
+    {
+      "epic_id": "EPIC-02",
+      "title": "Cobranças Empresariais (Boletos + Pix QR)",
+      "opportunity_ids": ["OPP-04"],
+      "hypothesis_ids": ["H-06", "H-07"],
+      "value_statement": "Para freelancers MEI que desistem de cobrar formalmente porque emitir boleto e caro e burocrático, o módulo de cobranças vai permitir emitir boletos gratuitos com QR Pix embutido em 2 passos e menos de 90 segundos, diferente de bancos que cobram por boleto e exigem formulários complexos, nossa abordagem simplifica ao máximo com defaults inteligentes e preview visual profissional.",
+      "linked_krs": ["KR-02"],
+      "priority": "P0",
+      "total_rice": 115.2
+    },
+    {
+      "epic_id": "EPIC-03",
+      "title": "Ecossistema PF-PJ Unificado",
+      "opportunity_ids": ["OPP-07", "OPP-09"],
+      "hypothesis_ids": ["H-05", "H-08", "H-09"],
+      "value_statement": "Para MEIs que misturam gastos pessoais e empresariais porque ter dois apps e inconveniente, o ecossistema PF-PJ unificado vai permitir alternar entre contas com 1 clique e transferir instantaneamente entre elas, diferente de bancos que tratam PF e PJ como mundos separados, nossa abordagem integra ambos no mesmo ambiente com ProfileSwitcher e saldos lado a lado.",
+      "linked_krs": ["KR-03"],
+      "priority": "P0",
+      "total_rice": 262.7
+    },
+    {
+      "epic_id": "EPIC-04",
+      "title": "Banco Desktop-First para Empreendedores",
+      "opportunity_ids": ["OPP-11"],
+      "hypothesis_ids": ["H-01"],
+      "value_statement": "Para freelancers digitais que trabalham 100% no computador e sofrem com interfaces mobile-adapted nos bancos PJ, a experiência desktop-first vai oferecer um ambiente bancário empresarial nativo para 1280px+ com sidebar fixa, tabelas aproveitando toda a largura e dashboard de produtividade, diferente de todos os concorrentes PJ que priorizam mobile, nossa abordagem trata o desktop como plataforma principal desde o design.",
+      "linked_krs": ["KR-04"],
+      "priority": "P0",
+      "total_rice": 283.5
+    }
+  ],
+
+  "features": [
+    {
+      "feature_id": "FEAT-01",
+      "epic_id": "EPIC-01",
+      "title": "Wizard de Abertura de Conta PJ em 3 Passos",
+      "benefit_hypothesis": "Se o onboarding PJ for um wizard de 3 passos (CNPJ -> confirmar dados -> conta ativa) que leva menos de 3 minutos, entao a taxa de conclusao sera superior a 85%, medido pela taxa de conversao do step 1 ao step 3.",
+      "acceptance_criteria": [
+        "Wizard com 3 steps: informar CNPJ, confirmar dados da Receita, conta criada",
+        "Validacao de CNPJ com algoritmo modulo 11 em tempo real",
+        "Consulta mock a Receita Federal retorna razao social, natureza juridica e endereco",
+        "MEI de socio unico recebe aprovacao imediata sem upload de documentos",
+        "Indicador visual de progresso (Step X/3)",
+        "Tempo total de conclusao < 3 minutos",
+        "Requer CPF do responsavel ja validado no ecp-digital-bank (RN-12)"
+      ]
+    },
+    {
+      "feature_id": "FEAT-02",
+      "epic_id": "EPIC-01",
+      "title": "Conta PJ Pre-Configurada (Zero Setup)",
+      "benefit_hypothesis": "Se a conta PJ vier com Pix CNPJ registrado, categorias de despesas e defaults de boleto pre-configurados, entao 90%+ dos usuarios farao a primeira operacao nos primeiros 10 minutos, medido pelo tempo entre criacao da conta e primeira transacao.",
+      "acceptance_criteria": [
+        "Chave Pix CNPJ registrada automaticamente na criacao da conta",
+        "7 categorias de despesas PJ criadas por padrao (Fornecedores, Impostos, Marketing, Operacional, Aluguel, Funcionarios, Outros)",
+        "Defaults de boleto pre-preenchidos: juros 1% a.m., multa 2%, validade 30 dias",
+        "Tela de sucesso exibe resumo do que foi configurado automaticamente",
+        "Conta criada com agencia 0001 e numero de 8 digitos + digito verificador",
+        "Saldo inicial zero em centavos (integer)"
+      ]
+    },
+    {
+      "feature_id": "FEAT-03",
+      "epic_id": "EPIC-02",
+      "title": "Emissao de Boleto em 2 Passos",
+      "benefit_hypothesis": "Se a emissao de boleto for simplificada em 2 passos (dados -> preview+envio) com defaults pre-preenchidos, entao freelancers emitirao 3+ boletos/mes com tempo de emissao < 90 segundos, medido pela media de boletos por empresa ativa e tempo medio de preenchimento.",
+      "acceptance_criteria": [
+        "Step 1: campos cliente (nome, CPF/CNPJ), valor, vencimento, descricao. Juros/multa em secao colapsada com defaults",
+        "Step 2: preview visual do boleto com codigo de barras + QR Pix embutido",
+        "Opcoes de envio: copiar link de pagamento, enviar por e-mail, copiar Pix copia-e-cola",
+        "Boleto gerado com codigo de barras FEBRABAN e linha digitavel",
+        "Valores em centavos (integer) no backend, exibicao em reais no frontend",
+        "Idempotencia via UUID (RN-08)",
+        "Boletos ilimitados e gratuitos"
+      ]
+    },
+    {
+      "feature_id": "FEAT-04",
+      "epic_id": "EPIC-02",
+      "title": "Gestao de Cobrancas com Status Semantico",
+      "benefit_hypothesis": "Se a lista de cobrancas usar badges semanticos coloridos e timeline por boleto, entao 95%+ dos freelancers identificarao corretamente o status de seus boletos em menos de 10 segundos, medido por testes de acuracia e tempo de reconhecimento.",
+      "acceptance_criteria": [
+        "Lista de boletos com filtros por status (Todos, Pendentes, Pagos, Vencidos, Cancelados) com contadores",
+        "Badges semanticos: Pendente (warning #ffcc00), Pago (success #3dff8b), Vencido (danger #ff4d4d), Cancelado (neutral #7b8aa3)",
+        "InvoiceTimeline compacta por boleto: Emitido -> Notificado -> Pago/Vencido",
+        "Busca por nome ou documento do cliente",
+        "Acoes: reenviar notificacao, cancelar boleto pendente",
+        "Comprovantes com CNPJ e razao social (RN-15)"
+      ]
+    },
+    {
+      "feature_id": "FEAT-05",
+      "epic_id": "EPIC-03",
+      "title": "ProfileSwitcher PF/PJ",
+      "benefit_hypothesis": "Se o toggle PF/PJ for um dropdown com dot indicadores e transicao fade 200ms, entao freelancers alternarao 2+ vezes por sessao sem confusao de contexto, medido pela media de toggles por sessao e taxa de erros de contexto.",
+      "acceptance_criteria": [
+        "Dropdown no header mostrando ambos os perfis (PF e PJ)",
+        "Dot verde no perfil ativo, dot cinza no inativo",
+        "Badge 'PF' ou 'PJ' com fundo lime-dim",
+        "Transicao fade 200ms ao alternar: sidebar e conteudo mudam sem reload de pagina",
+        "Header PJ exibe nome da empresa + badge PJ + CNPJ formatado",
+        "Sidebar PJ exibe itens exclusivos (Cobrancas, Time, Empresa)",
+        "Auth compartilhada via JWT com campo activeProfile"
+      ]
+    },
+    {
+      "feature_id": "FEAT-06",
+      "epic_id": "EPIC-03",
+      "title": "Transferencia Instantanea PF-PJ",
+      "benefit_hypothesis": "Se a transferencia PF-PJ for acessivel com 2 cliques e mostrar saldos lado a lado, entao freelancers usarao 2+ vezes por semana para separar receita do negocio, medido pela frequencia semanal de transferencias PF-PJ por usuario ativo.",
+      "acceptance_criteria": [
+        "Acessivel via QuickActions no Dashboard PJ (maximo 2 cliques ate a tela)",
+        "Cards lado a lado mostrando conta PF (nome, saldo) e conta PJ (razao social, saldo)",
+        "Toggle de direcao: PF->PJ ou PJ->PF",
+        "Validacao de mesma titularidade por CPF (RN-13)",
+        "Transferencia instantanea e gratuita",
+        "Saldo atualizado em ambas as contas atomicamente (BEGIN/COMMIT/ROLLBACK)",
+        "Validacao de saldo insuficiente (RN-04)",
+        "Badge 'Gratuita e instantanea' visivel"
+      ]
+    },
+    {
+      "feature_id": "FEAT-07",
+      "epic_id": "EPIC-04",
+      "title": "Layout Desktop-First com SidebarPJ",
+      "benefit_hypothesis": "Se o layout for projetado para 1280px+ com sidebar fixa de 280px e conteudo fluido, entao 70%+ das sessoes serao em desktop com tempo medio 2x maior que concorrentes, medido pela distribuicao de sessoes por viewport e duracao media.",
+      "acceptance_criteria": [
+        "SidebarPJ fixa de 280px com 8 itens de menu PJ (Dashboard, Extrato, Pix, Cobrancas, Cartoes, Time, Empresa, Perfil)",
+        "Conteudo fluido ocupando largura restante",
+        "Logo 'ECP Emps' + nome da empresa + CNPJ na sidebar",
+        "Botao 'Alternar para PF' na sidebar",
+        "Breakpoints: >= 1280px sidebar fixa, 1024-1279px colapsavel, < 1024px bottom nav mobile",
+        "Todos os cards em Surface #131c28, border-radius 18px, border #27364a"
+      ]
+    },
+    {
+      "feature_id": "FEAT-08",
+      "epic_id": "EPIC-04",
+      "title": "Dashboard PJ Empresarial",
+      "benefit_hypothesis": "Se o Dashboard PJ reunir saldo, QuickActions, cash flow e resumo de cobrancas em uma tela, entao 80%+ das operacoes frequentes serao iniciadas pelo dashboard, medido pela taxa de conversao QuickActions vs sidebar.",
+      "acceptance_criteria": [
+        "BalanceCardPJ com saldo, razao social, CNPJ formatado, show/hide saldo",
+        "QuickActionsPJ em grid: Enviar Pix, Cobrar (boleto), Transferir PF/PJ, Ver Extrato",
+        "CashFlowChart: grafico de barras entradas (verde) vs saidas (vermelho) ultimos 30 dias",
+        "InvoiceSummary: mini-cards com contadores por status de boleto",
+        "RecentTransactionsPJ: ultimas 5 transacoes com badge de categoria",
+        "Dados agregados via endpoint GET /pj/dashboard"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "_comment": "Stories para FEAT-01 — Wizard de Abertura de Conta PJ (TOP 1 feature por RICE score)",
+      "story_id": "US-001",
+      "feature_id": "FEAT-01",
+      "title": "Como MEI com conta PF ativa, quero informar meu CNPJ e ter os dados da empresa preenchidos automaticamente, para abrir minha conta PJ sem digitar tudo manualmente",
+      "acceptance_criteria": [
+        {
+          "scenario": "CNPJ valido informado",
+          "given": "Dado que o usuario esta autenticado no ecp-digital-bank com CPF validado",
+          "when": "Quando informa um CNPJ valido no campo de entrada do Step 1",
+          "then": "Entao o sistema valida o CNPJ com algoritmo modulo 11, consulta a Receita Federal (mock) e exibe os dados da empresa (razao social, nome fantasia, natureza juridica, endereco) no Step 2 pre-preenchidos"
+        },
+        {
+          "scenario": "CNPJ invalido informado",
+          "given": "Dado que o usuario esta no Step 1 do wizard de abertura",
+          "when": "Quando informa um CNPJ com digitos verificadores invalidos",
+          "then": "Entao o sistema exibe mensagem de erro em tempo real 'CNPJ invalido' e o botao 'Consultar CNPJ' permanece desabilitado"
+        },
+        {
+          "scenario": "CNPJ ja cadastrado",
+          "given": "Dado que o CNPJ informado ja possui conta PJ ativa no sistema",
+          "when": "Quando o usuario tenta consultar o CNPJ",
+          "then": "Entao o sistema exibe mensagem 'Este CNPJ ja possui conta PJ ativa' e bloqueia o avanço"
+        }
+      ],
+      "business_rules": ["RN-12"],
+      "estimation": "M"
+    },
+    {
+      "story_id": "US-002",
+      "feature_id": "FEAT-01",
+      "title": "Como MEI de socio unico, quero confirmar os dados da empresa e ter minha conta PJ aprovada imediatamente, para comecar a usar o banco sem esperar dias de analise",
+      "acceptance_criteria": [
+        {
+          "scenario": "MEI socio unico confirma dados",
+          "given": "Dado que o usuario esta no Step 2 com dados da empresa pre-preenchidos e a natureza juridica e 'mei'",
+          "when": "Quando clica em 'Confirmar e abrir conta'",
+          "then": "Entao o sistema cria a empresa com status 'active', gera a conta PJ (agencia 0001, numero de 8 digitos + DV), saldo zero em centavos, e redireciona para o Step 3 (conta criada)"
+        },
+        {
+          "scenario": "Edicao de campo antes de confirmar",
+          "given": "Dado que o usuario esta no Step 2 com dados pre-preenchidos",
+          "when": "Quando edita o campo 'nome fantasia' e confirma",
+          "then": "Entao o sistema salva o valor editado pelo usuario, nao o valor retornado pela consulta"
+        },
+        {
+          "scenario": "CPF do responsavel nao validado no PF",
+          "given": "Dado que o usuario esta autenticado mas seu CPF nao foi validado no ecp-digital-bank",
+          "when": "Quando tenta avancar do Step 1 para o Step 2",
+          "then": "Entao o sistema exibe mensagem 'Seu CPF precisa estar validado na conta pessoal antes de abrir conta PJ' com link para validacao no PF"
+        }
+      ],
+      "business_rules": ["RN-12", "RN-07", "RN-09"],
+      "estimation": "M"
+    },
+    {
+      "story_id": "US-003",
+      "feature_id": "FEAT-01",
+      "title": "Como novo usuario PJ, quero ver um resumo do que foi configurado automaticamente na minha conta, para ter confianca de que posso comecar a usar imediatamente",
+      "acceptance_criteria": [
+        {
+          "scenario": "Tela de sucesso apos criacao",
+          "given": "Dado que a conta PJ foi criada com sucesso no Step 2",
+          "when": "Quando o Step 3 e exibido",
+          "then": "Entao o sistema mostra: icone de sucesso verde, dados da conta (agencia 0001, numero), e lista do que foi configurado automaticamente (chave Pix CNPJ, 7 categorias de despesas, defaults de boleto)"
+        },
+        {
+          "scenario": "Navegacao pos-criacao",
+          "given": "Dado que o usuario esta no Step 3 (conta criada)",
+          "when": "Quando clica em 'Ir para o Dashboard'",
+          "then": "Entao e redirecionado para /pj/dashboard com a sidebar PJ ativa e o ProfileSwitcher mostrando o perfil PJ como ativo"
+        },
+        {
+          "scenario": "CTA alternativo para emitir boleto",
+          "given": "Dado que o usuario esta no Step 3",
+          "when": "Quando clica em 'Emitir primeiro boleto'",
+          "then": "Entao e redirecionado para /pj/cobrancas/nova com os dados da empresa ja preenchidos como emissor"
+        }
+      ],
+      "business_rules": ["RN-05"],
+      "estimation": "S"
+    },
+    {
+      "_comment": "Stories para FEAT-03 — Emissao de Boleto em 2 Passos (TOP 2 feature — core PJ)",
+      "story_id": "US-004",
+      "feature_id": "FEAT-03",
+      "title": "Como freelancer MEI, quero preencher os dados de uma cobranca em um formulario simples com defaults inteligentes, para emitir boletos sem perder tempo configurando juros e multa",
+      "acceptance_criteria": [
+        {
+          "scenario": "Preenchimento do formulario de cobranca",
+          "given": "Dado que o usuario com perfil Financial ou Admin esta na tela /pj/cobrancas/nova",
+          "when": "Quando preenche nome do cliente, CPF/CNPJ, valor (em reais, convertido para centavos), data de vencimento e descricao",
+          "then": "Entao o sistema valida os campos obrigatorios, formata CNPJ/CPF automaticamente, e habilita o botao 'Visualizar boleto'"
+        },
+        {
+          "scenario": "Defaults de juros e multa",
+          "given": "Dado que o usuario esta preenchendo o formulario de cobranca",
+          "when": "Quando expande a secao 'Configuracoes avancadas'",
+          "then": "Entao os campos juros (1% a.m.) e multa (2%) ja estao pre-preenchidos conforme defaults da conta, e desconto por antecipacao esta zerado"
+        },
+        {
+          "scenario": "Valor em centavos",
+          "given": "Dado que o usuario digitou R$ 1.500,00 no campo de valor",
+          "when": "Quando o formulario e submetido ao backend",
+          "then": "Entao o valor e enviado como 150000 (centavos integer) e armazenado na coluna amount da tabela invoices"
+        },
+        {
+          "scenario": "Visualizador tenta emitir boleto",
+          "given": "Dado que o usuario tem perfil 'viewer' na empresa",
+          "when": "Quando tenta acessar /pj/cobrancas/nova",
+          "then": "Entao o sistema bloqueia o acesso e exibe mensagem 'Voce nao tem permissao para emitir cobrancas'"
+        }
+      ],
+      "business_rules": ["RN-09", "RN-14", "RN-08", "RN-11", "RN-15"],
+      "estimation": "L"
+    },
+    {
+      "story_id": "US-005",
+      "feature_id": "FEAT-03",
+      "title": "Como freelancer MEI, quero visualizar um preview do boleto com QR Pix embutido antes de enviar, para ter certeza de que os dados estao corretos e a cobranca parece profissional",
+      "acceptance_criteria": [
+        {
+          "scenario": "Preview do boleto gerado",
+          "given": "Dado que o usuario preencheu todos os campos obrigatorios no Step 1",
+          "when": "Quando clica em 'Visualizar boleto'",
+          "then": "Entao o sistema exibe o Step 2 com preview visual contendo: dados do emissor (razao social, CNPJ), dados do pagador, valor, vencimento, codigo de barras representativo, QR Code Pix embutido e linha digitavel"
+        },
+        {
+          "scenario": "Envio por link de pagamento",
+          "given": "Dado que o usuario esta no Step 2 (preview) e clicou em 'Emitir boleto'",
+          "when": "Quando clica em 'Copiar link de pagamento'",
+          "then": "Entao o sistema copia para a area de transferencia um link unico do boleto e exibe feedback visual de 'Link copiado'"
+        },
+        {
+          "scenario": "Voltar para edicao",
+          "given": "Dado que o usuario esta no Step 2 (preview)",
+          "when": "Quando clica em 'Editar'",
+          "then": "Entao retorna ao Step 1 com todos os campos mantendo os valores preenchidos anteriormente"
+        },
+        {
+          "scenario": "Idempotencia na emissao",
+          "given": "Dado que o usuario clicou em 'Emitir boleto' e ocorreu timeout na requisicao",
+          "when": "Quando tenta emitir novamente com os mesmos dados",
+          "then": "Entao o sistema usa o idempotency_key UUID para evitar duplicacao e retorna o boleto ja criado"
+        }
+      ],
+      "business_rules": ["RN-08", "RN-14", "RN-15"],
+      "estimation": "L"
+    },
+    {
+      "story_id": "US-006",
+      "feature_id": "FEAT-03",
+      "title": "Como freelancer MEI, quero enviar a cobranca por e-mail ao meu cliente diretamente do banco, para nao precisar copiar dados e montar e-mail manualmente",
+      "acceptance_criteria": [
+        {
+          "scenario": "Envio de boleto por e-mail",
+          "given": "Dado que o boleto foi emitido com sucesso e o campo e-mail do cliente foi preenchido",
+          "when": "Quando o usuario clica em 'Enviar por e-mail'",
+          "then": "Entao o sistema envia e-mail ao cliente com link do boleto, valor, vencimento e Pix copia-e-cola, e marca notification_sent = 1 na tabela invoices"
+        },
+        {
+          "scenario": "Boleto sem e-mail do cliente",
+          "given": "Dado que o boleto foi emitido sem e-mail do cliente",
+          "when": "Quando o usuario tenta enviar por e-mail",
+          "then": "Entao o botao 'Enviar por e-mail' esta desabilitado com tooltip 'E-mail do cliente nao informado' e opcoes de link e Pix copia-e-cola permanecem disponiveis"
+        },
+        {
+          "scenario": "Copiar Pix copia-e-cola",
+          "given": "Dado que o boleto foi emitido com QR Pix embutido",
+          "when": "Quando o usuario clica em 'Copiar Pix copia-e-cola'",
+          "then": "Entao o sistema copia o codigo Pix para a area de transferencia e exibe feedback 'Codigo Pix copiado'"
+        }
+      ],
+      "business_rules": ["RN-15"],
+      "estimation": "M"
+    },
+    {
+      "_comment": "Stories para FEAT-06 — Transferencia Instantanea PF-PJ (TOP 3 feature — diferencial)",
+      "story_id": "US-007",
+      "feature_id": "FEAT-06",
+      "title": "Como MEI com conta PF e PJ, quero ver os saldos de ambas as contas lado a lado na tela de transferencia, para decidir quanto transferir entre elas",
+      "acceptance_criteria": [
+        {
+          "scenario": "Exibicao de saldos PF e PJ",
+          "given": "Dado que o usuario e titular de conta PF no ecp-digital-bank e conta PJ no ecp-digital-emps",
+          "when": "Quando acessa a tela de transferencia PF-PJ via QuickActions ou sidebar",
+          "then": "Entao o sistema exibe dois cards lado a lado: conta PF (nome pessoal, saldo em reais) e conta PJ (razao social, saldo em reais), com seta bidirecional entre eles"
+        },
+        {
+          "scenario": "Toggle de direcao",
+          "given": "Dado que a direcao padrao e PJ -> PF",
+          "when": "Quando o usuario clica na seta bidirecional",
+          "then": "Entao a direcao inverte para PF -> PJ e a seta anima indicando a nova direcao"
+        },
+        {
+          "scenario": "Saldo consultado via API PF",
+          "given": "Dado que o saldo PF e mantido em API separada (porta 3333)",
+          "when": "Quando a tela de transferencia carrega",
+          "then": "Entao o sistema consulta o saldo PF via PF_API_URL e exibe junto ao saldo PJ local, com badge 'Gratuita e instantanea'"
+        }
+      ],
+      "business_rules": ["RN-13", "RN-09"],
+      "estimation": "M"
+    },
+    {
+      "story_id": "US-008",
+      "feature_id": "FEAT-06",
+      "title": "Como MEI, quero transferir dinheiro da minha conta PJ para minha conta PF instantaneamente, para separar o pro-labore do caixa da empresa",
+      "acceptance_criteria": [
+        {
+          "scenario": "Transferencia PJ para PF com sucesso",
+          "given": "Dado que o usuario tem saldo PJ de R$ 5.000,00 e a direcao e PJ -> PF",
+          "when": "Quando informa R$ 2.000,00 e confirma a transferencia",
+          "then": "Entao o sistema debita 200000 centavos da conta PJ, credita na conta PF via API, registra a transacao com category 'transfer_pf' em pj_transactions, e exibe tela de confirmacao com saldos atualizados"
+        },
+        {
+          "scenario": "Saldo insuficiente",
+          "given": "Dado que o usuario tem saldo PJ de R$ 500,00",
+          "when": "Quando tenta transferir R$ 1.000,00 para a conta PF",
+          "then": "Entao o sistema exibe mensagem 'Saldo insuficiente. Saldo disponivel: R$ 500,00' e bloqueia a transferencia"
+        },
+        {
+          "scenario": "Titularidade diferente",
+          "given": "Dado que o CPF do usuario autenticado nao e o owner_user_id da empresa",
+          "when": "Quando tenta acessar a transferencia PF-PJ",
+          "then": "Entao o sistema bloqueia com mensagem 'Transferencia disponivel apenas para o titular da empresa (mesmo CPF nas contas PF e PJ)'"
+        },
+        {
+          "scenario": "Atomicidade da transferencia",
+          "given": "Dado que o usuario confirmou uma transferencia valida",
+          "when": "Quando o debito na PJ ocorre mas o credito na PF falha",
+          "then": "Entao o sistema executa ROLLBACK, saldo PJ permanece inalterado, e exibe mensagem 'Falha na transferencia, tente novamente'"
+        }
+      ],
+      "business_rules": ["RN-04", "RN-08", "RN-09", "RN-13"],
+      "estimation": "L"
+    },
+    {
+      "story_id": "US-009",
+      "feature_id": "FEAT-06",
+      "title": "Como MEI, quero receber confirmacao visual apos a transferencia PF-PJ com saldos atualizados, para ter certeza de que o dinheiro foi movido corretamente",
+      "acceptance_criteria": [
+        {
+          "scenario": "Tela de confirmacao",
+          "given": "Dado que a transferencia PF-PJ foi concluida com sucesso",
+          "when": "Quando a tela de confirmacao e exibida",
+          "then": "Entao mostra icone de sucesso verde (#3dff8b), resumo (de: conta PJ saldo anterior -> saldo novo, para: conta PF saldo anterior -> saldo novo, valor transferido), badge 'Instantanea e gratuita'"
+        },
+        {
+          "scenario": "Fazer outra transferencia",
+          "given": "Dado que o usuario esta na tela de confirmacao",
+          "when": "Quando clica em 'Fazer outra transferencia'",
+          "then": "Entao retorna a tela de transferencia com saldos atualizados e campo de valor limpo"
+        },
+        {
+          "scenario": "Transacao no extrato",
+          "given": "Dado que a transferencia foi concluida",
+          "when": "Quando o usuario acessa o extrato PJ",
+          "then": "Entao a transacao aparece com category 'transfer_pf', description informando a direcao, e counterpart_name com o nome pessoal do titular"
+        }
+      ],
+      "business_rules": ["RN-15", "RN-09"],
+      "estimation": "S"
+    }
+  ],
+
+  "summary": {
+    "total_epics": 4,
+    "total_features": 8,
+    "total_stories": 9,
+    "stories_by_feature": {
+      "FEAT-01_wizard_onboarding": 3,
+      "FEAT-03_emissao_boleto": 3,
+      "FEAT-06_transferencia_pf_pj": 3
+    },
+    "estimation_distribution": {
+      "XS": 0,
+      "S": 2,
+      "M": 4,
+      "L": 3,
+      "XL": 0
+    },
+    "business_rules_coverage": {
+      "RN-04": ["US-008"],
+      "RN-05": ["US-003"],
+      "RN-07": ["US-002"],
+      "RN-08": ["US-004", "US-005", "US-008"],
+      "RN-09": ["US-002", "US-004", "US-007", "US-008", "US-009"],
+      "RN-11": ["US-004"],
+      "RN-12": ["US-001", "US-002"],
+      "RN-13": ["US-007", "US-008"],
+      "RN-14": ["US-004", "US-005"],
+      "RN-15": ["US-005", "US-006", "US-009"]
+    },
+    "kr_to_epic_mapping": {
+      "KR-01_activation": "EPIC-01",
+      "KR-02_boletos": "EPIC-02",
+      "KR-03_toggle": "EPIC-03",
+      "KR-04_retention": "EPIC-04"
+    },
+    "top_3_features_rationale": "FEAT-01 (Wizard Onboarding) e a porta de entrada obrigatoria — sem ela nenhuma outra feature funciona. FEAT-03 (Emissao Boleto) e o core da proposta de valor PJ e driver principal do KR-02. FEAT-06 (Transferencia PF-PJ) e o diferencial unico do ecossistema ECP e driver do KR-03.",
+    "key_insight": "As 9 stories escritas cobrem 10 das 15 regras de negocio. As regras nao cobertas (RN-01, RN-02, RN-03, RN-06, RN-10) pertencem a features de Pix PJ e Cartoes Corporativos que serao detalhadas nas proximas sprints."
+  },
+
+  "next_hitl": 5,
+  "status": "awaiting_hitl_approval"
+}

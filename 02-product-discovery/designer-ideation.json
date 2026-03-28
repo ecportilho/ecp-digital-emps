@@ -1,0 +1,308 @@
+{
+  "agent": "product-designer",
+  "phase": "02-discovery",
+  "sub_phase": "ideation",
+  "product": "ECP Emps",
+  "session_id": "ecp-emps-20260328",
+  "generated_at": "2026-03-28",
+  "beachhead_segment": "Freelancer Digital MEI (22-35 anos)",
+  "input_references": [
+    "02-discovery/po-prioritization-rice.json",
+    "design_spec.md",
+    "product_briefing_spec.md",
+    "tech_spec.md"
+  ],
+
+  "hypotheses": [
+    {
+      "hypothesis_id": "H-01",
+      "opportunity_id": "OPP-11",
+      "hypothesis": "Se entregarmos uma interface bancária PJ projetada para desktop 1280px+ com sidebar fixa de 280px, dashboard com cards lado a lado e tabelas de extrato/cobranças aproveitando toda a largura da tela, freelancers digitais MEI adotarão o ECP Emps como banco principal de trabalho.",
+      "expected_outcome": "70%+ das sessões em desktop (1280px+). Tempo médio de sessão 2x maior que concorrentes mobile-adapted. NPS de usabilidade desktop > 8.",
+      "critical_assumptions": [
+        "Freelancers digitais MEI realmente preferem operar banco pelo computador em vez do celular durante o horário de trabalho",
+        "A experiência desktop precisa ser significativamente melhor que a versão web responsiva dos concorrentes para justificar a troca",
+        "O layout SidebarPJ (280px) + conteúdo fluido não gera sensação de 'sistema corporativo pesado' para MEIs individuais"
+      ],
+      "risk_type": "customer_value",
+      "validation_method": "Protótipo navegável do Dashboard PJ desktop (1280px) comparado com screenshots de Nubank Web e Cora Web. Teste de usabilidade com 5 freelancers MEI: task completion time para 3 tarefas (ver saldo, emitir boleto, ver extrato). Medir preferência declarada desktop vs mobile."
+    },
+    {
+      "hypothesis_id": "H-02",
+      "opportunity_id": "OPP-11",
+      "hypothesis": "Se o Dashboard PJ for organizado com QuickActionsPJ em grid proeminente (Enviar Pix, Cobrar, Transferir PF/PJ) logo abaixo do saldo, os freelancers completarão suas tarefas bancárias mais frequentes sem navegar pela sidebar, reduzindo clicks-to-action.",
+      "expected_outcome": "80%+ dos Pix e boletos iniciados via QuickActions (não sidebar). Clicks-to-action médio de 2 para operações frequentes. Redução de 40% no tempo para completar tarefa vs fluxo via menu.",
+      "critical_assumptions": [
+        "As 3-4 ações rápidas escolhidas correspondem às operações mais frequentes de um freelancer MEI",
+        "O grid de ações rápidas é visualmente distinguível dos cards informativos sem poluir o dashboard",
+        "Freelancers usam o dashboard como hub central em vez de navegar diretamente para seções específicas via sidebar"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Teste de primeiro clique (first-click test) com protótipo: pedir para 'cobrar um cliente' e 'transferir dinheiro para conta pessoal'. Medir se o primeiro clique é no QuickActions ou na sidebar. Comparar tempo de conclusão em ambos os caminhos."
+    },
+    {
+      "hypothesis_id": "H-03",
+      "opportunity_id": "OPP-01",
+      "hypothesis": "Se o fluxo de abertura de conta PJ for um wizard de 3 passos (informar CNPJ -> confirmar dados da Receita -> conta ativa) que leva menos de 3 minutos, aproveitando o KYC já feito na conta PF, a taxa de conclusão de onboarding será superior a 85%.",
+      "expected_outcome": "85%+ taxa de conclusão do onboarding PJ. Tempo médio < 3 minutos. Zero abandono por 'documentação pendente' para MEIs de sócio único.",
+      "critical_assumptions": [
+        "O usuário já possui conta PF ativa no ecp-digital-bank com CPF validado (RN-12)",
+        "A consulta mock à Receita Federal retorna dados suficientes (razão social, natureza jurídica, endereço) para preencher automaticamente o formulário",
+        "MEIs de sócio único aceitam aprovação imediata sem upload de documentos como suficiente para abrir uma conta PJ",
+        "3 passos é percebido como 'rápido' pelo freelancer (não gera sensação de burocracia)"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Protótipo do fluxo de onboarding com dados reais mockados. Teste de usabilidade: 5 freelancers completam o fluxo. Medir: tempo total, taxa de conclusão, pontos de hesitação (heatmap de cliques), satisfação pós-fluxo (escala 1-5). Benchmark: abertura Nubank PJ leva ~10 min."
+    },
+    {
+      "hypothesis_id": "H-04",
+      "opportunity_id": "OPP-03",
+      "hypothesis": "Se ao finalizar a abertura de conta PJ o sistema automaticamente registrar a chave Pix CNPJ, criar categorias de despesas padrão (Fornecedores, Impostos, Marketing, Operacional, Aluguel, Funcionários, Outros) e preencher defaults de boleto (juros 1% a.m., multa 2%), o freelancer perceberá a conta como 'pronta para usar' sem nenhum setup manual.",
+      "expected_outcome": "90%+ dos novos usuários realizam primeira operação (Pix ou boleto) nos primeiros 10 minutos após abertura. Zero configuração manual necessária antes do primeiro uso. Percepção de 'conta inteligente' em pesquisa qualitativa.",
+      "critical_assumptions": [
+        "Freelancers MEI valorizam ter defaults pré-configurados em vez de querer personalizar tudo antes de começar",
+        "As 7 categorias de despesas escolhidas cobrem 90%+ dos gastos reais de um freelancer digital",
+        "Defaults de juros/multa de boleto (1% a.m. / 2%) são adequados para o mercado de freelancers e não geram rejeição",
+        "Registrar Pix CNPJ automaticamente não gera surpresa negativa (privacidade do CNPJ)"
+      ],
+      "risk_type": "customer_value",
+      "validation_method": "Teste A/B no protótipo: Grupo A recebe tela de 'conta pronta' com resumo do que foi configurado automaticamente. Grupo B recebe wizard de configuração manual de 5 passos. Medir: tempo até primeira operação, satisfação, e 'willingness to continue' (escala 1-5)."
+    },
+    {
+      "hypothesis_id": "H-05",
+      "opportunity_id": "OPP-09",
+      "hypothesis": "Se a transferência PF<->PJ for acessível com 2 cliques a partir do Dashboard PJ (botão 'Transferir PF/PJ' no QuickActions -> confirmar valor -> concluído), com saldo de ambas as contas visível na mesma tela, freelancers usarão esta funcionalidade 2+ vezes por semana para separar receita do negócio de gastos pessoais.",
+      "expected_outcome": "Média de 2+ transferências PF<->PJ por semana por usuário ativo. 60%+ dos freelancers usam a funcionalidade na primeira semana. Toggle PF/PJ aumenta em 30% após ativação da transferência.",
+      "critical_assumptions": [
+        "Freelancers MEI atualmente fazem transferências entre contas PF e PJ (mesmo que em bancos diferentes) e querem fazer isso com mais frequência se for fácil",
+        "Ver os dois saldos (PF e PJ) lado a lado na tela de transferência motiva a ação de separar os valores",
+        "A gratuidade e instantaneidade são percebidas como diferenciais vs. TED entre bancos diferentes (que cobra taxa e demora)",
+        "A validação de mesma titularidade (CPF do owner) não adiciona fricção perceptível ao fluxo"
+      ],
+      "risk_type": "customer_value",
+      "validation_method": "Protótipo da tela de transferência PF/PJ com saldos visíveis. Entrevista contextual: mostrar o protótipo e perguntar 'com que frequência você faria isso?' e 'o que te impede hoje?'. Medir intenção de uso e comparar com comportamento atual declarado."
+    },
+    {
+      "hypothesis_id": "H-06",
+      "opportunity_id": "OPP-04",
+      "hypothesis": "Se a emissão de boleto for simplificada em um formulário de 2 passos (Passo 1: cliente + valor + vencimento; Passo 2: preview com QR Pix embutido + enviar por link/e-mail), com juros e multa pré-preenchidos e boleto ilimitado gratuito, freelancers que hoje desistem de cobrar via boleto passarão a emitir 3+ boletos por mês.",
+      "expected_outcome": "Média de 3+ boletos emitidos por mês por freelancer ativo. Tempo de emissão < 90 segundos. 70%+ dos boletos emitidos incluem QR Pix (pagamento híbrido). Taxa de abandono do formulário < 15%.",
+      "critical_assumptions": [
+        "Freelancers MEI realmente cobram clientes via boleto (ou cobrariam se fosse simples e gratuito)",
+        "2 passos são suficientes para capturar todos os dados obrigatórios sem parecer incompleto",
+        "O preview visual do boleto com QR Pix embutido gera confiança profissional no freelancer antes de enviar ao cliente",
+        "Juros e multa pré-preenchidos (1% a.m. / 2%) são aceitos sem edição na maioria dos casos",
+        "O envio por link compartilhável é preferido a e-mail para a maioria dos freelancers (WhatsApp como canal principal)"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Protótipo do InvoiceForm (2 steps) + InvoicePreview. Teste de usabilidade: 5 freelancers emitem um boleto fictício para um cliente. Medir: tempo total, erros cometidos, satisfação com o preview, e comparação qualitativa ('mais fácil ou mais difícil que seu banco atual?'). Teste de primeiro uso: completar sem instrução prévia."
+    },
+    {
+      "hypothesis_id": "H-07",
+      "opportunity_id": "OPP-04",
+      "hypothesis": "Se a lista de cobranças (InvoiceList) usar badges semânticos com cores claras (Pendente em amarelo #ffcc00, Pago em verde #3dff8b, Vencido em vermelho #ff4d4d) e mostrar uma InvoiceTimeline por boleto (Emitido -> Notificado -> Pago/Vencido), freelancers terão clareza imediata do status de todas as cobranças sem precisar abrir cada uma individualmente.",
+      "expected_outcome": "95%+ dos freelancers identificam corretamente o status de 5 boletos em < 10 segundos na tela de lista. Zero confusão entre 'pendente' e 'vencido'. Redução de 50% no volume de cliques para verificar status vs. fluxo sem badges/timeline.",
+      "critical_assumptions": [
+        "As cores semânticas do design_spec (warning, success, danger) são intuitivas no dark theme #0b0f14 para representar status financeiros",
+        "A timeline compacta (3-4 estados) é legível em uma linha da tabela sem precisar expandir",
+        "Freelancers com 8-12 clientes/mês precisam de uma visão de lista (não apenas notificações individuais) para gerenciar cobranças"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Teste de 5 segundos: mostrar a InvoiceList com 8 boletos em estados variados. Perguntar: 'quantos estão vencidos?', 'qual foi pago mais recentemente?'. Medir acurácia e tempo de resposta. Teste de contraste: validar legibilidade dos badges semânticos no fundo #0b0f14 com ferramenta WCAG."
+    },
+    {
+      "hypothesis_id": "H-08",
+      "opportunity_id": "OPP-07",
+      "hypothesis": "Se o ProfileSwitcher no header mostrar ambos os perfis (PF e PJ) com dot indicador de perfil ativo, badge 'PF'/'PJ', e a transição entre perfis for uma animação suave de fade 200ms que altera sidebar e conteúdo sem reload de página, freelancers alternarão entre PF e PJ 2+ vezes por sessão sem fricção cognitiva.",
+      "expected_outcome": "Média de 2+ toggles PF/PJ por sessão. Tempo de switch percebido < 1 segundo. Zero usuários reportam 'confusão sobre qual perfil está ativo'. 80%+ compreendem o ProfileSwitcher sem explicação no primeiro uso.",
+      "critical_assumptions": [
+        "Freelancers MEI realmente querem alternar entre PF e PJ na mesma sessão de trabalho (não preferem sessões separadas)",
+        "O dropdown com dot verde/cinza + badge PF/PJ é suficiente para indicar claramente o perfil ativo sem indicadores adicionais (cor de fundo, ícones)",
+        "A mudança de sidebar items e header (nome pessoal vs. razão social) é percebida imediatamente e não causa desorientação",
+        "A animação de fade 200ms é rápida o suficiente para parecer instantânea mas lenta o suficiente para o usuário perceber a mudança de contexto"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Protótipo interativo com ProfileSwitcher funcional. Teste de usabilidade: freelancer navega pelo Dashboard PJ, alterna para PF, faz uma tarefa, volta para PJ. Medir: tempo de switch, número de erros de contexto ('operar no perfil errado'), first-click accuracy no ProfileSwitcher, e satisfação qualitativa com a experiência."
+    },
+    {
+      "hypothesis_id": "H-09",
+      "opportunity_id": "OPP-07",
+      "hypothesis": "Se o header PJ exibir claramente o nome da empresa + badge 'PJ' + CNPJ formatado, e a sidebar PJ incluir itens exclusivos marcados visualmente (Cobranças, Time, Empresa), freelancers nunca confundirão em qual perfil estão operando, mesmo após múltiplas alternâncias.",
+      "expected_outcome": "Zero erros de contexto (operar no perfil errado) em testes de usabilidade. 100% dos usuários identificam corretamente o perfil ativo quando perguntados. Diferenciação PF/PJ percebida como 'natural' e 'óbvia' em feedback qualitativo.",
+      "critical_assumptions": [
+        "O nome da empresa + badge PJ no header é visualmente proeminente o suficiente no dark theme para funcionar como indicador contextual primário",
+        "A diferença nos itens de sidebar (6 PF vs 8 PJ) é perceptível mas não confusa (o usuário reconhece 'estou no PJ porque vejo Cobranças')",
+        "Manter o mesmo look-and-feel (cores, tipografia, componentes) entre PF e PJ não gera confusão — a diferenciação por conteúdo é suficiente"
+      ],
+      "risk_type": "usability",
+      "validation_method": "Teste de reconhecimento de contexto: apresentar 4 screenshots (2 PF, 2 PJ) em ordem aleatória. Pedir para classificar cada um como 'pessoal' ou 'empresa'. Medir tempo e acurácia. Complementar com teste de navegação livre: freelancer opera durante 5 minutos alternando perfis, depois é interrompido e perguntado 'em qual perfil você está agora?'."
+    }
+  ],
+
+  "screen_map": [
+    {
+      "screen_id": "SCR-01",
+      "screen_name": "Onboarding PJ — Step 1: Informar CNPJ",
+      "route": "/pj/onboarding",
+      "description": "Primeira tela do wizard de abertura de conta PJ. Campo único para digitar CNPJ com formatação automática (XX.XXX.XXX/XXXX-XX). Validação em tempo real do CNPJ (algoritmo módulo 11). Background #0b0f14, card centralizado em Surface #131c28 com border-radius 18px. Logo ECP Emps no topo. Botão 'Consultar CNPJ' em Lime #b7ff2a.",
+      "primary_actions": ["Digitar CNPJ", "Consultar CNPJ na Receita Federal (mock)", "Voltar para conta PF"],
+      "hypotheses_linked": ["H-03"]
+    },
+    {
+      "screen_id": "SCR-02",
+      "screen_name": "Onboarding PJ — Step 2: Confirmar Dados",
+      "route": "/pj/onboarding",
+      "description": "Exibe dados retornados da consulta: razão social, nome fantasia, natureza jurídica, endereço. Campos pré-preenchidos e editáveis. Indicador visual de progresso (Step 2/3). Card com informações da empresa sobre Surface #131c28. Texto principal em #eaf2ff, labels em #7b8aa3.",
+      "primary_actions": ["Confirmar dados da empresa", "Editar campo incorreto", "Voltar ao step anterior"],
+      "hypotheses_linked": ["H-03"]
+    },
+    {
+      "screen_id": "SCR-03",
+      "screen_name": "Onboarding PJ — Step 3: Conta Criada",
+      "route": "/pj/onboarding",
+      "description": "Tela de sucesso: ícone de check verde (#3dff8b), mensagem 'Conta PJ ativa!', dados da conta (agência 0001, número). Resumo do que foi configurado automaticamente: chave Pix CNPJ registrada, categorias criadas, defaults de boleto. Botão CTA 'Ir para o Dashboard' em Lime #b7ff2a. Botão secundário 'Emitir primeiro boleto'.",
+      "primary_actions": ["Ir para Dashboard PJ", "Emitir primeiro boleto", "Registrar chave Pix adicional"],
+      "hypotheses_linked": ["H-03", "H-04"]
+    },
+    {
+      "screen_id": "SCR-04",
+      "screen_name": "Dashboard PJ",
+      "route": "/pj/dashboard",
+      "description": "Tela principal do perfil PJ. Layout desktop 1280px+: SidebarPJ fixa 280px à esquerda (fundo #0f1620), conteúdo fluido à direita. Header com ProfileSwitcher (PF/PJ) à esquerda e notificações à direita. Conteúdo: BalanceCardPJ (saldo com show/hide, razão social, CNPJ) em destaque. Grid QuickActionsPJ (4 botões: Enviar Pix, Cobrar, Transferir PF/PJ, Ver Extrato). CashFlowChart (barras verdes/vermelhas 30 dias). InvoiceSummary (mini-cards com contadores de boletos por status). RecentTransactionsPJ (5 últimas). Todos os cards em Surface #131c28, border-radius 18px, border #27364a.",
+      "primary_actions": ["Enviar Pix (QuickAction)", "Cobrar cliente (QuickAction)", "Transferir PF/PJ (QuickAction)", "Ver extrato completo", "Alternar para PF (ProfileSwitcher)", "Ver notificações"],
+      "hypotheses_linked": ["H-01", "H-02", "H-05", "H-08", "H-09"]
+    },
+    {
+      "screen_id": "SCR-05",
+      "screen_name": "Transferência PF ↔ PJ",
+      "route": "/pj/transferir",
+      "description": "Tela de transferência entre contas de mesma titularidade. Dois cards lado a lado: conta PF (nome pessoal, saldo PF) e conta PJ (razão social, saldo PJ). Seta bidirecional entre eles indicando direção da transferência (toggle para inverter). Campo de valor com input em centavos convertido para exibição em reais. Botão 'Transferir' em Lime #b7ff2a. Labels em #a9b7cc, saldos em #eaf2ff. Badge 'Gratuita e instantânea' em lime-dim.",
+      "primary_actions": ["Selecionar direção (PF→PJ ou PJ→PF)", "Informar valor", "Confirmar transferência", "Voltar ao Dashboard"],
+      "hypotheses_linked": ["H-05"]
+    },
+    {
+      "screen_id": "SCR-06",
+      "screen_name": "Nova Cobrança — Step 1: Dados",
+      "route": "/pj/cobrancas/nova",
+      "description": "Primeiro passo do formulário de emissão de boleto. Card em Surface #131c28. Campos: nome do cliente (Input com ícone), CPF/CNPJ do cliente (formatação automática), e-mail (opcional), valor (input monetário em centavos), data de vencimento (date picker), descrição do serviço. Seção 'Configurações avançadas' colapsada por padrão com juros (1% a.m. pré-preenchido), multa (2% pré-preenchido) e desconto por antecipação. Botão 'Visualizar boleto' em Lime #b7ff2a.",
+      "primary_actions": ["Preencher dados do cliente", "Definir valor e vencimento", "Expandir configurações avançadas (opcional)", "Visualizar preview do boleto"],
+      "hypotheses_linked": ["H-06"]
+    },
+    {
+      "screen_id": "SCR-07",
+      "screen_name": "Nova Cobrança — Step 2: Preview e Envio",
+      "route": "/pj/cobrancas/nova",
+      "description": "Preview visual do boleto gerado. Card maior em Surface #131c28 simulando o boleto: dados do emissor (razão social, CNPJ), dados do pagador, valor, vencimento, código de barras (visual representativo), QR Code Pix embutido, linha digitável. Abaixo do preview: opções de envio (Copiar link de pagamento, Enviar por e-mail, Copiar Pix copia-e-cola). Botão 'Emitir boleto' em Lime #b7ff2a. Botão 'Editar' secundário para voltar ao step 1.",
+      "primary_actions": ["Emitir boleto", "Copiar link de pagamento", "Enviar por e-mail", "Copiar Pix copia-e-cola", "Voltar para editar"],
+      "hypotheses_linked": ["H-06"]
+    },
+    {
+      "screen_id": "SCR-08",
+      "screen_name": "Lista de Cobranças",
+      "route": "/pj/cobrancas",
+      "description": "Tabela de boletos emitidos com filtros. Header da página com título 'Cobranças' e botão 'Nova cobrança' em Lime #b7ff2a. Filtros: abas por status (Todos, Pendentes, Pagos, Vencidos, Cancelados) com contadores. Tabela com colunas: Cliente, Valor, Vencimento, Status (InvoiceStatusBadge com cores semânticas), Ações. Badges: Pendente (#ffcc00 fundo rgba), Pago (#3dff8b fundo rgba), Vencido (#ff4d4d fundo rgba), Cancelado (#7b8aa3 fundo rgba). Cada linha expansível para mostrar InvoiceTimeline compacta. Busca por nome/documento do cliente.",
+      "primary_actions": ["Filtrar por status", "Buscar por cliente", "Ver detalhes de boleto", "Emitir nova cobrança", "Reenviar notificação", "Cancelar boleto pendente"],
+      "hypotheses_linked": ["H-07"]
+    },
+    {
+      "screen_id": "SCR-09",
+      "screen_name": "Extrato PJ",
+      "route": "/pj/extrato",
+      "description": "Extrato de transações com categorias empresariais. Header com período selecionável (7d, 30d, 60d, 90d, personalizado) e resumo (total entradas em #3dff8b, total saídas em #ff4d4d, saldo do período em #eaf2ff). Tabela de transações: Data, Descrição, Contraparte, Categoria (badge), Valor (verde para entradas, vermelho para saídas). Categorias automáticas: Fornecedores, Impostos, Marketing, Operacional, Aluguel, Funcionários, Outros. Filtro por categoria e por tipo (entrada/saída). Paginação cursor-based.",
+      "primary_actions": ["Filtrar por período", "Filtrar por categoria", "Filtrar por tipo (entrada/saída)", "Ver detalhes de transação", "Exportar extrato"],
+      "hypotheses_linked": ["H-01"]
+    },
+    {
+      "screen_id": "SCR-10",
+      "screen_name": "Pix PJ — Enviar",
+      "route": "/pj/pix/enviar",
+      "description": "Envio de Pix com dados PJ. Card em Surface #131c28. Campo de chave Pix do destinatário (com lookup automático mostrando nome e instituição). Valor em input monetário. Descrição opcional. Dados do remetente exibidos (razão social, CNPJ). Indicador de limite diário restante (barra de progresso). Botão 'Enviar Pix' em Lime #b7ff2a. Comprovante com dados fiscais (CNPJ emissor/receptor).",
+      "primary_actions": ["Informar chave Pix", "Definir valor", "Confirmar envio", "Ver comprovante"],
+      "hypotheses_linked": ["H-01", "H-02"]
+    },
+    {
+      "screen_id": "SCR-11",
+      "screen_name": "Pix PJ — Chaves",
+      "route": "/pj/pix/chaves",
+      "description": "Gerenciamento de chaves Pix da empresa. Lista de chaves registradas em cards individuais (tipo, valor, status). Chave CNPJ em destaque com badge 'Registrada automaticamente' em lime-dim. Botão 'Registrar nova chave' abrindo modal com seleção de tipo (e-mail, telefone, aleatória). Limite de 20 chaves PJ (regulamentação BCB) com contador visual.",
+      "primary_actions": ["Ver chaves registradas", "Registrar nova chave Pix", "Desativar chave existente"],
+      "hypotheses_linked": ["H-04"]
+    },
+    {
+      "screen_id": "SCR-12",
+      "screen_name": "Confirmação de Transferência PF/PJ",
+      "route": "/pj/transferir",
+      "description": "Modal ou tela de confirmação após transferência PF↔PJ concluída. Ícone de sucesso (#3dff8b). Resumo: de (conta PF/PJ com saldo anterior), para (conta PJ/PF com saldo atualizado), valor transferido. Badge 'Instantânea e gratuita'. Botões: 'Fazer outra transferência' e 'Voltar ao Dashboard'. Animação sutil de check.",
+      "primary_actions": ["Fazer outra transferência", "Voltar ao Dashboard"],
+      "hypotheses_linked": ["H-05"]
+    }
+  ],
+
+  "design_tokens_used": {
+    "colors": {
+      "background": "#0b0f14",
+      "surface": "#131c28",
+      "secondary_bg": "#0f1620",
+      "border": "#27364a",
+      "lime_accent": "#b7ff2a",
+      "lime_pressed": "#7ed100",
+      "lime_dim": "rgba(183, 255, 42, 0.12)",
+      "text_primary": "#eaf2ff",
+      "text_secondary": "#a9b7cc",
+      "text_tertiary": "#7b8aa3",
+      "success": "#3dff8b",
+      "warning": "#ffcc00",
+      "danger": "#ff4d4d",
+      "info": "#4da3ff"
+    },
+    "typography": {
+      "font_family": "Inter"
+    },
+    "border_radius": {
+      "card": "18px",
+      "control": "13px"
+    },
+    "layout": {
+      "sidebar_width": "280px",
+      "desktop_min_width": "1280px"
+    },
+    "source": "design_spec.md — all tokens inherited from ecp-digital-bank"
+  },
+
+  "hypothesis_coverage": {
+    "OPP-11": ["H-01", "H-02"],
+    "OPP-01": ["H-03"],
+    "OPP-03": ["H-04"],
+    "OPP-09": ["H-05"],
+    "OPP-04": ["H-06", "H-07"],
+    "OPP-07": ["H-08", "H-09"]
+  },
+
+  "risk_distribution": {
+    "customer_value": ["H-01", "H-04", "H-05"],
+    "usability": ["H-02", "H-03", "H-06", "H-07", "H-08", "H-09"],
+    "feasibility": [],
+    "business_value": []
+  },
+
+  "summary": {
+    "total_hypotheses": 9,
+    "total_screens": 12,
+    "p0_opportunities_covered": 6,
+    "risk_types_covered": ["customer_value", "usability"],
+    "key_design_decisions": [
+      "Desktop-first layout with fixed 280px SidebarPJ + fluid content area optimized for 1280px+",
+      "3-step onboarding wizard with auto-populated data from Receita Federal mock, completing in < 3 minutes",
+      "Zero-config account: Pix CNPJ key auto-registered, expense categories pre-created, invoice defaults pre-filled",
+      "QuickActionsPJ grid as primary task-entry point on Dashboard, reducing clicks-to-action for frequent operations",
+      "2-step invoice creation (data -> preview+send) with pre-filled interest/penalty and embedded Pix QR code",
+      "ProfileSwitcher with dual-account dropdown, green/gray dot indicators, PF/PJ badges, and 200ms fade transition",
+      "Semantic color badges for invoice status leveraging design_spec colors (warning, success, danger) on dark theme",
+      "Side-by-side balance display on PF<->PJ transfer screen to motivate financial separation behavior"
+    ],
+    "beachhead_focus": "All hypotheses are designed for Ana Beatriz (29, freelancer designer MEI, 8-12 clients/month, works 100% from computer). Lucas (hamburgueria owner) benefits from invoice and dashboard features but is not the primary design target for this iteration."
+  },
+
+  "next_hitl": 3,
+  "status": "awaiting_hitl_approval"
+}

@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECP Emps — High-Fi Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0b0f14;
+  --surface: #131c28;
+  --surface-2: #0f1620;
+  --border: #27364a;
+  --lime: #b7ff2a;
+  --lime-pressed: #7ed100;
+  --lime-dim: rgba(183, 255, 42, 0.12);
+  --text: #eaf2ff;
+  --text-2: #a9b7cc;
+  --text-3: #7b8aa3;
+  --success: #3dff8b;
+  --warning: #ffcc00;
+  --danger: #ff4d4d;
+  --info: #4da3ff;
+  --radius-card: 18px;
+  --radius-control: 13px;
+  --font: 'Inter', sans-serif;
+}
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+a { color: var(--lime); text-decoration: none; }
+input, select, textarea, button { font-family: var(--font); outline: none; }
+::placeholder { color: var(--text-3); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ===== UTILITY ===== */
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-control);
+  height: 20px;
+  margin: 8px 0;
+}
+.shimmer.h-lg { height: 40px; }
+.shimmer.h-sm { height: 14px; width: 60%; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px; border-radius: var(--radius-control); font-weight: 600;
+  font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.15s;
+}
+.btn-lime { background: var(--lime); color: #0b0f14; }
+.btn-lime:hover { background: var(--lime-pressed); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--lime); color: var(--lime); }
+.btn-ghost { background: transparent; color: var(--text-2); }
+.btn-ghost:hover { color: var(--lime); }
+.btn-danger { background: rgba(255,77,77,0.15); color: var(--danger); border: 1px solid rgba(255,77,77,0.3); }
+.btn-danger:hover { background: rgba(255,77,77,0.25); }
+.btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== INPUTS ===== */
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-size: 0.85rem; color: var(--text-2); margin-bottom: 6px; font-weight: 500; }
+.input-field {
+  width: 100%; padding: 12px 16px; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-control); color: var(--text); font-size: 0.95rem; transition: border 0.15s;
+}
+.input-field:focus { border-color: var(--lime); }
+.input-field.error { border-color: var(--danger); }
+textarea.input-field { min-height: 80px; resize: vertical; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em;
+}
+.badge-lime { background: var(--lime-dim); color: var(--lime); }
+.badge-success { background: rgba(61,255,139,0.12); color: var(--success); }
+.badge-warning { background: rgba(255,204,0,0.12); color: var(--warning); }
+.badge-danger { background: rgba(255,77,77,0.12); color: var(--danger); }
+.badge-info { background: rgba(77,163,255,0.12); color: var(--info); }
+.badge-neutral { background: rgba(123,138,163,0.12); color: var(--text-3); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 24px;
+}
+
+/* ===== TOAST ===== */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 14px 20px; border-radius: var(--radius-control); font-size: 0.9rem; font-weight: 500;
+  animation: slideUp 0.3s ease; min-width: 280px; display: flex; align-items: center; gap: 10px;
+}
+.toast-success { background: rgba(61,255,139,0.15); color: var(--success); border: 1px solid rgba(61,255,139,0.3); }
+.toast-error { background: rgba(255,77,77,0.15); color: var(--danger); border: 1px solid rgba(255,77,77,0.3); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card);
+  padding: 32px; width: 100%; max-width: 480px; animation: slideUp 0.2s ease;
+}
+.modal-box h3 { font-size: 1.2rem; margin-bottom: 20px; }
+
+/* ===== TABLE ===== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 16px; font-size: 0.8rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+td { padding: 14px 16px; border-bottom: 1px solid rgba(39,54,74,0.5); font-size: 0.9rem; }
+tr:hover td { background: rgba(183,255,42,0.03); }
+
+/* ===== TOGGLE ===== */
+.toggle-wrapper { display: flex; gap: 4px; background: var(--surface-2); border-radius: var(--radius-control); padding: 4px; border: 1px solid var(--border); }
+.toggle-btn { padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: var(--text-3); cursor: pointer; font-weight: 500; font-size: 0.85rem; transition: all 0.15s; }
+.toggle-btn.active { background: var(--lime-dim); color: var(--lime); }
+
+/* ========== ONBOARDING SCREENS ========== */
+.onboarding-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); padding: 40px;
+}
+.onboarding-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card);
+  padding: 48px; width: 100%; max-width: 520px; animation: slideUp 0.4s ease;
+}
+.onboarding-card .logo { font-size: 1.6rem; font-weight: 800; color: var(--lime); margin-bottom: 8px; }
+.onboarding-card .logo span { color: var(--text); font-weight: 400; }
+.onboarding-card h2 { font-size: 1.4rem; margin: 24px 0 8px; }
+.onboarding-card p.sub { color: var(--text-2); margin-bottom: 32px; }
+.step-dots { display: flex; gap: 8px; margin-bottom: 32px; }
+.step-dot { width: 40px; height: 4px; border-radius: 2px; background: var(--border); }
+.step-dot.active { background: var(--lime); }
+.step-dot.done { background: var(--lime-pressed); }
+
+/* ===== SUCCESS SCREEN ===== */
+.success-screen { text-align: center; }
+.success-icon { width: 100px; height: 100px; margin: 0 auto 24px; border-radius: 50%; background: var(--lime-dim); display: flex; align-items: center; justify-content: center; animation: pulse 1s ease-in-out; }
+.success-icon svg { width: 48px; height: 48px; color: var(--lime); }
+
+/* ========== APP LAYOUT ========== */
+.app-layout { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px; min-height: 100vh; background: var(--surface-2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+}
+.sidebar-header { padding: 24px; border-bottom: 1px solid var(--border); }
+.sidebar-header .logo { font-size: 1.3rem; font-weight: 800; color: var(--lime); }
+.sidebar-header .logo span { color: var(--text); font-weight: 400; }
+.sidebar-header .company { font-size: 0.85rem; color: var(--text-2); margin-top: 4px; }
+.sidebar-header .cnpj { font-size: 0.75rem; color: var(--text-3); }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-control);
+  color: var(--text-2); cursor: pointer; transition: all 0.15s; font-size: 0.9rem; font-weight: 500;
+}
+.nav-item:hover { background: rgba(183,255,42,0.05); color: var(--text); }
+.nav-item.active { background: var(--lime-dim); color: var(--lime); }
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.nav-item .new-badge { font-size: 0.65rem; background: var(--lime-dim); color: var(--lime); padding: 2px 6px; border-radius: 8px; margin-left: auto; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid var(--border); }
+.sidebar-footer .nav-item { color: var(--text-3); font-size: 0.85rem; }
+
+/* TOPBAR */
+.topbar {
+  position: fixed; top: 0; left: 280px; right: 0; height: 60px; background: var(--surface);
+  border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; z-index: 99;
+}
+.profile-switcher { position: relative; }
+.profile-switcher-trigger {
+  display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px;
+  border-radius: var(--radius-control); transition: background 0.15s;
+}
+.profile-switcher-trigger:hover { background: rgba(255,255,255,0.05); }
+.profile-dot { width: 8px; height: 8px; border-radius: 50%; }
+.profile-dot.active { background: var(--success); }
+.profile-dot.inactive { background: var(--text-3); }
+.profile-name { font-weight: 600; font-size: 0.9rem; }
+.profile-sub { font-size: 0.75rem; color: var(--text-3); }
+.profile-dropdown {
+  position: absolute; top: 100%; left: 0; margin-top: 8px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-card); padding: 8px; min-width: 300px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 200;
+}
+.profile-option {
+  display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-control);
+  cursor: pointer; transition: background 0.15s;
+}
+.profile-option:hover { background: rgba(255,255,255,0.05); }
+.profile-option.active { background: var(--lime-dim); }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.notif-bell {
+  position: relative; width: 40px; height: 40px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;
+}
+.notif-bell:hover { background: rgba(255,255,255,0.05); }
+.notif-bell svg { width: 20px; height: 20px; color: var(--text-2); }
+.notif-badge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+
+/* MAIN CONTENT */
+.main-content { margin-left: 280px; margin-top: 60px; padding: 40px; min-height: calc(100vh - 60px); }
+.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+.page-subtitle { color: var(--text-2); margin-bottom: 32px; }
+
+/* ===== DASHBOARD ===== */
+.balance-card {
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(183,255,42,0.05) 100%);
+  border: 1px solid var(--border); border-radius: var(--radius-card); padding: 32px;
+}
+.balance-card .company-name { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+.balance-card .cnpj { font-size: 0.8rem; color: var(--text-3); margin-bottom: 16px; }
+.balance-amount { font-size: 2.4rem; font-weight: 800; color: var(--lime); }
+.balance-amount.blurred { filter: blur(8px); user-select: none; }
+.balance-sub { font-size: 0.85rem; color: var(--text-3); margin-top: 4px; }
+.eye-toggle { cursor: pointer; color: var(--text-3); margin-left: 12px; display: inline-flex; vertical-align: middle; }
+.eye-toggle:hover { color: var(--text); }
+
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+.quick-action {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card);
+  padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.15s;
+}
+.quick-action:hover { border-color: var(--lime); transform: translateY(-2px); }
+.quick-action .icon-circle {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--lime-dim);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+}
+.quick-action .icon-circle svg { width: 22px; height: 22px; color: var(--lime); }
+.quick-action span { font-size: 0.85rem; font-weight: 500; color: var(--text-2); }
+
+/* Cash flow chart */
+.chart-container { margin-top: 32px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 12px; height: 160px; padding-top: 10px; }
+.chart-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar-group { display: flex; gap: 4px; align-items: flex-end; height: 140px; }
+.chart-bar { width: 18px; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 4px; }
+.chart-bar.income { background: var(--success); }
+.chart-bar.expense { background: var(--danger); opacity: 0.7; }
+.chart-label { font-size: 0.7rem; color: var(--text-3); }
+
+/* Invoice summary */
+.invoice-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.summary-card { padding: 20px; }
+.summary-card .count { font-size: 1.8rem; font-weight: 700; }
+.summary-card .label { font-size: 0.8rem; color: var(--text-3); margin-top: 2px; }
+.summary-card .amount { font-size: 0.9rem; font-weight: 600; margin-top: 4px; }
+
+/* Recent transactions */
+.tx-list { display: flex; flex-direction: column; }
+.tx-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(39,54,74,0.4); }
+.tx-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tx-icon svg { width: 18px; height: 18px; }
+.tx-info { flex: 1; }
+.tx-info .desc { font-weight: 500; font-size: 0.9rem; }
+.tx-info .meta { font-size: 0.8rem; color: var(--text-3); }
+.tx-amount { font-weight: 600; text-align: right; }
+.tx-amount.positive { color: var(--success); }
+.tx-amount.negative { color: var(--danger); }
+.tx-date { font-size: 0.75rem; color: var(--text-3); text-align: right; margin-left: 12px; min-width: 60px; }
+
+/* ===== TRANSFER PF<>PJ ===== */
+.transfer-cards { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; }
+.transfer-card { padding: 24px; text-align: center; }
+.transfer-card .label { font-size: 0.85rem; color: var(--text-3); margin-bottom: 8px; }
+.transfer-card .bal { font-size: 1.6rem; font-weight: 700; }
+.direction-toggle { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.arrow-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--lime-dim); border: 2px solid var(--lime); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+.arrow-btn:hover { background: var(--lime); }
+.arrow-btn:hover svg { color: var(--bg); }
+.arrow-btn svg { width: 24px; height: 24px; color: var(--lime); transition: transform 0.3s, color 0.2s; }
+.arrow-btn.reversed svg { transform: rotate(180deg); }
+
+/* ===== PIX ===== */
+.pix-key-card {
+  display: flex; align-items: center; justify-content: space-between; padding: 16px 20px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); margin-bottom: 12px;
+}
+.pix-key-info { display: flex; align-items: center; gap: 16px; }
+.pix-key-type { width: 40px; height: 40px; border-radius: 12px; background: var(--lime-dim); display: flex; align-items: center; justify-content: center; }
+.pix-key-type svg { width: 18px; height: 18px; color: var(--lime); }
+.pix-key-value { font-weight: 500; }
+.pix-key-label { font-size: 0.8rem; color: var(--text-3); }
+
+/* ===== COBRANÇAS FORM ===== */
+.boleto-preview {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 32px;
+}
+.barcode-placeholder { height: 50px; background: repeating-linear-gradient(90deg, var(--text) 0px, var(--text) 2px, transparent 2px, transparent 5px); opacity: 0.3; margin: 20px 0; border-radius: 4px; }
+.qr-placeholder { width: 120px; height: 120px; background: var(--text); border-radius: 8px; opacity: 0.1; display: flex; align-items: center; justify-content: center; margin: 16px auto; }
+
+/* ===== FILTER TABS ===== */
+.filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.filter-tab { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-3); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
+.filter-tab.active { background: var(--lime-dim); border-color: var(--lime); color: var(--lime); }
+.filter-tab:hover:not(.active) { border-color: var(--text-3); color: var(--text-2); }
+
+/* ===== EXTRATO ===== */
+.extrato-balance { padding: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+.date-filter { display: flex; gap: 8px; align-items: center; }
+.date-filter input { padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-control); color: var(--text); font-size: 0.85rem; }
+
+/* ===== CONFIRMATION STEP ===== */
+.confirm-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(39,54,74,0.4); }
+.confirm-row .label { color: var(--text-3); font-size: 0.9rem; }
+.confirm-row .value { font-weight: 500; font-size: 0.9rem; }
+
+/* ===== SCREEN TRANSITIONS ===== */
+.screen { transition: opacity 0.2s ease; }
+.screen.fade-in { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== SCREEN 1: CNPJ INPUT ========== -->
+<div id="screen-onboard-1" class="onboarding-screen screen">
+  <div class="onboarding-card">
+    <div class="logo">ECP <span>Emps</span></div>
+    <div class="step-dots">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <h2>Abra sua conta PJ</h2>
+    <p class="sub">Informe o CNPJ da sua empresa para comecar.</p>
+    <div class="input-group">
+      <label>CNPJ</label>
+      <input type="text" class="input-field" id="cnpjInput" placeholder="00.000.000/0000-00" maxlength="18">
+    </div>
+    <button class="btn btn-lime btn-block" id="btnConsultar" onclick="consultarCNPJ()">Consultar</button>
+    <div id="cnpjShimmer" class="hidden" style="margin-top:24px;">
+      <div class="shimmer h-lg"></div>
+      <div class="shimmer"></div>
+      <div class="shimmer h-sm"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 2: CONFIRM DATA ========== -->
+<div id="screen-onboard-2" class="onboarding-screen screen hidden">
+  <div class="onboarding-card">
+    <div class="logo">ECP <span>Emps</span></div>
+    <div class="step-dots">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <h2>Confirme os dados da empresa</h2>
+    <p class="sub">Verificamos as informacoes. Confira e prossiga.</p>
+    <div class="input-group">
+      <label>Razao Social</label>
+      <input type="text" class="input-field" value="AB Design Studio Ltda" readonly style="opacity:0.8">
+    </div>
+    <div class="input-group">
+      <label>Nome Fantasia</label>
+      <input type="text" class="input-field" value="AB Design Studio" readonly style="opacity:0.8">
+    </div>
+    <div class="input-group">
+      <label>Natureza Juridica</label>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="text" class="input-field" value="Microempreendedor Individual (MEI)" readonly style="opacity:0.8;flex:1">
+        <span class="badge badge-lime">MEI</span>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>Endereco</label>
+      <input type="text" class="input-field" value="Rua das Flores, 123 - Centro - Sao Paulo/SP" readonly style="opacity:0.8">
+    </div>
+    <div class="input-group">
+      <label>CNPJ</label>
+      <input type="text" class="input-field" value="12.345.678/0001-95" readonly style="opacity:0.8">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-secondary" onclick="showScreen('screen-onboard-1')">Voltar</button>
+      <button class="btn btn-lime" style="flex:1" onclick="showScreen('screen-onboard-3')">Confirmar e abrir conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 3: SUCCESS ========== -->
+<div id="screen-onboard-3" class="onboarding-screen screen hidden">
+  <div class="onboarding-card success-screen">
+    <div class="logo">ECP <span>Emps</span></div>
+    <div class="step-dots" style="justify-content:center;">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <div class="success-icon" style="margin-top:24px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2 style="font-size:1.6rem;">Sua conta PJ esta pronta!</h2>
+    <p class="sub" style="margin-bottom:16px;">AB Design Studio agora faz parte do ECP Emps.</p>
+    <div class="card" style="text-align:left;margin-bottom:24px;background:var(--lime-dim);border-color:rgba(183,255,42,0.2);">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <div>
+          <div style="font-weight:600;color:var(--lime);font-size:0.9rem;">Registre sua chave Pix CNPJ agora</div>
+          <div style="font-size:0.8rem;color:var(--text-2);">Receba pagamentos usando o CNPJ da empresa.</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-lime btn-block" onclick="enterApp()">Ir para o Dashboard</button>
+  </div>
+</div>
+
+<!-- ========== APP LAYOUT (Screens 4-12) ========== -->
+<div id="app-layout" class="app-layout hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">ECP <span>Emps</span></div>
+      <div class="company">AB Design Studio</div>
+      <div class="cnpj">MEI &bull; 12.345.678/0001-95</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-screen="screen-dashboard" onclick="navigateTo(this,'screen-dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-screen="screen-extrato" onclick="navigateTo(this,'screen-extrato')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Extrato
+      </div>
+      <div class="nav-item" data-screen="screen-pix-enviar" onclick="navigateTo(this,'screen-pix-enviar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Pix
+      </div>
+      <div class="nav-item" data-screen="screen-cobrancas-lista" onclick="navigateTo(this,'screen-cobrancas-lista')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Cobrancas
+        <span class="new-badge">NOVO</span>
+      </div>
+      <div class="nav-item" data-screen="screen-cartoes" onclick="navigateTo(this,'screen-cartoes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Cartoes
+      </div>
+      <div class="nav-item" data-screen="screen-time" onclick="navigateTo(this,'screen-time')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Time
+        <span class="new-badge">NOVO</span>
+      </div>
+      <div class="nav-item" data-screen="screen-empresa" onclick="navigateTo(this,'screen-empresa')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+        Empresa
+        <span class="new-badge">NOVO</span>
+      </div>
+      <div class="nav-item" data-screen="screen-perfil" onclick="navigateTo(this,'screen-perfil')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Perfil
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="nav-item" onclick="showScreen('screen-onboard-1');document.getElementById('app-layout').classList.add('hidden');" style="font-size:0.85rem;color:var(--text-3);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        Alternar para PF
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="profile-switcher">
+      <div class="profile-switcher-trigger" onclick="toggleProfileDropdown()">
+        <span class="profile-dot active"></span>
+        <div>
+          <div class="profile-name" id="activeProfileName">AB Design Studio</div>
+          <div class="profile-sub" id="activeProfileSub">PJ &bull; MEI</div>
+        </div>
+        <span class="badge badge-lime" style="margin-left:8px;" id="activeProfileBadge">PJ</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="profile-dropdown hidden" id="profileDropdown">
+        <div class="profile-option" onclick="switchProfile('pf')">
+          <span class="profile-dot inactive" id="pfDot"></span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Marina Silva</div>
+            <div style="font-size:0.75rem;color:var(--text-3);">Conta pessoal</div>
+          </div>
+          <span class="badge badge-lime" style="margin-left:auto;">PF</span>
+        </div>
+        <div class="profile-option active" onclick="switchProfile('pj')">
+          <span class="profile-dot active" id="pjDot"></span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">AB Design Studio</div>
+            <div style="font-size:0.75rem;color:var(--text-3);">MEI &bull; 12.345.678/0001-95</div>
+          </div>
+          <span class="badge badge-lime" style="margin-left:auto;">PJ</span>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-bell" onclick="showToast('3 novas notificacoes','success')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-badge"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== SCREEN 4: DASHBOARD ===== -->
+  <main id="screen-dashboard" class="main-content screen fade-in">
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Visao geral da sua empresa</div>
+
+    <!-- Balance Card -->
+    <div class="balance-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="company-name">AB Design Studio</div>
+          <div class="cnpj">12.345.678/0001-95</div>
+          <div style="margin-top:16px;">
+            <span class="balance-amount" id="dashBalance">R$ 8.750,00</span>
+            <span class="eye-toggle" onclick="toggleBalance()">
+              <svg id="eyeOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eyeClosed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </span>
+          </div>
+          <div class="balance-sub">Rendendo 100% CDI</div>
+        </div>
+        <span class="badge badge-success">Conta ativa</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <div class="quick-action" onclick="navigateToScreen('screen-pix-enviar')">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+        <span>Enviar Pix</span>
+      </div>
+      <div class="quick-action" onclick="navigateToScreen('screen-cobrancas-nova')">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </div>
+        <span>Cobrar</span>
+      </div>
+      <div class="quick-action" onclick="navigateToScreen('screen-transfer')">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        </div>
+        <span>Transferir PF&#8596;PJ</span>
+      </div>
+      <div class="quick-action" onclick="navigateToScreen('screen-cartoes')">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <span>Novo Cartao</span>
+      </div>
+    </div>
+
+    <!-- Cash Flow Chart -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div style="font-weight:600;">Fluxo de Caixa</div>
+          <div style="display:flex;gap:16px;font-size:0.8rem;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--success);display:inline-block;"></span> Entradas</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--danger);display:inline-block;"></span> Saidas</span>
+          </div>
+        </div>
+        <div class="chart-bars">
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:80px"></div><div class="chart-bar expense" style="height:30px"></div></div><div class="chart-label">Seg</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:40px"></div><div class="chart-bar expense" style="height:60px"></div></div><div class="chart-label">Ter</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:100px"></div><div class="chart-bar expense" style="height:20px"></div></div><div class="chart-label">Qua</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:60px"></div><div class="chart-bar expense" style="height:45px"></div></div><div class="chart-label">Qui</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:120px"></div><div class="chart-bar expense" style="height:35px"></div></div><div class="chart-label">Sex</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:30px"></div><div class="chart-bar expense" style="height:70px"></div></div><div class="chart-label">Sab</div></div>
+          <div class="chart-day"><div class="chart-bar-group"><div class="chart-bar income" style="height:50px"></div><div class="chart-bar expense" style="height:15px"></div></div><div class="chart-label">Dom</div></div>
+        </div>
+      </div>
+
+      <!-- Invoice Summary -->
+      <div>
+        <div class="invoice-summary">
+          <div class="card summary-card">
+            <div class="count" style="color:var(--warning);">5</div>
+            <div class="label">Pendentes</div>
+            <div class="amount" style="color:var(--warning);">R$ 4.200,00</div>
+          </div>
+          <div class="card summary-card">
+            <div class="count" style="color:var(--success);">12</div>
+            <div class="label">Pagos</div>
+            <div class="amount" style="color:var(--success);">R$ 18.500,00</div>
+          </div>
+          <div class="card summary-card">
+            <div class="count" style="color:var(--danger);">2</div>
+            <div class="label">Vencidos</div>
+            <div class="amount" style="color:var(--danger);">R$ 1.800,00</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div style="font-weight:600;margin-bottom:16px;">Transacoes Recentes</div>
+          <div class="tx-list">
+            <div class="tx-item">
+              <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+              <div class="tx-info"><div class="desc">Pix de Carlos Mendes</div><div class="meta">Pix Recebido</div></div>
+              <div class="tx-amount positive">+ R$ 2.500,00</div>
+              <div class="tx-date">27 Mar</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+              <div class="tx-info"><div class="desc">Pix de Startup XYZ</div><div class="meta">Pix Recebido</div></div>
+              <div class="tx-amount positive">+ R$ 4.000,00</div>
+              <div class="tx-date">26 Mar</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+              <div class="tx-info"><div class="desc">Adobe Creative Cloud</div><div class="meta">Compra Cartao</div></div>
+              <div class="tx-amount negative">- R$ 290,00</div>
+              <div class="tx-date">25 Mar</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+              <div class="tx-info"><div class="desc">Fornecedor Papel</div><div class="meta">Pix Enviado</div></div>
+              <div class="tx-amount negative">- R$ 850,00</div>
+              <div class="tx-date">24 Mar</div>
+            </div>
+            <div class="tx-item">
+              <div class="tx-icon" style="background:rgba(77,163,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/></svg></div>
+              <div class="tx-info"><div class="desc">Transferencia de PF</div><div class="meta">Transferencia PF</div></div>
+              <div class="tx-amount positive">+ R$ 1.000,00</div>
+              <div class="tx-date">23 Mar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 5: TRANSFER PF<>PJ ===== -->
+  <main id="screen-transfer" class="main-content screen hidden">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+      <button class="btn btn-ghost btn-sm" onclick="navigateToScreen('screen-dashboard')" style="padding:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div>
+        <div class="page-title" style="margin-bottom:0;">Transferencia PF &harr; PJ</div>
+        <div class="page-subtitle" style="margin-bottom:0;">Movimente entre suas contas instantaneamente</div>
+      </div>
+    </div>
+
+    <div id="transferStep1">
+      <div class="transfer-cards">
+        <div class="card transfer-card">
+          <div class="label" id="transferFromLabel">Conta PJ</div>
+          <div class="bal" id="transferFromBal" style="color:var(--lime);">R$ 8.750,00</div>
+          <div style="font-size:0.8rem;color:var(--text-3);margin-top:4px;" id="transferFromName">AB Design Studio</div>
+        </div>
+        <div class="direction-toggle">
+          <div class="arrow-btn" id="arrowBtn" onclick="toggleTransferDirection()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text-3);" id="directionLabel">PJ &rarr; PF</span>
+        </div>
+        <div class="card transfer-card">
+          <div class="label" id="transferToLabel">Conta PF</div>
+          <div class="bal" id="transferToBal" style="color:var(--text-2);">R$ 3.200,00</div>
+          <div style="font-size:0.8rem;color:var(--text-3);margin-top:4px;" id="transferToName">Marina Silva</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:400px;margin:32px auto 0;">
+        <div class="input-group">
+          <label>Valor da transferencia</label>
+          <input type="text" class="input-field" id="transferAmount" placeholder="R$ 0,00" style="font-size:1.4rem;font-weight:700;text-align:center;" oninput="formatCurrency(this)">
+        </div>
+        <button class="btn btn-lime btn-block" onclick="confirmTransfer()">Transferir</button>
+      </div>
+    </div>
+
+    <div id="transferStep2" class="hidden">
+      <div class="card" style="max-width:480px;margin:0 auto;">
+        <div class="success-icon" style="margin-bottom:20px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:var(--lime);"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h2 style="text-align:center;margin-bottom:24px;">Transferencia realizada!</h2>
+        <div class="confirm-row"><span class="label">De</span><span class="value" id="txFromName">Conta PJ - AB Design Studio</span></div>
+        <div class="confirm-row"><span class="label">Para</span><span class="value" id="txToName">Conta PF - Marina Silva</span></div>
+        <div class="confirm-row"><span class="label">Valor</span><span class="value" style="color:var(--lime);" id="txAmount">R$ 500,00</span></div>
+        <div class="confirm-row"><span class="label">Data</span><span class="value">28/03/2026 &bull; Instantanea</span></div>
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="resetTransfer()">Nova transferencia</button>
+          <button class="btn btn-lime" style="flex:1;" onclick="navigateToScreen('screen-dashboard')">Voltar ao Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 7: NOVA COBRANCA ===== -->
+  <main id="screen-cobrancas-nova" class="main-content screen hidden">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+      <button class="btn btn-ghost btn-sm" onclick="navigateToScreen('screen-cobrancas-lista')" style="padding:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div>
+        <div class="page-title" style="margin-bottom:0;">Nova Cobranca</div>
+        <div class="page-subtitle" style="margin-bottom:0;">Emita um boleto com QR Code Pix</div>
+      </div>
+    </div>
+
+    <div id="cobrancaStep1">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+        <div class="card">
+          <h3 style="font-size:1.1rem;margin-bottom:20px;">Dados do cliente</h3>
+          <div class="input-group">
+            <label>Nome do cliente</label>
+            <input type="text" class="input-field" id="cobClientName" placeholder="Nome completo ou razao social" value="Tech Solutions Ltda">
+          </div>
+          <div class="input-group">
+            <label>CPF / CNPJ</label>
+            <input type="text" class="input-field" id="cobClientDoc" placeholder="000.000.000-00" value="98.765.432/0001-10">
+          </div>
+          <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" class="input-field" id="cobClientEmail" placeholder="email@empresa.com" value="financeiro@techsolutions.com">
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1.1rem;margin-bottom:20px;">Detalhes da cobranca</h3>
+          <div class="input-group">
+            <label>Valor</label>
+            <input type="text" class="input-field" id="cobAmount" placeholder="R$ 0,00" value="R$ 3.500,00" style="font-size:1.2rem;font-weight:700;">
+          </div>
+          <div class="input-group">
+            <label>Vencimento</label>
+            <input type="date" class="input-field" id="cobDueDate" value="2026-04-15">
+          </div>
+          <div class="input-group">
+            <label>Descricao</label>
+            <textarea class="input-field" id="cobDesc" placeholder="Ex: Servico de design de marca">Projeto de branding - Fase 2</textarea>
+          </div>
+          <div style="margin-top:16px;padding:16px;background:var(--surface-2);border-radius:var(--radius-control);border:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <span style="font-size:0.9rem;font-weight:500;">Juros e multa</span>
+              <label style="position:relative;width:44px;height:24px;cursor:pointer;">
+                <input type="checkbox" id="cobJurosToggle" checked style="display:none;">
+                <span style="position:absolute;inset:0;background:var(--lime-dim);border-radius:12px;transition:0.2s;" onclick="this.parentElement.querySelector('input').checked=!this.parentElement.querySelector('input').checked;this.style.background=this.parentElement.querySelector('input').checked?'var(--lime-dim)':'var(--border)';">
+                  <span style="position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--lime);border-radius:50%;transition:0.2s;"></span>
+                </span>
+              </label>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div class="input-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem;">Juros (% a.m.)</label>
+                <input type="text" class="input-field" value="1,00" style="font-size:0.85rem;padding:8px 12px;">
+              </div>
+              <div class="input-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem;">Multa (%)</label>
+                <input type="text" class="input-field" value="2,00" style="font-size:0.85rem;padding:8px 12px;">
+              </div>
+              <div class="input-group" style="margin-bottom:0;">
+                <label style="font-size:0.75rem;">Desconto (%)</label>
+                <input type="text" class="input-field" value="0,00" style="font-size:0.85rem;padding:8px 12px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+        <button class="btn btn-secondary" onclick="navigateToScreen('screen-cobrancas-lista')">Cancelar</button>
+        <button class="btn btn-lime" onclick="previewCobranca()">Visualizar cobranca</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Preview -->
+    <div id="cobrancaStep2" class="hidden">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+        <div class="boleto-preview">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <div style="font-weight:700;font-size:1.1rem;">Boleto</div>
+            <span class="badge badge-warning">Pendente</span>
+          </div>
+          <div class="confirm-row"><span class="label">Beneficiario</span><span class="value">AB Design Studio</span></div>
+          <div class="confirm-row"><span class="label">CNPJ</span><span class="value">12.345.678/0001-95</span></div>
+          <div class="confirm-row"><span class="label">Pagador</span><span class="value" id="prevClient">Tech Solutions Ltda</span></div>
+          <div class="confirm-row"><span class="label">Valor</span><span class="value" style="color:var(--lime);font-weight:700;" id="prevAmount">R$ 3.500,00</span></div>
+          <div class="confirm-row"><span class="label">Vencimento</span><span class="value" id="prevDue">15/04/2026</span></div>
+          <div class="confirm-row"><span class="label">Descricao</span><span class="value" id="prevDesc">Projeto de branding - Fase 2</span></div>
+          <div class="barcode-placeholder"></div>
+          <div style="text-align:center;font-size:0.75rem;color:var(--text-3);font-family:monospace;letter-spacing:1px;">23793.38128 60000.000003 00000.000405 1 84340000350000</div>
+        </div>
+        <div>
+          <div class="card" style="text-align:center;margin-bottom:24px;">
+            <div style="font-weight:600;margin-bottom:16px;">QR Code Pix</div>
+            <div class="qr-placeholder" style="margin:0 auto;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-3);margin-top:12px;">Pagamento instantaneo via Pix</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <button class="btn btn-lime btn-block" onclick="sendCobranca()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Enviar por e-mail
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="navigator.clipboard&&navigator.clipboard.writeText('23793.38128 60000.000003');showToast('Codigo copiado!','success');">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copiar link de pagamento
+            </button>
+            <button class="btn btn-ghost btn-block" onclick="document.getElementById('cobrancaStep2').classList.add('hidden');document.getElementById('cobrancaStep1').classList.remove('hidden');">Voltar e editar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 9: LISTA DE COBRANCAS ===== -->
+  <main id="screen-cobrancas-lista" class="main-content screen hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;">
+      <div>
+        <div class="page-title">Cobrancas</div>
+        <div class="page-subtitle" style="margin-bottom:0;">Gerencie seus boletos emitidos</div>
+      </div>
+      <button class="btn btn-lime" onclick="navigateToScreen('screen-cobrancas-nova')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova cobranca
+      </button>
+    </div>
+
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:24px;">
+      <input type="text" class="input-field" placeholder="Buscar por cliente..." style="max-width:300px;margin-bottom:0;" id="cobSearch" oninput="filterInvoices()">
+      <div class="filter-tabs" id="cobFilterTabs">
+        <button class="filter-tab active" onclick="setFilter(this,'todos')">Todos</button>
+        <button class="filter-tab" onclick="setFilter(this,'pendente')">Pendentes</button>
+        <button class="filter-tab" onclick="setFilter(this,'pago')">Pagos</button>
+        <button class="filter-tab" onclick="setFilter(this,'vencido')">Vencidos</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrapper">
+        <table id="invoiceTable">
+          <thead>
+            <tr><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Acoes</th></tr>
+          </thead>
+          <tbody>
+            <tr data-status="pago" data-client="carlos mendes">
+              <td><div style="font-weight:500;">Carlos Mendes</div><div style="font-size:0.8rem;color:var(--text-3);">123.456.789-00</div></td>
+              <td style="font-weight:600;">R$ 2.500,00</td>
+              <td>15/03/2026</td>
+              <td><span class="badge badge-success">Pago</span></td>
+              <td><button class="btn btn-ghost btn-sm">Ver</button></td>
+            </tr>
+            <tr data-status="pago" data-client="startup xyz">
+              <td><div style="font-weight:500;">Startup XYZ</div><div style="font-size:0.8rem;color:var(--text-3);">11.222.333/0001-44</div></td>
+              <td style="font-weight:600;">R$ 4.000,00</td>
+              <td>20/03/2026</td>
+              <td><span class="badge badge-success">Pago</span></td>
+              <td><button class="btn btn-ghost btn-sm">Ver</button></td>
+            </tr>
+            <tr data-status="vencido" data-client="agencia criativa">
+              <td><div style="font-weight:500;">Agencia Criativa</div><div style="font-size:0.8rem;color:var(--text-3);">55.666.777/0001-88</div></td>
+              <td style="font-weight:600;">R$ 1.800,00</td>
+              <td>10/03/2026</td>
+              <td><span class="badge badge-danger">Vencido</span></td>
+              <td><button class="btn btn-ghost btn-sm">Reenviar</button></td>
+            </tr>
+            <tr data-status="pendente" data-client="tech solutions">
+              <td><div style="font-weight:500;">Tech Solutions</div><div style="font-size:0.8rem;color:var(--text-3);">98.765.432/0001-10</div></td>
+              <td style="font-weight:600;">R$ 2.200,00</td>
+              <td>05/04/2026</td>
+              <td><span class="badge badge-warning">Pendente</span></td>
+              <td><button class="btn btn-ghost btn-sm">Copiar</button></td>
+            </tr>
+            <tr data-status="pendente" data-client="maria costa">
+              <td><div style="font-weight:500;">Maria Costa</div><div style="font-size:0.8rem;color:var(--text-3);">987.654.321-00</div></td>
+              <td style="font-weight:600;">R$ 2.000,00</td>
+              <td>10/04/2026</td>
+              <td><span class="badge badge-warning">Pendente</span></td>
+              <td><button class="btn btn-ghost btn-sm">Copiar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 10: EXTRATO ===== -->
+  <main id="screen-extrato" class="main-content screen hidden">
+    <div class="page-title">Extrato</div>
+    <div class="page-subtitle">Historico de transacoes da conta PJ</div>
+
+    <div class="card extrato-balance">
+      <div>
+        <div style="font-size:0.85rem;color:var(--text-3);">Saldo atual</div>
+        <div style="font-size:1.8rem;font-weight:700;color:var(--lime);">R$ 8.750,00</div>
+      </div>
+      <div class="date-filter">
+        <input type="date" value="2026-03-01">
+        <span style="color:var(--text-3);">ate</span>
+        <input type="date" value="2026-03-28">
+        <button class="btn btn-sm btn-secondary">Filtrar</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;">
+      <div class="tx-list" style="padding:0 24px;">
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Carlos Mendes</div><div class="meta">Pix Recebido &bull; Chave CNPJ</div></div>
+          <div class="tx-amount positive">+ R$ 2.500,00</div>
+          <div class="tx-date">27 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Startup XYZ</div><div class="meta">Pix Recebido &bull; Chave CNPJ</div></div>
+          <div class="tx-amount positive">+ R$ 4.000,00</div>
+          <div class="tx-date">26 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="tx-info"><div class="desc">Adobe Creative Cloud</div><div class="meta">Compra Cartao &bull; **** 8721</div></div>
+          <div class="tx-amount negative">- R$ 290,00</div>
+          <div class="tx-date">25 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Fornecedor Papel</div><div class="meta">Pix Enviado &bull; Chave CPF</div></div>
+          <div class="tx-amount negative">- R$ 850,00</div>
+          <div class="tx-date">24 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(77,163,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/></svg></div>
+          <div class="tx-info"><div class="desc">Transferencia de PF</div><div class="meta">Transferencia PF &rarr; PJ</div></div>
+          <div class="tx-amount positive">+ R$ 1.000,00</div>
+          <div class="tx-date">23 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="tx-info"><div class="desc">Boleto DAS - MEI</div><div class="meta">Boleto Pago</div></div>
+          <div class="tx-amount negative">- R$ 71,60</div>
+          <div class="tx-date">20 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Maria Costa</div><div class="meta">Pix Recebido &bull; Chave E-mail</div></div>
+          <div class="tx-amount positive">+ R$ 1.500,00</div>
+          <div class="tx-date">18 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="tx-info"><div class="desc">Google Workspace</div><div class="meta">Compra Cartao &bull; **** 8721</div></div>
+          <div class="tx-amount negative">- R$ 144,00</div>
+          <div class="tx-date">15 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Fornecedor Tinta</div><div class="meta">Pix Enviado &bull; Chave Aleatoria</div></div>
+          <div class="tx-amount negative">- R$ 620,00</div>
+          <div class="tx-date">12 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(61,255,139,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="tx-info"><div class="desc">Agencia Criativa</div><div class="meta">Pix Recebido &bull; Chave CNPJ</div></div>
+          <div class="tx-amount positive">+ R$ 3.200,00</div>
+          <div class="tx-date">10 Mar</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 11: PIX ENVIAR ===== -->
+  <main id="screen-pix-enviar" class="main-content screen hidden">
+    <div class="page-title">Pix</div>
+    <div class="page-subtitle">Envie e gerencie suas chaves Pix</div>
+
+    <div class="toggle-wrapper" style="margin-bottom:32px;display:inline-flex;">
+      <button class="toggle-btn active" onclick="showPixTab(this,'pix-enviar-tab')">Enviar</button>
+      <button class="toggle-btn" onclick="showPixTab(this,'pix-chaves-tab')">Minhas Chaves</button>
+    </div>
+
+    <!-- Pix Enviar Tab -->
+    <div id="pix-enviar-tab">
+      <div id="pixStep1">
+        <div class="card" style="max-width:520px;">
+          <h3 style="font-size:1.1rem;margin-bottom:20px;">Para quem voce quer enviar?</h3>
+          <div class="input-group">
+            <label>Chave Pix</label>
+            <input type="text" class="input-field" id="pixKeyInput" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatoria" value="123.456.789-00">
+          </div>
+          <button class="btn btn-lime btn-block" onclick="lookupPixKey()">Buscar</button>
+        </div>
+      </div>
+
+      <div id="pixStep2" class="hidden">
+        <div class="card" style="max-width:520px;">
+          <div style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--surface-2);border-radius:var(--radius-control);margin-bottom:24px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:600;">Carlos Mendes</div>
+              <div style="font-size:0.8rem;color:var(--text-3);">Banco Inter &bull; CPF ***.***.789-00</div>
+            </div>
+            <span class="badge badge-success" style="margin-left:auto;">Verificado</span>
+          </div>
+          <div class="input-group">
+            <label>Valor</label>
+            <input type="text" class="input-field" id="pixAmount" placeholder="R$ 0,00" style="font-size:1.4rem;font-weight:700;text-align:center;" oninput="formatCurrency(this)">
+          </div>
+          <div class="input-group">
+            <label>Descricao (opcional)</label>
+            <input type="text" class="input-field" id="pixDesc" placeholder="Ex: Pagamento freelance">
+          </div>
+          <div style="display:flex;gap:12px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('pixStep2').classList.add('hidden');document.getElementById('pixStep1').classList.remove('hidden');">Voltar</button>
+            <button class="btn btn-lime" style="flex:1" onclick="confirmPix()">Revisar e enviar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pixStep3" class="hidden">
+        <div class="card" style="max-width:520px;">
+          <h3 style="font-size:1.1rem;margin-bottom:20px;">Confirme o Pix</h3>
+          <div class="confirm-row"><span class="label">De</span><span class="value">AB Design Studio &bull; 12.345.678/0001-95</span></div>
+          <div class="confirm-row"><span class="label">Para</span><span class="value">Carlos Mendes</span></div>
+          <div class="confirm-row"><span class="label">Instituicao</span><span class="value">Banco Inter</span></div>
+          <div class="confirm-row"><span class="label">Chave</span><span class="value">123.456.789-00</span></div>
+          <div class="confirm-row"><span class="label">Valor</span><span class="value" style="color:var(--lime);font-weight:700;" id="pixConfirmAmount">R$ 0,00</span></div>
+          <div class="confirm-row"><span class="label">Descricao</span><span class="value" id="pixConfirmDesc">-</span></div>
+          <div style="display:flex;gap:12px;margin-top:24px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('pixStep3').classList.add('hidden');document.getElementById('pixStep2').classList.remove('hidden');">Voltar</button>
+            <button class="btn btn-lime" style="flex:1" onclick="sendPix()">Confirmar Pix</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pixStep4" class="hidden">
+        <div class="card" style="max-width:520px;text-align:center;">
+          <div class="success-icon" style="margin-bottom:20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:var(--lime);"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2 style="margin-bottom:8px;">Pix enviado!</h2>
+          <p style="color:var(--text-2);margin-bottom:24px;">Transferencia realizada com sucesso.</p>
+          <div style="text-align:left;">
+            <div class="confirm-row"><span class="label">Para</span><span class="value">Carlos Mendes</span></div>
+            <div class="confirm-row"><span class="label">Valor</span><span class="value" style="color:var(--lime);" id="pixReceiptAmount">R$ 0,00</span></div>
+            <div class="confirm-row"><span class="label">Data</span><span class="value">28/03/2026 14:32</span></div>
+            <div class="confirm-row"><span class="label">ID</span><span class="value" style="font-family:monospace;font-size:0.8rem;">E123456782026032814320000001</span></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:24px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="resetPix()">Novo Pix</button>
+            <button class="btn btn-lime" style="flex:1;" onclick="navigateToScreen('screen-dashboard')">Dashboard</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pix Chaves Tab (Screen 12) -->
+    <div id="pix-chaves-tab" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <div style="font-size:0.9rem;color:var(--text-2);">3 chaves cadastradas</div>
+        <button class="btn btn-lime btn-sm" onclick="document.getElementById('newKeyModal').classList.remove('hidden');">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova chave
+        </button>
+      </div>
+
+      <div class="pix-key-card">
+        <div class="pix-key-info">
+          <div class="pix-key-type">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+          </div>
+          <div>
+            <div class="pix-key-value">12.345.678/0001-95</div>
+            <div class="pix-key-label">CNPJ</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-lime">CNPJ</span>
+          <button class="btn btn-danger btn-sm" onclick="showToast('Chave CNPJ nao pode ser removida','error')">Excluir</button>
+        </div>
+      </div>
+
+      <div class="pix-key-card">
+        <div class="pix-key-info">
+          <div class="pix-key-type">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div class="pix-key-value">contato@abdesign.com</div>
+            <div class="pix-key-label">E-mail</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-info">E-mail</span>
+          <button class="btn btn-danger btn-sm" onclick="this.closest('.pix-key-card').style.display='none';showToast('Chave excluida com sucesso','success');">Excluir</button>
+        </div>
+      </div>
+
+      <div class="pix-key-card">
+        <div class="pix-key-info">
+          <div class="pix-key-type">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div>
+            <div class="pix-key-value" style="font-family:monospace;font-size:0.85rem;">a1b2c3d4-e5f6-7890-abcd-ef1234567890</div>
+            <div class="pix-key-label">Chave aleatoria</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-neutral">Aleatoria</span>
+          <button class="btn btn-danger btn-sm" onclick="this.closest('.pix-key-card').style.display='none';showToast('Chave excluida com sucesso','success');">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN: CARTOES ===== -->
+  <main id="screen-cartoes" class="main-content screen hidden">
+    <div class="page-title">Cartoes Corporativos</div>
+    <div class="page-subtitle">Gerencie os cartoes da empresa</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div class="card" style="background:linear-gradient(135deg,#131c28 0%,rgba(183,255,42,0.08) 100%);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(183,255,42,0.05);"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+          <div style="font-size:0.85rem;color:var(--text-3);">Cartao Virtual</div>
+          <span class="badge badge-success">Ativo</span>
+        </div>
+        <div style="font-size:1.4rem;font-weight:600;letter-spacing:3px;margin-bottom:16px;">**** **** **** 8721</div>
+        <div style="display:flex;justify-content:space-between;">
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-3);">Titular</div>
+            <div style="font-weight:500;">Marina Silva</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-3);">Validade</div>
+            <div style="font-weight:500;">08/28</div>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:6px;">
+            <span style="color:var(--text-3);">Limite utilizado</span>
+            <span style="font-weight:600;">R$ 1.250,00 / R$ 3.000,00</span>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:41.7%;background:var(--success);border-radius:3px;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-3);margin-top:4px;">41,7% utilizado</div>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;border-style:dashed;cursor:pointer;" onclick="showToast('Solicite um novo cartao para membros do time','success')">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <span style="font-weight:500;color:var(--text-2);">Solicitar novo cartao</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div style="font-weight:600;margin-bottom:16px;">Ultimas compras</div>
+      <div class="tx-list">
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="tx-info"><div class="desc">Adobe Creative Cloud</div><div class="meta">Assinatura mensal</div></div>
+          <div class="tx-amount negative">- R$ 290,00</div>
+          <div class="tx-date">25 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="tx-info"><div class="desc">Google Workspace</div><div class="meta">Assinatura mensal</div></div>
+          <div class="tx-amount negative">- R$ 144,00</div>
+          <div class="tx-date">15 Mar</div>
+        </div>
+        <div class="tx-item">
+          <div class="tx-icon" style="background:rgba(255,77,77,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="tx-info"><div class="desc">Figma Professional</div><div class="meta">Assinatura anual (parcela 3/12)</div></div>
+          <div class="tx-amount negative">- R$ 75,00</div>
+          <div class="tx-date">10 Mar</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN: TIME ===== -->
+  <main id="screen-time" class="main-content screen hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;">
+      <div>
+        <div class="page-title">Time</div>
+        <div class="page-subtitle" style="margin-bottom:0;">Gerencie os membros da sua empresa</div>
+      </div>
+      <button class="btn btn-lime" onclick="document.getElementById('inviteModal').classList.remove('hidden');">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Convidar membro
+      </button>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead>
+          <tr><th>Membro</th><th>Perfil</th><th>Status</th><th>Acoes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--lime);">MS</div>
+                <div>
+                  <div style="font-weight:500;">Marina Silva</div>
+                  <div style="font-size:0.8rem;color:var(--text-3);">marina@abdesign.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-lime">Admin</span></td>
+            <td><span class="badge badge-success">Ativo</span></td>
+            <td><span style="font-size:0.8rem;color:var(--text-3);">Voce</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:rgba(77,163,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--info);">JO</div>
+                <div>
+                  <div style="font-weight:500;">Joao Oliveira</div>
+                  <div style="font-size:0.8rem;color:var(--text-3);">joao@abdesign.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-info">Financeiro</span></td>
+            <td><span class="badge badge-info">Convidado</span></td>
+            <td>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-ghost btn-sm">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="showToast('Convite cancelado','success')">Remover</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Permissions Matrix -->
+    <div class="card" style="margin-top:24px;">
+      <div style="font-weight:600;margin-bottom:16px;">Matriz de permissoes</div>
+      <table>
+        <thead>
+          <tr><th>Funcionalidade</th><th>Admin</th><th>Financeiro</th><th>Visualizador</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Ver saldo e extrato</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--success);">&#10003;</td></tr>
+          <tr><td>Enviar Pix</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--danger);">&#10007;</td></tr>
+          <tr><td>Emitir cobrancas</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--danger);">&#10007;</td></tr>
+          <tr><td>Gerenciar cartoes</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--danger);">&#10007;</td><td style="color:var(--danger);">&#10007;</td></tr>
+          <tr><td>Convidar membros</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--danger);">&#10007;</td><td style="color:var(--danger);">&#10007;</td></tr>
+          <tr><td>Editar dados empresa</td><td style="color:var(--success);">&#10003;</td><td style="color:var(--danger);">&#10007;</td><td style="color:var(--danger);">&#10007;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN: EMPRESA ===== -->
+  <main id="screen-empresa" class="main-content screen hidden">
+    <div class="page-title">Dados da Empresa</div>
+    <div class="page-subtitle">Informacoes cadastrais da sua empresa</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h3 style="font-size:1.1rem;">Informacoes gerais</h3>
+          <span class="badge badge-success">Ativa</span>
+        </div>
+        <div class="input-group">
+          <label>Razao Social</label>
+          <input type="text" class="input-field" value="AB Design Studio Ltda" readonly style="opacity:0.7;">
+        </div>
+        <div class="input-group">
+          <label>Nome Fantasia</label>
+          <input type="text" class="input-field" value="AB Design Studio">
+        </div>
+        <div class="input-group">
+          <label>CNPJ</label>
+          <input type="text" class="input-field" value="12.345.678/0001-95" readonly style="opacity:0.7;">
+        </div>
+        <div class="input-group">
+          <label>Natureza Juridica</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="text" class="input-field" value="Microempreendedor Individual" readonly style="opacity:0.7;flex:1;">
+            <span class="badge badge-lime">MEI</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Data de Abertura</label>
+          <input type="text" class="input-field" value="15/01/2023" readonly style="opacity:0.7;">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:1.1rem;margin-bottom:20px;">Endereco</h3>
+        <div class="input-group">
+          <label>CEP</label>
+          <input type="text" class="input-field" value="01310-100">
+        </div>
+        <div class="input-group">
+          <label>Logradouro</label>
+          <input type="text" class="input-field" value="Rua das Flores, 123">
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+          <div class="input-group">
+            <label>Bairro</label>
+            <input type="text" class="input-field" value="Centro">
+          </div>
+          <div class="input-group">
+            <label>Complemento</label>
+            <input type="text" class="input-field" value="Sala 4">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+          <div class="input-group">
+            <label>Cidade</label>
+            <input type="text" class="input-field" value="Sao Paulo">
+          </div>
+          <div class="input-group">
+            <label>UF</label>
+            <input type="text" class="input-field" value="SP">
+          </div>
+        </div>
+        <button class="btn btn-lime btn-block" style="margin-top:8px;" onclick="showToast('Endereco atualizado com sucesso','success')">Salvar alteracoes</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN: PERFIL ===== -->
+  <main id="screen-perfil" class="main-content screen hidden">
+    <div class="page-title">Perfil</div>
+    <div class="page-subtitle">Dados do operador da conta</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--lime);">MS</div>
+          <div>
+            <div style="font-size:1.1rem;font-weight:600;">Marina Silva</div>
+            <div style="font-size:0.85rem;color:var(--text-3);">marina@abdesign.com</div>
+            <span class="badge badge-lime" style="margin-top:4px;">Admin</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Nome completo</label>
+          <input type="text" class="input-field" value="Marina Silva">
+        </div>
+        <div class="input-group">
+          <label>E-mail</label>
+          <input type="email" class="input-field" value="marina@abdesign.com">
+        </div>
+        <div class="input-group">
+          <label>Telefone</label>
+          <input type="text" class="input-field" value="(11) 99876-5432">
+        </div>
+        <div class="input-group">
+          <label>CPF</label>
+          <input type="text" class="input-field" value="***.***.456-78" readonly style="opacity:0.7;">
+        </div>
+        <button class="btn btn-lime btn-block" onclick="showToast('Perfil atualizado com sucesso','success')">Salvar</button>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:24px;">
+          <h3 style="font-size:1.1rem;margin-bottom:20px;">Alterar senha</h3>
+          <div class="input-group">
+            <label>Senha atual</label>
+            <input type="password" class="input-field" placeholder="Digite sua senha atual">
+          </div>
+          <div class="input-group">
+            <label>Nova senha</label>
+            <input type="password" class="input-field" placeholder="Minimo 8 caracteres">
+          </div>
+          <div class="input-group">
+            <label>Confirmar nova senha</label>
+            <input type="password" class="input-field" placeholder="Repita a nova senha">
+          </div>
+          <button class="btn btn-secondary btn-block" onclick="showToast('Senha alterada com sucesso','success')">Alterar senha</button>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size:1.1rem;margin-bottom:16px;">Sessoes ativas</h3>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:var(--radius-control);margin-bottom:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <div style="flex:1;">
+              <div style="font-size:0.85rem;font-weight:500;">Chrome &bull; Windows</div>
+              <div style="font-size:0.75rem;color:var(--text-3);">Sao Paulo, SP &bull; Agora</div>
+            </div>
+            <span class="badge badge-success">Atual</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:var(--radius-control);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <div style="flex:1;">
+              <div style="font-size:0.85rem;font-weight:500;">Safari &bull; iPhone</div>
+              <div style="font-size:0.75rem;color:var(--text-3);">Sao Paulo, SP &bull; Ha 2 horas</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="showToast('Sessao encerrada','success')">Encerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div><!-- /app-layout -->
+
+<!-- ===== INVITE MODAL ===== -->
+<div id="inviteModal" class="modal-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden');">
+  <div class="modal-box">
+    <h3>Convidar membro</h3>
+    <div class="input-group">
+      <label>E-mail do convidado</label>
+      <input type="email" class="input-field" placeholder="email@empresa.com" id="inviteEmail">
+    </div>
+    <div class="input-group">
+      <label>Perfil de acesso</label>
+      <select class="input-field" id="inviteRole">
+        <option value="financeiro">Financeiro</option>
+        <option value="visualizador">Visualizador</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('inviteModal').classList.add('hidden');">Cancelar</button>
+      <button class="btn btn-lime" style="flex:1" onclick="document.getElementById('inviteModal').classList.add('hidden');showToast('Convite enviado com sucesso!','success');">Enviar convite</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NEW KEY MODAL ===== -->
+<div id="newKeyModal" class="modal-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden');">
+  <div class="modal-box">
+    <h3>Registrar nova chave Pix</h3>
+    <div class="input-group">
+      <label>Tipo de chave</label>
+      <select class="input-field" id="newKeyType">
+        <option value="telefone">Telefone</option>
+        <option value="email">E-mail</option>
+        <option value="aleatoria">Chave aleatoria</option>
+      </select>
+    </div>
+    <div class="input-group" id="newKeyValueGroup">
+      <label>Valor da chave</label>
+      <input type="text" class="input-field" placeholder="(11) 99999-9999" id="newKeyValue">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('newKeyModal').classList.add('hidden');">Cancelar</button>
+      <button class="btn btn-lime" style="flex:1" onclick="document.getElementById('newKeyModal').classList.add('hidden');showToast('Chave registrada com sucesso!','success');">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== GLOBAL STATE =====
+let balanceVisible = true;
+let transferDirection = 'pj-to-pf'; // or 'pf-to-pj'
+let currentProfile = 'pj';
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+}
+
+function enterApp() {
+  document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('app-layout').classList.remove('hidden');
+  navigateToScreen('screen-dashboard');
+}
+
+function navigateTo(navItem, screenId) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  navItem.classList.add('active');
+  document.querySelectorAll('.main-content').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById(screenId);
+  if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+}
+
+function navigateToScreen(screenId) {
+  document.querySelectorAll('.main-content').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById(screenId);
+  if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.screen === screenId);
+  });
+}
+
+// ===== CNPJ MASK & ONBOARDING =====
+document.getElementById('cnpjInput').addEventListener('input', function(e) {
+  let v = e.target.value.replace(/\D/g, '');
+  if (v.length > 14) v = v.slice(0, 14);
+  if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+  else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+  else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+  e.target.value = v;
+});
+
+function consultarCNPJ() {
+  const shimmer = document.getElementById('cnpjShimmer');
+  const btn = document.getElementById('btnConsultar');
+  btn.disabled = true;
+  btn.textContent = 'Consultando...';
+  shimmer.classList.remove('hidden');
+  setTimeout(() => {
+    shimmer.classList.add('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Consultar';
+    showScreen('screen-onboard-2');
+  }, 1500);
+}
+
+// ===== BALANCE TOGGLE =====
+function toggleBalance() {
+  balanceVisible = !balanceVisible;
+  document.getElementById('dashBalance').classList.toggle('blurred', !balanceVisible);
+  document.getElementById('eyeOpen').classList.toggle('hidden', !balanceVisible);
+  document.getElementById('eyeClosed').classList.toggle('hidden', balanceVisible);
+}
+
+// ===== PROFILE SWITCHER =====
+function toggleProfileDropdown() {
+  document.getElementById('profileDropdown').classList.toggle('hidden');
+}
+
+function switchProfile(profile) {
+  currentProfile = profile;
+  document.getElementById('profileDropdown').classList.add('hidden');
+  if (profile === 'pf') {
+    document.getElementById('activeProfileName').textContent = 'Marina Silva';
+    document.getElementById('activeProfileSub').textContent = 'Conta pessoal';
+    document.getElementById('activeProfileBadge').textContent = 'PF';
+    document.getElementById('pfDot').className = 'profile-dot active';
+    document.getElementById('pjDot').className = 'profile-dot inactive';
+    showToast('Alternado para perfil PF','success');
+  } else {
+    document.getElementById('activeProfileName').textContent = 'AB Design Studio';
+    document.getElementById('activeProfileSub').innerHTML = 'PJ &bull; MEI';
+    document.getElementById('activeProfileBadge').textContent = 'PJ';
+    document.getElementById('pfDot').className = 'profile-dot inactive';
+    document.getElementById('pjDot').className = 'profile-dot active';
+    showToast('Alternado para perfil PJ','success');
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  const ps = document.querySelector('.profile-switcher');
+  const dd = document.getElementById('profileDropdown');
+  if (ps && !ps.contains(e.target)) dd.classList.add('hidden');
+});
+
+// ===== TRANSFER =====
+function toggleTransferDirection() {
+  const arrow = document.getElementById('arrowBtn');
+  if (transferDirection === 'pj-to-pf') {
+    transferDirection = 'pf-to-pj';
+    arrow.classList.add('reversed');
+    document.getElementById('transferFromLabel').textContent = 'Conta PF';
+    document.getElementById('transferFromBal').textContent = 'R$ 3.200,00';
+    document.getElementById('transferFromBal').style.color = 'var(--text-2)';
+    document.getElementById('transferFromName').textContent = 'Marina Silva';
+    document.getElementById('transferToLabel').textContent = 'Conta PJ';
+    document.getElementById('transferToBal').textContent = 'R$ 8.750,00';
+    document.getElementById('transferToBal').style.color = 'var(--lime)';
+    document.getElementById('transferToName').textContent = 'AB Design Studio';
+    document.getElementById('directionLabel').innerHTML = 'PF &rarr; PJ';
+  } else {
+    transferDirection = 'pj-to-pf';
+    arrow.classList.remove('reversed');
+    document.getElementById('transferFromLabel').textContent = 'Conta PJ';
+    document.getElementById('transferFromBal').textContent = 'R$ 8.750,00';
+    document.getElementById('transferFromBal').style.color = 'var(--lime)';
+    document.getElementById('transferFromName').textContent = 'AB Design Studio';
+    document.getElementById('transferToLabel').textContent = 'Conta PF';
+    document.getElementById('transferToBal').textContent = 'R$ 3.200,00';
+    document.getElementById('transferToBal').style.color = 'var(--text-2)';
+    document.getElementById('transferToName').textContent = 'Marina Silva';
+    document.getElementById('directionLabel').innerHTML = 'PJ &rarr; PF';
+  }
+}
+
+function confirmTransfer() {
+  const amount = document.getElementById('transferAmount').value;
+  if (!amount || amount === 'R$ ') { showToast('Informe o valor da transferencia','error'); return; }
+  document.getElementById('txFromName').textContent = transferDirection === 'pj-to-pf' ? 'Conta PJ - AB Design Studio' : 'Conta PF - Marina Silva';
+  document.getElementById('txToName').textContent = transferDirection === 'pj-to-pf' ? 'Conta PF - Marina Silva' : 'Conta PJ - AB Design Studio';
+  document.getElementById('txAmount').textContent = amount;
+  document.getElementById('transferStep1').classList.add('hidden');
+  document.getElementById('transferStep2').classList.remove('hidden');
+  showToast('Transferencia realizada com sucesso!','success');
+}
+
+function resetTransfer() {
+  document.getElementById('transferStep2').classList.add('hidden');
+  document.getElementById('transferStep1').classList.remove('hidden');
+  document.getElementById('transferAmount').value = '';
+}
+
+// ===== CURRENCY FORMAT =====
+function formatCurrency(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (!v) { input.value = ''; return; }
+  v = (parseInt(v) / 100).toFixed(2);
+  v = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  input.value = 'R$ ' + v;
+}
+
+// ===== PIX FLOW =====
+function lookupPixKey() {
+  document.getElementById('pixStep1').classList.add('hidden');
+  document.getElementById('pixStep2').classList.remove('hidden');
+}
+
+function confirmPix() {
+  const amount = document.getElementById('pixAmount').value;
+  if (!amount || amount === 'R$ ') { showToast('Informe o valor','error'); return; }
+  document.getElementById('pixConfirmAmount').textContent = amount;
+  document.getElementById('pixConfirmDesc').textContent = document.getElementById('pixDesc').value || '-';
+  document.getElementById('pixStep2').classList.add('hidden');
+  document.getElementById('pixStep3').classList.remove('hidden');
+}
+
+function sendPix() {
+  document.getElementById('pixReceiptAmount').textContent = document.getElementById('pixConfirmAmount').textContent;
+  document.getElementById('pixStep3').classList.add('hidden');
+  document.getElementById('pixStep4').classList.remove('hidden');
+  showToast('Pix enviado com sucesso!','success');
+}
+
+function resetPix() {
+  ['pixStep2','pixStep3','pixStep4'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('pixStep1').classList.remove('hidden');
+  document.getElementById('pixAmount').value = '';
+  document.getElementById('pixDesc').value = '';
+  document.getElementById('pixKeyInput').value = '';
+}
+
+function showPixTab(btn, tabId) {
+  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pix-enviar-tab').classList.add('hidden');
+  document.getElementById('pix-chaves-tab').classList.add('hidden');
+  document.getElementById(tabId).classList.remove('hidden');
+}
+
+// ===== COBRANCA FLOW =====
+function previewCobranca() {
+  document.getElementById('prevClient').textContent = document.getElementById('cobClientName').value;
+  document.getElementById('prevAmount').textContent = document.getElementById('cobAmount').value;
+  document.getElementById('prevDesc').textContent = document.getElementById('cobDesc').value;
+  const d = document.getElementById('cobDueDate').value;
+  if (d) { const parts = d.split('-'); document.getElementById('prevDue').textContent = parts[2]+'/'+parts[1]+'/'+parts[0]; }
+  document.getElementById('cobrancaStep1').classList.add('hidden');
+  document.getElementById('cobrancaStep2').classList.remove('hidden');
+}
+
+function sendCobranca() {
+  showToast('Cobranca enviada por e-mail com sucesso!','success');
+  setTimeout(() => navigateToScreen('screen-cobrancas-lista'), 1000);
+}
+
+// ===== INVOICE FILTERS =====
+let currentFilter = 'todos';
+
+function setFilter(btn, filter) {
+  currentFilter = filter;
+  btn.parentElement.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  filterInvoices();
+}
+
+function filterInvoices() {
+  const search = (document.getElementById('cobSearch').value || '').toLowerCase();
+  const rows = document.querySelectorAll('#invoiceTable tbody tr');
+  rows.forEach(row => {
+    const status = row.dataset.status;
+    const client = row.dataset.client;
+    const matchFilter = currentFilter === 'todos' || status === currentFilter;
+    const matchSearch = !search || client.includes(search);
+    row.style.display = matchFilter && matchSearch ? '' : 'none';
+  });
+}
+
+// ===== TOAST =====
+function showToast(message, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  const icon = type === 'success'
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  toast.innerHTML = icon + message;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ===== KEYBOARD SHORTCUT =====
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+    document.getElementById('profileDropdown').classList.add('hidden');
+  }
+});
+</script>
+
+</body>
+</html>

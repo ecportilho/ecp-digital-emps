@@ -1,0 +1,438 @@
+{
+  "metadata": {
+    "document": "Monitoring and Alerting Configuration",
+    "product": "ECP Emps",
+    "version": "1.0",
+    "created_at": "2026-03-28",
+    "agent": "operations",
+    "phase": "04-product-operation"
+  },
+  "health_checks": [
+    {
+      "name": "API Health",
+      "endpoint": "GET /health",
+      "interval_seconds": 30,
+      "timeout_seconds": 5,
+      "expected_response": {
+        "status_code": 200,
+        "body": {
+          "status": "ok",
+          "uptime": "> 0",
+          "database": "connected",
+          "version": "string"
+        }
+      },
+      "failure_threshold": 3,
+      "recovery_threshold": 2,
+      "alert_on_failure": true
+    },
+    {
+      "name": "Database Health",
+      "endpoint": "GET /health/db",
+      "interval_seconds": 60,
+      "timeout_seconds": 10,
+      "expected_response": {
+        "status_code": 200,
+        "body": {
+          "sqlite_status": "ok",
+          "wal_mode": true,
+          "file_size_mb": "number",
+          "tables_count": "> 0"
+        }
+      },
+      "failure_threshold": 2,
+      "recovery_threshold": 1,
+      "alert_on_failure": true
+    },
+    {
+      "name": "Web App Health",
+      "endpoint": "GET /",
+      "target": "https://app.ecpemps.com.br",
+      "interval_seconds": 60,
+      "timeout_seconds": 10,
+      "expected_response": {
+        "status_code": 200,
+        "content_type": "text/html",
+        "contains": "ECP Emps"
+      },
+      "failure_threshold": 3,
+      "recovery_threshold": 2,
+      "alert_on_failure": true
+    },
+    {
+      "name": "Auth Flow",
+      "endpoint": "POST /auth/login",
+      "interval_seconds": 300,
+      "timeout_seconds": 15,
+      "type": "synthetic_transaction",
+      "description": "Login sintético com usuário de monitoramento para validar fluxo de autenticação end-to-end",
+      "failure_threshold": 2,
+      "recovery_threshold": 1,
+      "alert_on_failure": true
+    }
+  ],
+  "key_metrics": {
+    "infrastructure": [
+      {
+        "name": "cpu_usage_percent",
+        "description": "Uso de CPU do processo Node.js",
+        "collection_interval_seconds": 15,
+        "retention_days": 90,
+        "warning_threshold": 70,
+        "critical_threshold": 90
+      },
+      {
+        "name": "memory_usage_mb",
+        "description": "Heap memory do processo Node.js (RSS)",
+        "collection_interval_seconds": 15,
+        "retention_days": 90,
+        "warning_threshold": 512,
+        "critical_threshold": 768
+      },
+      {
+        "name": "disk_usage_percent",
+        "description": "Uso de disco — crítico para SQLite que cresce com dados",
+        "collection_interval_seconds": 60,
+        "retention_days": 90,
+        "warning_threshold": 75,
+        "critical_threshold": 90
+      },
+      {
+        "name": "sqlite_file_size_mb",
+        "description": "Tamanho do arquivo database-emps.sqlite",
+        "collection_interval_seconds": 300,
+        "retention_days": 365,
+        "warning_threshold": 500,
+        "critical_threshold": 900
+      },
+      {
+        "name": "sqlite_wal_size_mb",
+        "description": "Tamanho do WAL file — indica checkpointing saudável",
+        "collection_interval_seconds": 60,
+        "retention_days": 30,
+        "warning_threshold": 100,
+        "critical_threshold": 200
+      }
+    ],
+    "application": [
+      {
+        "name": "http_request_rate",
+        "description": "Requisições por segundo (RPS) na API Fastify",
+        "collection_interval_seconds": 10,
+        "retention_days": 90,
+        "segmentation": ["route", "method", "status_code"]
+      },
+      {
+        "name": "http_response_time_ms",
+        "description": "Histograma de tempo de resposta por rota",
+        "collection_interval_seconds": 10,
+        "retention_days": 90,
+        "percentiles": ["p50", "p95", "p99"],
+        "segmentation": ["route", "method"]
+      },
+      {
+        "name": "http_error_rate",
+        "description": "Taxa de respostas 5xx sobre o total",
+        "collection_interval_seconds": 10,
+        "retention_days": 90,
+        "segmentation": ["route", "error_code"]
+      },
+      {
+        "name": "active_connections",
+        "description": "Número de conexões HTTP ativas simultâneas",
+        "collection_interval_seconds": 10,
+        "retention_days": 30,
+        "warning_threshold": 100,
+        "critical_threshold": 200
+      },
+      {
+        "name": "jwt_auth_failures",
+        "description": "Tentativas de autenticação falhadas por minuto",
+        "collection_interval_seconds": 60,
+        "retention_days": 90,
+        "warning_threshold": 50,
+        "critical_threshold": 200,
+        "note": "Spike pode indicar ataque de brute force"
+      }
+    ],
+    "business": [
+      {
+        "name": "pix_transfers_count",
+        "description": "Número de transferências Pix processadas",
+        "collection_interval_seconds": 60,
+        "retention_days": 365,
+        "segmentation": ["status", "type"]
+      },
+      {
+        "name": "pix_processing_time_ms",
+        "description": "Tempo de processamento de Pix end-to-end",
+        "collection_interval_seconds": 60,
+        "retention_days": 365,
+        "percentiles": ["p50", "p95", "p99"]
+      },
+      {
+        "name": "invoices_generated_count",
+        "description": "Número de boletos gerados",
+        "collection_interval_seconds": 60,
+        "retention_days": 365,
+        "segmentation": ["status", "has_juros_multa"]
+      },
+      {
+        "name": "invoice_generation_time_ms",
+        "description": "Tempo de geração de boleto",
+        "collection_interval_seconds": 60,
+        "retention_days": 365,
+        "percentiles": ["p50", "p95", "p99"]
+      },
+      {
+        "name": "companies_created_count",
+        "description": "Novas empresas cadastradas (onboarding)",
+        "collection_interval_seconds": 300,
+        "retention_days": 365
+      },
+      {
+        "name": "activation_rate_7d",
+        "description": "Taxa de ativação: empresas com 3+ operações nos primeiros 7 dias (KR-01)",
+        "collection_interval_seconds": 3600,
+        "retention_days": 365
+      },
+      {
+        "name": "efas_weekly",
+        "description": "Empresas Financeiramente Ativas por Semana (North Star)",
+        "collection_interval_seconds": 86400,
+        "retention_days": 365
+      },
+      {
+        "name": "pf_pj_toggle_rate",
+        "description": "Média de toggles PF/PJ por sessão (KR-03)",
+        "collection_interval_seconds": 3600,
+        "retention_days": 365
+      }
+    ]
+  },
+  "alert_rules": [
+    {
+      "id": "ALERT-001",
+      "name": "API Down",
+      "condition": "health_check('API Health').failures >= 3 in 2 minutes",
+      "severity": "S1",
+      "channels": ["pagerduty:ecp-emps", "slack:#ecp-emps-incidents"],
+      "auto_action": "Trigger incident response playbook S1",
+      "runbook": "1. Verificar status do processo Node.js\n2. Verificar logs de erro recentes\n3. Verificar espaço em disco e memória\n4. Se processo morto: restart via pm2 ou systemd\n5. Se não resolver: iniciar rollback"
+    },
+    {
+      "id": "ALERT-002",
+      "name": "High Error Rate",
+      "condition": "http_error_rate > 1% for 5 minutes",
+      "severity": "S2",
+      "channels": ["slack:#ecp-emps-oncall", "email:oncall@ecpemps.com.br"],
+      "auto_action": null,
+      "runbook": "1. Identificar rotas com maior taxa de erro via dashboard\n2. Verificar logs de AppError por ErrorCode\n3. Se erro em rota específica: verificar último deploy e diff\n4. Se erro generalizado: verificar saúde do SQLite e recursos do servidor\n5. Se causado por deploy recente: considerar rollback"
+    },
+    {
+      "id": "ALERT-003",
+      "name": "High Latency",
+      "condition": "http_response_time_ms.p95 > 500ms for 10 minutes",
+      "severity": "S2",
+      "channels": ["slack:#ecp-emps-oncall"],
+      "auto_action": null,
+      "runbook": "1. Verificar quais rotas estão lentas via APM\n2. Verificar se SQLite está em lock contention (WAL checkpoint)\n3. Verificar CPU e memória do servidor\n4. Se query lenta: verificar índices do SQLite\n5. Se recurso saturado: escalar verticalmente"
+    },
+    {
+      "id": "ALERT-004",
+      "name": "Database File Growth",
+      "condition": "sqlite_file_size_mb > 500 OR sqlite_wal_size_mb > 100",
+      "severity": "S3",
+      "channels": ["slack:#ecp-emps-oncall"],
+      "auto_action": "Trigger PRAGMA wal_checkpoint(TRUNCATE)",
+      "runbook": "1. Verificar tamanho atual do DB e WAL\n2. Se WAL grande: executar PRAGMA wal_checkpoint(TRUNCATE)\n3. Se DB grande: analisar tabelas com mais registros\n4. Considerar archiving de dados antigos (soft-deleted records)\n5. Verificar se backup automatizado está funcionando"
+    },
+    {
+      "id": "ALERT-005",
+      "name": "Pix Processing Timeout",
+      "condition": "pix_processing_time_ms.p95 > 5000ms for 5 minutes OR pix_timeout_rate > 2%",
+      "severity": "S1",
+      "channels": ["pagerduty:ecp-emps", "slack:#ecp-emps-incidents"],
+      "auto_action": "Pausar processamento de novas transferências e notificar",
+      "runbook": "1. Verificar status do módulo pj-pix\n2. Verificar se há lock no SQLite na tabela pix_transfers\n3. Verificar conectividade com PSP (simulado)\n4. Se timeout por lock: kill queries longas e fazer checkpoint WAL\n5. Se PSP indisponível: ativar circuit breaker e informar usuários"
+    },
+    {
+      "id": "ALERT-006",
+      "name": "Auth Brute Force Suspected",
+      "condition": "jwt_auth_failures > 100 in 5 minutes from same IP",
+      "severity": "S2",
+      "channels": ["slack:#ecp-emps-security", "email:security@ecpemps.com.br"],
+      "auto_action": "Rate limit IP to 5 req/min",
+      "runbook": "1. Identificar IP(s) com maior volume de falhas\n2. Verificar se é ataque distribuído ou single source\n3. Aplicar rate limiting agressivo nos IPs ofensores\n4. Verificar se alguma conta foi comprometida\n5. Se ataque persistente: bloquear IP range e notificar security team"
+    },
+    {
+      "id": "ALERT-007",
+      "name": "Low Disk Space",
+      "condition": "disk_usage_percent > 85%",
+      "severity": "S2",
+      "channels": ["slack:#ecp-emps-oncall"],
+      "auto_action": null,
+      "runbook": "1. Identificar maiores consumidores de disco (du -sh)\n2. Limpar logs antigos (> 30 dias)\n3. Executar VACUUM no SQLite se fragmentação > 20%\n4. Verificar e limpar backups locais antigos\n5. Se necessário: expandir volume de disco"
+    },
+    {
+      "id": "ALERT-008",
+      "name": "Memory Leak Suspected",
+      "condition": "memory_usage_mb > 512 AND memory_usage_mb.trend == 'increasing' for 1 hour",
+      "severity": "S3",
+      "channels": ["slack:#ecp-emps-oncall"],
+      "auto_action": null,
+      "runbook": "1. Capturar heap snapshot do processo Node.js\n2. Comparar com snapshot anterior para identificar objetos crescentes\n3. Verificar se há event listeners não removidos\n4. Verificar se há queries SQLite com resultsets grandes em memória\n5. Se crítico: restart graceful do processo"
+    }
+  ],
+  "incident_response_playbook": {
+    "severity_levels": [
+      {
+        "level": "S1",
+        "name": "Critical",
+        "description": "Serviço indisponível ou funcionalidade core (Pix, Boleto, Login) completamente quebrada para todos os usuários",
+        "examples": ["API down", "Banco de dados corrompido", "Pix timeout generalizado", "Dados de clientes expostos"],
+        "response_time": "< 15 minutos",
+        "resolution_target": "< 1 hora",
+        "communication": {
+          "internal": "PagerDuty imediato → Slack #ecp-emps-incidents → War room",
+          "stakeholders": "Notificar PM e Tech Lead em 15 minutos",
+          "external": "Status page atualizada em 30 minutos se impacto em clientes"
+        },
+        "escalation": {
+          "15_min": "Engenheiro de plantão inicia diagnóstico",
+          "30_min": "Se não resolvido: escalar para Tech Lead",
+          "60_min": "Se não resolvido: escalar para CTO + considerar rollback completo",
+          "120_min": "Se não resolvido: incident commander assume, mobilizar time completo"
+        },
+        "post_incident": {
+          "postmortem_required": true,
+          "postmortem_deadline_hours": 48,
+          "blameless": true,
+          "action_items_tracked": true,
+          "review_meeting": "Obrigatória com todo o squad em 72h"
+        }
+      },
+      {
+        "level": "S2",
+        "name": "Major",
+        "description": "Funcionalidade degradada mas não indisponível. Impacto parcial em usuários ou performance significativamente degradada",
+        "examples": ["Latência alta em rotas específicas", "Error rate elevado mas < 5%", "Feature flag não funciona", "Boleto demora > 5s para gerar"],
+        "response_time": "< 30 minutos",
+        "resolution_target": "< 4 horas",
+        "communication": {
+          "internal": "Slack #ecp-emps-oncall → Assignee responde em 30min",
+          "stakeholders": "Notificar PM se impacto em KRs",
+          "external": "Não necessário a menos que persista por > 2h"
+        },
+        "escalation": {
+          "30_min": "Engenheiro de plantão inicia diagnóstico",
+          "2_hours": "Se não resolvido: escalar para S1 se impacto crescendo",
+          "4_hours": "Se não resolvido: escalar para Tech Lead"
+        },
+        "post_incident": {
+          "postmortem_required": true,
+          "postmortem_deadline_hours": 96,
+          "blameless": true,
+          "action_items_tracked": true,
+          "review_meeting": "Opcional — pode ser async via documento"
+        }
+      },
+      {
+        "level": "S3",
+        "name": "Minor",
+        "description": "Impacto mínimo em usuários. Issue cosmético, degradação leve ou warning que requer atenção",
+        "examples": ["Memory usage acima do normal", "WAL file crescendo", "Erro em feature não-crítica", "Log warnings frequentes"],
+        "response_time": "< 4 horas (horário comercial)",
+        "resolution_target": "< 24 horas",
+        "communication": {
+          "internal": "Slack #ecp-emps-oncall — tratado no próximo horário comercial",
+          "stakeholders": "Não necessário",
+          "external": "Não necessário"
+        },
+        "escalation": {
+          "24_hours": "Se não resolvido: criar ticket e priorizar na sprint",
+          "48_hours": "Se recorrente: escalar para S2"
+        },
+        "post_incident": {
+          "postmortem_required": false,
+          "action_items_tracked": true,
+          "review_meeting": "Não necessária"
+        }
+      },
+      {
+        "level": "S4",
+        "name": "Informational",
+        "description": "Observação ou tendência que não causa impacto imediato mas deve ser acompanhada",
+        "examples": ["Crescimento de uso de disco acima do projetado", "Aumento gradual de latência", "Dependency com CVE de baixo risco"],
+        "response_time": "Próximo sprint planning",
+        "resolution_target": "Dentro do sprint corrente",
+        "communication": {
+          "internal": "Ticket criado no backlog",
+          "stakeholders": "Não necessário",
+          "external": "Não necessário"
+        },
+        "escalation": {
+          "1_week": "Revisar na retrospectiva",
+          "2_weeks": "Se tendência piora: escalar para S3"
+        },
+        "post_incident": {
+          "postmortem_required": false,
+          "action_items_tracked": false,
+          "review_meeting": "Não necessária"
+        }
+      }
+    ]
+  },
+  "on_call_rotation": {
+    "structure": {
+      "primary": {
+        "role": "Engenheiro principal de plantão",
+        "responsibilities": ["Responder a alertas S1/S2", "Diagnóstico inicial", "Comunicação no canal de incidentes", "Decidir rollback se necessário"],
+        "response_sla": "15 minutos para S1, 30 minutos para S2"
+      },
+      "secondary": {
+        "role": "Engenheiro de backup",
+        "responsibilities": ["Assumir se primary não responder em 15min", "Apoiar primary em incidentes S1", "Cobertura durante breaks do primary"],
+        "response_sla": "30 minutos"
+      }
+    },
+    "schedule": {
+      "rotation_period": "1 semana (segunda 09:00 a segunda 09:00)",
+      "handoff": "Segunda-feira às 09:00 UTC-3 com briefing de 15min",
+      "coverage": "Horário comercial (09:00-18:00 UTC-3) durante fase de launch. 24/7 após atingir 1000+ empresas ativas."
+    },
+    "tools": {
+      "alerting": "PagerDuty",
+      "communication": "Slack #ecp-emps-oncall + #ecp-emps-incidents",
+      "status_page": "Statuspage.io",
+      "runbooks": "Documentados no repositório /04-product-operation/runbooks/"
+    },
+    "wellness": {
+      "max_consecutive_weeks": 2,
+      "comp_time": "4h de folga por semana de plantão sem incidentes S1/S2",
+      "s1_incident_comp": "Dia de folga compensatória por incidente S1 fora do horário comercial"
+    }
+  },
+  "dashboards": [
+    {
+      "name": "ECP Emps — Operations Overview",
+      "description": "Dashboard principal com visão geral de saúde do sistema",
+      "panels": ["API Uptime (30d)", "Error Rate (24h)", "Latency P50/P95/P99 (24h)", "Active Connections", "RPS by Route", "CPU/Memory/Disk"]
+    },
+    {
+      "name": "ECP Emps — Business Metrics",
+      "description": "Métricas de negócio e KRs",
+      "panels": ["EFAS (North Star)", "Activation Rate (KR-01)", "Boletos/Empresa (KR-02)", "Toggle Rate (KR-03)", "D30 Retention (KR-04)", "New Companies/Day"]
+    },
+    {
+      "name": "ECP Emps — A/B Tests",
+      "description": "Status e resultados dos experimentos ativos",
+      "panels": ["Experiment Status", "Variant vs Control (primary metric)", "Sample Size Progress", "Guardrail Monitors"]
+    },
+    {
+      "name": "ECP Emps — DORA Metrics",
+      "description": "Métricas de engenharia e delivery",
+      "panels": ["Deployment Frequency (4w)", "Lead Time (4w)", "Change Failure Rate (3m)", "MTTR (3m)"]
+    }
+  ]
+}

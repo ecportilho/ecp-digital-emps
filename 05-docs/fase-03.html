@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fase 03 — Product Delivery | ECP Emps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--lime); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .module-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .module-name { font-size: 14px; font-weight: 700; color: var(--lime); margin-bottom: 6px; }
+    .module-desc { font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
+    .module-endpoints { font-size: 12px; color: var(--muted); }
+    .module-files { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'Courier New', monospace; }
+
+    .adr-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+    .adr-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .adr-id { font-size: 11px; font-weight: 700; color: var(--lime); }
+    .adr-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: rgba(61,255,139,0.12); color: var(--success); }
+    .adr-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .adr-section { font-size: 13px; color: var(--text-2); margin-bottom: 8px; line-height: 1.6; }
+    .adr-section strong { color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .tree-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; font-family: 'Courier New', monospace; font-size: 13px; color: var(--text-2); line-height: 1.8; white-space: pre; overflow-x: auto; }
+    .tree-section .dir { color: var(--info); }
+    .tree-section .file { color: var(--text-2); }
+    .tree-section .highlight { color: var(--lime); font-weight: 700; }
+
+    .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .page-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
+    .page-route { font-size: 12px; font-family: 'Courier New', monospace; color: var(--lime); margin-bottom: 4px; }
+    .page-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .page-desc { font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">&#x2B21;</span> ECP Emps</div>
+    <div class="sidebar-product"><strong>Banco Digital PJ</strong>MEI &amp; Microempresas</div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><span class="nav-icon">&#x25C9;</span> Vis&atilde;o Geral</a></li>
+      <li class="sidebar-section-title">Fases do Produto</li>
+      <li><a href="fase-01.html"><span class="nav-icon">01</span> Contexto Estrat&eacute;gico</a></li>
+      <li><a href="fase-02.html"><span class="nav-icon">02</span> Product Discovery</a></li>
+      <li><a href="fase-03.html"><span class="nav-icon">03</span> Product Delivery</a></li>
+      <li><a href="fase-04.html"><span class="nav-icon">04</span> Opera&ccedil;&atilde;o</a></li>
+    </ul>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-title">Fase 03 &mdash; Product Delivery</div>
+    <div class="topbar-meta">
+      <span><span class="status-dot yellow"></span> Aguardando HITLs #7-#10</span>
+      <span>Architect + Backend + Frontend + QA</span>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1>Fase 03 &mdash; Product Delivery</h1>
+    <p class="subtitle">Arquitetura, implementa&ccedil;&atilde;o backend (API + persist&ecirc;ncia), frontend (UI + integra&ccedil;&atilde;o) e quality gate.</p>
+
+    <!-- ═══════════════════ STATS ═══════════════════ -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">68</div>
+        <div class="stat-label">Arquivos criados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">35</div>
+        <div class="stat-label">Endpoints API</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Tabelas SQLite</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">P&aacute;ginas React</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ ARCHITECTURE ═══════════════════ -->
+    <h2>Arquitetura</h2>
+
+    <h3>Stack Tecnol&oacute;gica</h3>
+    <table class="comp-table">
+      <thead><tr><th>Camada</th><th>Tecnologia</th><th>Vers&atilde;o</th><th>Papel</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Backend</strong></td><td>Fastify</td><td>5.0</td><td>Servidor HTTP de alta performance</td></tr>
+        <tr><td></td><td>TypeScript</td><td>5.5</td><td>Linguagem base (strict mode)</td></tr>
+        <tr><td></td><td>Zod</td><td>3.23</td><td>Valida&ccedil;&atilde;o de inputs e schemas</td></tr>
+        <tr><td></td><td>better-sqlite3</td><td>&#8212;</td><td>Banco SQLite s&iacute;ncrono</td></tr>
+        <tr><td></td><td>jsonwebtoken + bcryptjs</td><td>&#8212;</td><td>Auth JWT</td></tr>
+        <tr><td><strong>Frontend</strong></td><td>React</td><td>18.3</td><td>UI library</td></tr>
+        <tr><td></td><td>TypeScript</td><td>5.6</td><td>Tipagem segura</td></tr>
+        <tr><td></td><td>React Router</td><td>6.26</td><td>Navega&ccedil;&atilde;o SPA</td></tr>
+        <tr><td></td><td>Tailwind CSS</td><td>3.4</td><td>Estiliza&ccedil;&atilde;o utility-first</td></tr>
+        <tr><td></td><td>Vite</td><td>5.4</td><td>Build tool + HMR</td></tr>
+        <tr><td></td><td>Lucide React</td><td>&#8212;</td><td>&Iacute;cones SVG</td></tr>
+        <tr><td><strong>Banco</strong></td><td>SQLite3</td><td>&#8212;</td><td>database-emps.sqlite (WAL mode)</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════════════ ADRs ═══════════════════ -->
+    <h2>Architectural Decision Records (ADRs)</h2>
+
+    <div class="adr-card">
+      <div class="adr-header"><span class="adr-id">ADR-001</span><span class="adr-status">Accepted</span></div>
+      <div class="adr-title">SQLite como banco de dados PJ separado</div>
+      <div class="adr-section"><strong>Decis&atilde;o:</strong> Usar database-emps.sqlite separado do database.sqlite (PF), no mesmo servidor, com WAL mode habilitado.</div>
+      <div class="adr-section"><strong>Positivo:</strong> Isolamento de dados PF/PJ, backup independente, zero infra adicional, consistente com ecossistema ECP.</div>
+      <div class="adr-section"><strong>Negativo:</strong> SQLite single-writer pode causar conten&ccedil;&atilde;o em escala. Aceit&aacute;vel para MVP (500 empresas).</div>
+    </div>
+
+    <div class="adr-card">
+      <div class="adr-header"><span class="adr-id">ADR-002</span><span class="adr-status">Accepted</span></div>
+      <div class="adr-title">JWT compartilhado entre PF e PJ</div>
+      <div class="adr-section"><strong>Decis&atilde;o:</strong> Compartilhar JWT_SECRET entre ecp-digital-bank e ecp-digital-bank-emps. O auth-pj module valida tokens do PF e adiciona contexto PJ (companyId, role).</div>
+      <div class="adr-section"><strong>Positivo:</strong> SSO nativo, zero fricção no toggle PF↔PJ, sem novo login.</div>
+      <div class="adr-section"><strong>Negativo:</strong> Compromisso de uma chave compromete ambos. Aceit&aacute;vel para MVP; evoluir para auth service em produ&ccedil;&atilde;o.</div>
+    </div>
+
+    <div class="adr-card">
+      <div class="adr-header"><span class="adr-id">ADR-003</span><span class="adr-status">Accepted</span></div>
+      <div class="adr-title">RBAC com 3 perfis hierárquicos</div>
+      <div class="adr-section"><strong>Decis&atilde;o:</strong> Admin > Financial > Viewer. Middleware requireRole() valida hierarquia por rota. Toda ação registra userId do operador.</div>
+      <div class="adr-section"><strong>Positivo:</strong> Granularidade suficiente para MVP, auditoria completa, simples de entender.</div>
+      <div class="adr-section"><strong>Negativo:</strong> Sem permissões customizáveis por recurso. Suficiente para 3 perfis; expandir se necessário.</div>
+    </div>
+
+    <div class="adr-card">
+      <div class="adr-header"><span class="adr-id">ADR-004</span><span class="adr-status">Accepted</span></div>
+      <div class="adr-title">Boleto com barcode mock FEBRABAN</div>
+      <div class="adr-section"><strong>Decis&atilde;o:</strong> Gerar barcode e linha digit&aacute;vel com estrutura v&aacute;lida mas sem registro real em CIP (registradora). Mock para MVP.</div>
+      <div class="adr-section"><strong>Positivo:</strong> Permite desenvolvimento completo do fluxo de cobran&ccedil;a sem depend&ecirc;ncia externa.</div>
+      <div class="adr-section"><strong>Negativo:</strong> Boletos n&atilde;o s&atilde;o pag&aacute;veis em outros bancos. Integra&ccedil;&atilde;o real necess&aacute;ria para produ&ccedil;&atilde;o.</div>
+    </div>
+
+    <div class="adr-card">
+      <div class="adr-header"><span class="adr-id">ADR-005</span><span class="adr-status">Accepted</span></div>
+      <div class="adr-title">Valores monet&aacute;rios em centavos (integer)</div>
+      <div class="adr-section"><strong>Decis&atilde;o:</strong> Todo valor financeiro armazenado como INTEGER em centavos. Frontend converte para exibi&ccedil;&atilde;o. Utilities money.ts para convers&atilde;o.</div>
+      <div class="adr-section"><strong>Positivo:</strong> Zero erros de arredondamento, precis&atilde;o absoluta, padr&atilde;o da ind&uacute;stria fintech.</div>
+      <div class="adr-section"><strong>Negativo:</strong> Requer convers&atilde;o em toda exibi&ccedil;&atilde;o. Custo m&iacute;nimo vs. benef&iacute;cio enorme.</div>
+    </div>
+
+    <!-- ═══════════════════ DATABASE ═══════════════════ -->
+    <h2>Modelo de Dados (12 tabelas + 22 &iacute;ndices)</h2>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-name">companies</div>
+        <div class="module-desc">Cadastro de empresas (MEI, EI, EIRELI, LTDA, SLU)</div>
+        <div class="module-files">id, owner_user_id, cnpj, razao_social, nome_fantasia, natureza_juridica, endereco, status, created_at, updated_at, deleted_at</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_accounts</div>
+        <div class="module-desc">Contas PJ com saldo em centavos</div>
+        <div class="module-files">id, company_id, agency(0001), number, balance, daily_transfer_limit, status</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">team_members</div>
+        <div class="module-desc">Multi-usu&aacute;rios com RBAC</div>
+        <div class="module-files">id, company_id, user_id, role(admin|financial|viewer), status(active|invited|removed)</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_transactions</div>
+        <div class="module-desc">Transa&ccedil;&otilde;es PJ com categoriza&ccedil;&atilde;o</div>
+        <div class="module-files">id, account_id, operator_id, type, category, amount, balance_after, direction, reference_id(idempotency)</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_pix_keys</div>
+        <div class="module-desc">Chaves Pix PJ (m&aacute;x 20)</div>
+        <div class="module-files">id, company_id, account_id, type(cnpj|email|phone|random), value, status</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">invoices</div>
+        <div class="module-desc">Boletos emitidos (cobran&ccedil;as)</div>
+        <div class="module-files">id, company_id, customer_name, amount, due_date, barcode, pix_qrcode, status(pending|paid|overdue|cancelled), type(single|installment|recurring)</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">corporate_cards</div>
+        <div class="module-desc">Cart&otilde;es corporativos virtuais</div>
+        <div class="module-files">id, company_id, holder_id, last4, limit_cents, used_cents, due_day, status</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">corporate_card_purchases</div>
+        <div class="module-desc">Compras no cart&atilde;o corporativo</div>
+        <div class="module-files">id, card_id, merchant_name, merchant_category, amount, status</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">corporate_invoices</div>
+        <div class="module-desc">Faturas do cart&atilde;o</div>
+        <div class="module-files">id, card_id, reference_month, total_cents, due_date, status(open|closed|paid|overdue)</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_notifications</div>
+        <div class="module-desc">Notifica&ccedil;&otilde;es da empresa</div>
+        <div class="module-files">id, company_id, user_id, title, body, type, is_read</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_pix_rate_limit</div>
+        <div class="module-desc">Rate limiting Pix (20/hora)</div>
+        <div class="module-files">id, account_id, window_start, transfer_count</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj_audit_logs</div>
+        <div class="module-desc">Audit trail completo</div>
+        <div class="module-files">id, company_id, user_id, action, resource, resource_id, metadata, ip_address</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ API MODULES ═══════════════════ -->
+    <h2>M&oacute;dulos da API (35 endpoints)</h2>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-name">auth-pj</div>
+        <div class="module-desc">Proxy auth + switch PF&#x2192;PJ + RBAC</div>
+        <div class="module-endpoints">2 endpoints: POST /auth/pj/switch, GET /auth/pj/me</div>
+        <div class="module-files">auth-pj.routes.ts &middot; auth-pj.service.ts &middot; auth-pj.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">companies</div>
+        <div class="module-desc">Cadastro e gest&atilde;o de empresas</div>
+        <div class="module-endpoints">3 endpoints: POST, GET /me, PATCH /me</div>
+        <div class="module-files">companies.routes.ts &middot; companies.service.ts &middot; companies.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj-accounts</div>
+        <div class="module-desc">Conta PJ + saldo + transfer PF&#x2194;PJ</div>
+        <div class="module-endpoints">3 endpoints: GET /me, GET /balance, POST /transfer-pf</div>
+        <div class="module-files">pj-accounts.routes.ts &middot; pj-accounts.service.ts &middot; pj-accounts.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj-pix</div>
+        <div class="module-desc">Pix empresarial completo</div>
+        <div class="module-endpoints">6 endpoints: transfer, keys (CRUD), qrcode, lookup</div>
+        <div class="module-files">pj-pix.routes.ts &middot; pj-pix.service.ts &middot; pj-pix.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">invoices</div>
+        <div class="module-desc">Boletos de cobran&ccedil;a</div>
+        <div class="module-endpoints">6 endpoints: create, list, detail, cancel, resend, summary</div>
+        <div class="module-files">invoices.routes.ts &middot; invoices.service.ts &middot; invoices.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj-transactions</div>
+        <div class="module-desc">Extrato PJ + categoriza&ccedil;&atilde;o</div>
+        <div class="module-endpoints">3 endpoints: list (cursor), detail, summary</div>
+        <div class="module-files">pj-transactions.routes.ts &middot; pj-transactions.service.ts &middot; pj-transactions.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">corporate-cards</div>
+        <div class="module-desc">Cart&otilde;es corporativos + faturas</div>
+        <div class="module-endpoints">7 endpoints: CRUD, limit, block, invoice, purchases</div>
+        <div class="module-files">corporate-cards.routes.ts &middot; corporate-cards.service.ts &middot; corporate-cards.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">team</div>
+        <div class="module-desc">Multi-usu&aacute;rios + convites + RBAC</div>
+        <div class="module-endpoints">4 endpoints: invite, list, change role, remove</div>
+        <div class="module-files">team.routes.ts &middot; team.service.ts &middot; team.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj-notifications</div>
+        <div class="module-desc">Notifica&ccedil;&otilde;es da empresa</div>
+        <div class="module-endpoints">4 endpoints: list, unread-count, mark-read, read-all</div>
+        <div class="module-files">pj-notifications.routes.ts &middot; pj-notifications.service.ts &middot; pj-notifications.schema.ts</div>
+      </div>
+      <div class="module-card">
+        <div class="module-name">pj-dashboard</div>
+        <div class="module-desc">Dados agregados do dashboard</div>
+        <div class="module-endpoints">1 endpoint: GET /pj/dashboard</div>
+        <div class="module-files">pj-dashboard.routes.ts &middot; pj-dashboard.service.ts</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ FRONTEND PAGES ═══════════════════ -->
+    <h2>P&aacute;ginas React (12 telas)</h2>
+
+    <div class="page-grid">
+      <div class="page-card"><div class="page-route">/pj/dashboard</div><div class="page-name">Dashboard PJ</div><div class="page-desc">Saldo, cash flow, cobran&ccedil;as, a&ccedil;&otilde;es r&aacute;pidas</div></div>
+      <div class="page-card"><div class="page-route">/pj/extrato</div><div class="page-name">Extrato PJ</div><div class="page-desc">Transa&ccedil;&otilde;es com categorias + filtros</div></div>
+      <div class="page-card"><div class="page-route">/pj/pix/enviar</div><div class="page-name">Pix Enviar</div><div class="page-desc">Wizard 4 passos + limites</div></div>
+      <div class="page-card"><div class="page-route">/pj/pix/receber</div><div class="page-name">Pix Receber</div><div class="page-desc">QR Code + copia e cola</div></div>
+      <div class="page-card"><div class="page-route">/pj/pix/chaves</div><div class="page-name">Pix Chaves</div><div class="page-desc">CRUD de chaves (m&aacute;x 20)</div></div>
+      <div class="page-card"><div class="page-route">/pj/cobrancas/nova</div><div class="page-name">Nova Cobran&ccedil;a</div><div class="page-desc">Form 2 etapas + preview boleto</div></div>
+      <div class="page-card"><div class="page-route">/pj/cobrancas</div><div class="page-name">Lista de Cobran&ccedil;as</div><div class="page-desc">Tabela + badges + filtros</div></div>
+      <div class="page-card"><div class="page-route">/pj/cobrancas/:id</div><div class="page-name">Detalhe Cobran&ccedil;a</div><div class="page-desc">Timeline + barcode + a&ccedil;&otilde;es</div></div>
+      <div class="page-card"><div class="page-route">/pj/cartoes</div><div class="page-name">Cart&otilde;es Corporativos</div><div class="page-desc">Visual card + limit bar</div></div>
+      <div class="page-card"><div class="page-route">/pj/cartoes/:id/fatura</div><div class="page-name">Fatura do Cart&atilde;o</div><div class="page-desc">Compras + total + vencimento</div></div>
+      <div class="page-card"><div class="page-route">/pj/time</div><div class="page-name">Gest&atilde;o do Time</div><div class="page-desc">Membros + convite + roles</div></div>
+      <div class="page-card"><div class="page-route">/pj/empresa</div><div class="page-name">Dados da Empresa</div><div class="page-desc">Cadastro + edi&ccedil;&atilde;o (admin)</div></div>
+    </div>
+
+    <!-- ═══════════════════ FOLDER STRUCTURE ═══════════════════ -->
+    <h2>Estrutura de Pastas</h2>
+    <div class="tree-section"><span class="highlight">ecp-digital-emps/</span>
+├── <span class="dir">server/</span>
+│   ├── <span class="dir">src/</span>
+│   │   ├── <span class="file">app.ts</span>              <span class="highlight">← Fastify + plugins + routes</span>
+│   │   ├── <span class="file">server.ts</span>           <span class="highlight">← Entry point (port 3334)</span>
+│   │   ├── <span class="dir">database/</span>
+│   │   │   ├── <span class="file">connection.ts</span>   <span class="highlight">← SQLite3 + WAL mode</span>
+│   │   │   ├── <span class="dir">migrations/</span>      <span class="highlight">← 001-initial.sql (12 tabelas)</span>
+│   │   │   └── <span class="file">seed.ts</span>         <span class="highlight">← Dados demo AB Design Studio</span>
+│   │   ├── <span class="dir">modules/</span>             <span class="highlight">← 10 m&oacute;dulos (30 arquivos)</span>
+│   │   │   ├── <span class="dir">auth-pj/</span>  <span class="dir">companies/</span>  <span class="dir">pj-accounts/</span>
+│   │   │   ├── <span class="dir">pj-pix/</span>   <span class="dir">invoices/</span>   <span class="dir">pj-transactions/</span>
+│   │   │   ├── <span class="dir">corporate-cards/</span>  <span class="dir">team/</span>
+│   │   │   ├── <span class="dir">pj-notifications/</span>  <span class="dir">pj-dashboard/</span>
+│   │   ├── <span class="dir">shared/</span>
+│   │   │   ├── <span class="dir">errors/</span>  <span class="dir">middleware/</span>  <span class="dir">utils/</span>
+│   │   └── <span class="dir">types/</span>
+│   └── <span class="file">package.json</span>
+├── <span class="dir">web/</span>
+│   ├── <span class="dir">src/</span>
+│   │   ├── <span class="file">App.tsx</span>              <span class="highlight">← Layout + Router</span>
+│   │   ├── <span class="dir">routes/</span>              <span class="highlight">← 12 p&aacute;ginas PJ</span>
+│   │   ├── <span class="dir">components/</span>
+│   │   │   ├── <span class="dir">ui/</span>              <span class="highlight">← Button, Card, Input, Modal, Badge</span>
+│   │   │   └── <span class="dir">layout/</span>          <span class="highlight">← SidebarPJ, HeaderPJ, ProfileSwitcher</span>
+│   │   ├── <span class="dir">hooks/</span>  <span class="dir">services/</span>  <span class="dir">lib/</span>  <span class="dir">styles/</span>
+│   └── <span class="file">package.json</span>
+├── <span class="file">package.json</span>              <span class="highlight">← Root (npm run dev)</span>
+└── <span class="file">.env.example</span></div>
+
+    <!-- ═══════════════════ HITL ═══════════════════ -->
+    <div class="hitl-box">
+      <div class="hitl-title">HITLs #7 a #10 &mdash; Decis&atilde;o de Aprova&ccedil;&atilde;o da Fase 03</div>
+      <div class="hitl-question">
+        #7: Arquitetura s&oacute;lida? Contratos prontos? &bull;
+        #8: APIs corretas? Persist&ecirc;ncia validada? &bull;
+        #9: Front integrado? Design fiel ao design_spec? &bull;
+        #10: Qualidade aprovada? Pronto para operar?
+      </div>
+      <ul class="hitl-options">
+        <li><strong>&#x2705; Aprovado</strong> &mdash; Delivery conclu&iacute;do. Avan&ccedil;ar para Fase 04 (Opera&ccedil;&atilde;o de Produto).</li>
+        <li><strong>&#x26A0;&#xFE0F; Aprovado com ressalvas</strong> &mdash; C&oacute;digo ok, mas com ajustes espec&iacute;ficos.</li>
+        <li><strong>&#x274C; Reprovado</strong> &mdash; Retornar ao agente respons&aacute;vel com feedback.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>

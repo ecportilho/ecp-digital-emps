@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fase 01 — Contexto Estratégico | ECP Emps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">&#x2B21;</span> ECP Emps
+    </div>
+    <div class="sidebar-product">
+      <strong>Banco Digital PJ</strong>
+      MEI &amp; Microempresas
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><span class="nav-icon">&#x25C9;</span> Vis&atilde;o Geral</a></li>
+      <li class="sidebar-section-title">Fases do Produto</li>
+      <li><a href="fase-01.html"><span class="nav-icon">01</span> Contexto Estrat&eacute;gico</a></li>
+      <li><a href="fase-02.html"><span class="nav-icon">02</span> Product Discovery</a></li>
+      <li><a href="fase-03.html"><span class="nav-icon">03</span> Product Delivery</a></li>
+      <li><a href="fase-04.html"><span class="nav-icon">04</span> Opera&ccedil;&atilde;o</a></li>
+    </ul>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-title">Fase 01 &mdash; Contexto Estrat&eacute;gico</div>
+    <div class="topbar-meta">
+      <span><span class="status-dot yellow"></span> Aguardando HITL #1</span>
+      <span>Product Manager</span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+    <h1>Fase 01 &mdash; Contexto Estrat&eacute;gico</h1>
+    <p class="subtitle">OKRs, OST (Opportunity Solution Tree), North Star Metric e princ&iacute;pios de produto definidos pelo Product Manager Agent.</p>
+
+    <!-- ═══════════════════ VISÃO ═══════════════════ -->
+    <h2>Vis&atilde;o do Produto</h2>
+    <div class="vision-card">
+      <div class="vision-label">Vis&atilde;o 3-5 anos</div>
+      <blockquote>
+        Para microempreendedores brasileiros que perdem tempo e dinheiro com bancos que ignoram as necessidades do seu neg&oacute;cio, o <strong>ECP Emps</strong> &eacute; o banco digital web-first que automatiza a gest&atilde;o financeira empresarial com intelig&ecirc;ncia, diferente dos bancos digitais PJ existentes porque &eacute; o &uacute;nico que integra conta PF e PJ em um s&oacute; lugar com categoriza&ccedil;&atilde;o autom&aacute;tica por IA e experi&ecirc;ncia nativa de desktop.
+      </blockquote>
+    </div>
+
+    <p><strong>Janela de oportunidade:</strong> 12-18 meses de first-mover advantage no segmento web-first PJ antes que concorrentes reajam.</p>
+    <p><strong>Segmento beachhead:</strong> Freelancer Digital MEI (22-35 anos, servi&ccedil;os digitais, afinidade natural com desktop, menor CAC, maior product-market fit para MVP).</p>
+
+    <!-- ═══════════════════ NORTH STAR ═══════════════════ -->
+    <h2>North Star Metric</h2>
+    <div class="ns-card">
+      <div class="ns-main">
+        <div class="ns-label">North Star</div>
+        <div class="ns-name">EFAS &mdash; Empresas Financeiramente Ativas por Semana</div>
+        <div class="ns-definition">N&uacute;mero de empresas com 3+ opera&ccedil;&otilde;es financeiras nos &uacute;ltimos 7 dias. Captura o momento em que a empresa usa o ECP Emps como banco principal.</div>
+        <div class="ns-formula">COUNT(DISTINCT company_id FROM pj_transactions WHERE created_at >= 7d ago GROUP BY company_id HAVING COUNT >= 3)</div>
+      </div>
+      <div class="ns-input">
+        <div class="input-name">Activation Rate</div>
+        <div class="input-target">35%+</div>
+        <div class="input-desc">3+ ops em 7 dias ap&oacute;s abertura</div>
+      </div>
+      <div class="ns-input">
+        <div class="input-name">Boletos/empresa</div>
+        <div class="input-target">2+/m&ecirc;s</div>
+        <div class="input-desc">Uso como ferramenta de cobran&ccedil;a</div>
+      </div>
+      <div class="ns-input">
+        <div class="input-name">Toggle PF&#x2194;PJ</div>
+        <div class="input-target">2+/sess&atilde;o</div>
+        <div class="input-desc">Valor da integra&ccedil;&atilde;o PF-PJ</div>
+      </div>
+      <div class="ns-input">
+        <div class="input-name">ARPAC</div>
+        <div class="input-target">R$ 70/m&ecirc;s</div>
+        <div class="input-desc">Receita m&eacute;dia por empresa</div>
+      </div>
+      <div class="ns-input">
+        <div class="input-name">Reten&ccedil;&atilde;o D30</div>
+        <div class="input-target">45%+</div>
+        <div class="input-desc">Login 30 dias ap&oacute;s abertura</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ OKRs ═══════════════════ -->
+    <h2>OKRs &mdash; Q2 2026 (Abril-Junho)</h2>
+
+    <h3>Objetivo</h3>
+    <div class="vision-card" style="border-color: var(--border);">
+      <div class="vision-label">Objective</div>
+      <blockquote style="font-size: 16px;">
+        Tornar o ECP Emps o banco digital que MEIs freelancers confiam para separar, organizar e cobrar &mdash; substituindo planilhas, bancos ruins e a bagun&ccedil;a financeira PF/PJ.
+      </blockquote>
+    </div>
+
+    <h3>Key Results</h3>
+    <div class="kr-grid">
+
+      <!-- KR-01 -->
+      <div class="kr-card">
+        <div class="kr-id">KR-01</div>
+        <div class="kr-description">Alcançar taxa de ativação de 35% (empresas com 3+ operações em 7 dias após abertura)</div>
+        <div class="kr-meta">
+          <span>Baseline: 0%</span>
+          <span class="target">Meta: 35%</span>
+        </div>
+        <div class="kr-metric">Activation Rate = companies_3tx_7d / companies_created * 100</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
+        <span class="kr-status measurable">Mensur&aacute;vel</span>
+      </div>
+
+      <!-- KR-02 -->
+      <div class="kr-card">
+        <div class="kr-id">KR-02</div>
+        <div class="kr-description">Atingir média de 2+ boletos emitidos por empresa ativa por mês</div>
+        <div class="kr-meta">
+          <span>Baseline: 0</span>
+          <span class="target">Meta: 2+</span>
+        </div>
+        <div class="kr-metric">invoices(status!=cancelled, parent=null) / active_companies</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
+        <span class="kr-status measurable">Mensur&aacute;vel (com refinamento)</span>
+      </div>
+
+      <!-- KR-03 -->
+      <div class="kr-card">
+        <div class="kr-id">KR-03</div>
+        <div class="kr-description">Atingir média de 2+ toggles PF↔PJ por sessão</div>
+        <div class="kr-meta">
+          <span>Baseline: 0</span>
+          <span class="target">Meta: 2+</span>
+        </div>
+        <div class="kr-metric">toggle_events / sessions_with_toggle</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
+        <span class="kr-status blocked">Requer analytics_events</span>
+      </div>
+
+      <!-- KR-04 -->
+      <div class="kr-card">
+        <div class="kr-id">KR-04</div>
+        <div class="kr-description">Alcançar retenção D30 de 45% (login 30 dias após abertura)</div>
+        <div class="kr-meta">
+          <span>Baseline: 0%</span>
+          <span class="target">Meta: 45%</span>
+        </div>
+        <div class="kr-metric">companies_login_d28_32 / companies_created_30d_ago * 100</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
+        <span class="kr-status measurable">Mensur&aacute;vel</span>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ OST ═══════════════════ -->
+    <h2>Opportunity Solution Tree (OST)</h2>
+    <p>12 oportunidades mapeadas (dores, necessidades e desejos) &mdash; <strong>nenhuma solu&ccedil;&atilde;o</strong>, seguindo Teresa Torres.</p>
+
+    <!-- KR-01 -->
+    <div class="ost-section">
+      <div class="ost-kr-header">
+        <span class="ost-kr-badge">KR-01</span>
+        <span class="ost-kr-title">Activation Rate 35%</span>
+      </div>
+      <div class="opp-list">
+        <div class="opp-item">
+          <span class="opp-id">OPP-01</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs n&atilde;o conseguem abrir conta PJ rapidamente porque os bancos exigem documenta&ccedil;&atilde;o excessiva e processos burocr&aacute;ticos demorados</div>
+            <div class="opp-evidence">Personas: Ana Beatriz, Lucas &middot; 73% dos MEIs n&atilde;o t&ecirc;m controle financeiro formal</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-02</span>
+          <span class="opp-type necessidade">Necessidade</span>
+          <div class="opp-content">
+            <div class="opp-desc">Empreendedores precisam entender imediatamente o valor da conta PJ na primeira sess&atilde;o para justificar a mudan&ccedil;a de banco</div>
+            <div class="opp-evidence">Ana: &ldquo;conta PJ do Inter n&atilde;o funciona bem no desktop&rdquo; &mdash; se n&atilde;o v&ecirc; valor r&aacute;pido, abandona</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-03</span>
+          <span class="opp-type desejo">Desejo</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs desejam que a conta PJ j&aacute; venha configurada com as ferramentas que precisam, sem setup manual</div>
+            <div class="opp-evidence">Princ&iacute;pio de produto: &ldquo;Automa&ccedil;&atilde;o vence configura&ccedil;&atilde;o&rdquo;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KR-02 -->
+    <div class="ost-section">
+      <div class="ost-kr-header">
+        <span class="ost-kr-badge">KR-02</span>
+        <span class="ost-kr-title">2+ boletos/empresa/m&ecirc;s</span>
+      </div>
+      <div class="opp-list">
+        <div class="opp-item">
+          <span class="opp-id">OPP-04</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">Emitir boleto de cobran&ccedil;a &eacute; burocr&aacute;tico e caro nos bancos atuais, fazendo o MEI desistir de cobrar formalmente</div>
+            <div class="opp-evidence">Ana paga R$ 2/boleto no Inter &middot; Lucas acha boletos B2B complicados</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-05</span>
+          <span class="opp-type necessidade">Necessidade</span>
+          <div class="opp-content">
+            <div class="opp-desc">Freelancers precisam cobrar clientes de forma profissional (com dados da empresa) sem perder tempo configurando cada cobran&ccedil;a</div>
+            <div class="opp-evidence">Ana: 8-12 clientes ativos por m&ecirc;s &middot; Ag&ecirc;ncia com m&uacute;ltiplos clientes</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-06</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs n&atilde;o sabem quando um cliente pagou ou deixou de pagar porque a concilia&ccedil;&atilde;o entre cobran&ccedil;a e extrato &eacute; manual</div>
+            <div class="opp-evidence">Lucas: &ldquo;concilia&ccedil;&atilde;o do iFood com o extrato &eacute; manual&rdquo;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KR-03 -->
+    <div class="ost-section">
+      <div class="ost-kr-header">
+        <span class="ost-kr-badge">KR-03</span>
+        <span class="ost-kr-title">2+ toggles PF&#x2194;PJ/sess&atilde;o</span>
+      </div>
+      <div class="opp-list">
+        <div class="opp-item">
+          <span class="opp-id">OPP-07</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs misturam gastos pessoais e empresariais porque ter duas contas em apps separados &eacute; inconveniente demais</div>
+            <div class="opp-evidence">42% n&atilde;o separam PF/PJ &middot; Ana mistura gastos no cart&atilde;o PF</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-08</span>
+          <span class="opp-type necessidade">Necessidade</span>
+          <div class="opp-content">
+            <div class="opp-desc">Empreendedores precisam ver a situa&ccedil;&atilde;o financeira completa (pessoal + neg&oacute;cio) para decis&otilde;es como retiradas de pr&oacute;-labore</div>
+            <div class="opp-evidence">Gap de mercado: nenhum concorrente oferece dashboard consolidado PF+PJ</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-09</span>
+          <span class="opp-type desejo">Desejo</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs desejam transferir dinheiro entre conta pessoal e do neg&oacute;cio instantaneamente sem burocracia</div>
+            <div class="opp-evidence">RN-13: transfer&ecirc;ncia instant&acirc;nea PF-PJ mesma titularidade</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KR-04 -->
+    <div class="ost-section">
+      <div class="ost-kr-header">
+        <span class="ost-kr-badge">KR-04</span>
+        <span class="ost-kr-title">Reten&ccedil;&atilde;o D30 45%</span>
+      </div>
+      <div class="opp-list">
+        <div class="opp-item">
+          <span class="opp-id">OPP-10</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">MEIs n&atilde;o sabem quanto o neg&oacute;cio realmente lucra por m&ecirc;s porque n&atilde;o t&ecirc;m ferramenta acess&iacute;vel de fluxo de caixa</div>
+            <div class="opp-evidence">Ana n&atilde;o sabe quanto lucra &middot; Lucas sente que perde dinheiro &middot; 58% usam planilhas</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-11</span>
+          <span class="opp-type necessidade">Necessidade</span>
+          <div class="opp-content">
+            <div class="opp-desc">Empreendedores que trabalham no computador precisam de banco que funcione plenamente no desktop</div>
+            <div class="opp-evidence">Nenhum concorrente PJ oferece experi&ecirc;ncia completa no desktop &middot; Ana trabalha 100% do computador</div>
+          </div>
+        </div>
+        <div class="opp-item">
+          <span class="opp-id">OPP-12</span>
+          <span class="opp-type dor">Dor</span>
+          <div class="opp-content">
+            <div class="opp-desc">Empresas com mais de uma pessoa n&atilde;o conseguem dar acesso parcial &agrave; conta sem compartilhar senha</div>
+            <div class="opp-evidence">Mariana e Thiago: &ldquo;Cora n&atilde;o deixa dar acesso parcial para a assistente&rdquo;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PRINCÍPIOS ═══════════════════ -->
+    <h2>Princ&iacute;pios de Produto</h2>
+
+    <div class="principles-grid">
+
+      <div class="principle-card">
+        <div class="principle-num">01</div>
+        <div class="principle-name">Desktop primeiro, mobile sempre</div>
+        <div class="principle-desc">A experi&ecirc;ncia principal &eacute; projetada para desktop (1280px+), com mobile como acompanhamento.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Toda feature &eacute; desenhada first para tela grande; mobile recebe vers&atilde;o simplificada.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Abrimos m&atilde;o de market share mobile-only para ganhar produtividade no p&uacute;blico que trabalha no computador.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">02</div>
+        <div class="principle-name">Automa&ccedil;&atilde;o vence configura&ccedil;&atilde;o</div>
+        <div class="principle-desc">O sistema faz a escolha certa automaticamente em vez de pedir configura&ccedil;&atilde;o ao usu&aacute;rio.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Categoriza&ccedil;&atilde;o autom&aacute;tica; chave Pix CNPJ registrada na abertura; boleto com defaults inteligentes.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Abrimos m&atilde;o de flexibilidade para power users em prol de simplicidade para a maioria.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">03</div>
+        <div class="principle-name">Clareza financeira acima de tudo</div>
+        <div class="principle-desc">O empreendedor deve saber exatamente quanto tem, quanto entra e quanto sai &mdash; sem c&aacute;lculo mental.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Dashboard mostra lucro real; categorias empresariais claras; gr&aacute;ficos de cash flow sempre vis&iacute;veis.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Priorizamos transpar&ecirc;ncia mesmo que revele que o neg&oacute;cio vai mal.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">04</div>
+        <div class="principle-name">PF e PJ s&atilde;o um s&oacute; empreendedor</div>
+        <div class="principle-desc">A pessoa e o neg&oacute;cio coexistem; o banco deve refletir essa realidade.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Toggle PF/PJ no mesmo app; transfer&ecirc;ncia instant&acirc;nea PF-PJ; vis&atilde;o consolidada.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Abrimos m&atilde;o de independ&ecirc;ncia total entre PF e PJ em prol de experi&ecirc;ncia integrada.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">05</div>
+        <div class="principle-name">Gratuito no core, premium no extra</div>
+        <div class="principle-desc">Opera&ccedil;&otilde;es essenciais (Pix, boletos, conta) s&atilde;o gratuitas; funcionalidades avan&ccedil;adas podem ser premium.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Pix ilimitado gr&aacute;tis, boletos gr&aacute;tis, conta sem mensalidade.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Abrimos m&atilde;o de receita imediata por opera&ccedil;&atilde;o em prol de ado&ccedil;&atilde;o e volume.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">06</div>
+        <div class="principle-name">Dados do empreendedor pertencem ao empreendedor</div>
+        <div class="principle-desc">Acesso total e export dos dados financeiros, sem lock-in.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Export de extrato em CSV/PDF, relat&oacute;rios download&aacute;veis, API aberta (futuro).</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Facilitamos a sa&iacute;da do cliente, apostando que a experi&ecirc;ncia superior garante reten&ccedil;&atilde;o.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">07</div>
+        <div class="principle-name">Seguran&ccedil;a sem fric&ccedil;&atilde;o desnecess&aacute;ria</div>
+        <div class="principle-desc">Proteger o empreendedor sem que ele sinta que est&aacute; lutando contra o pr&oacute;prio banco.</div>
+        <div class="principle-practice"><strong>Na pr&aacute;tica:</strong> Confirma&ccedil;&atilde;o adicional s&oacute; acima de R$ 5K; limite noturno autom&aacute;tico; RBAC por perfil.</div>
+        <div class="principle-tradeoff"><strong>Trade-off:</strong> Aceitamos que limites menores passem sem confirma&ccedil;&atilde;o extra em prol de fluidez.</div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ ROADMAP ═══════════════════ -->
+    <h2>Outcome Roadmap</h2>
+
+    <div class="roadmap">
+      <div class="roadmap-col">
+        <div class="roadmap-header now">
+          <div class="roadmap-period">Now &mdash; Abr/Mai 2026</div>
+          <div class="roadmap-theme">O empreendedor abre a conta, opera e sente que o banco entende seu neg&oacute;cio</div>
+        </div>
+        <ul class="roadmap-outcomes">
+          <li>MEIs abrem conta PJ em &lt; 3 min e fazem primeira opera&ccedil;&atilde;o no mesmo dia</li>
+          <li>Empreendedores cobram clientes com boleto+Pix sem outro sistema</li>
+          <li>Empreendedor percebe a conex&atilde;o PF-PJ no mesmo ambiente</li>
+        </ul>
+        <div class="roadmap-krs">
+          <span class="roadmap-kr-tag">KR-01</span>
+          <span class="roadmap-kr-tag">KR-02</span>
+          <span class="roadmap-kr-tag">KR-03</span>
+        </div>
+      </div>
+
+      <div class="roadmap-col">
+        <div class="roadmap-header next">
+          <div class="roadmap-period">Next &mdash; Jun/Jul 2026</div>
+          <div class="roadmap-theme">O empreendedor entende para onde vai o dinheiro e toma decis&otilde;es melhores</div>
+        </div>
+        <ul class="roadmap-outcomes">
+          <li>MEIs sabem quanto lucraram sem planilha</li>
+          <li>Categoriza&ccedil;&atilde;o autom&aacute;tica por IA elimina trabalho manual</li>
+          <li>Empreendedores com s&oacute;cios delegam acesso com confian&ccedil;a</li>
+        </ul>
+        <div class="roadmap-krs">
+          <span class="roadmap-kr-tag">KR-01</span>
+          <span class="roadmap-kr-tag">KR-02</span>
+          <span class="roadmap-kr-tag">KR-04</span>
+        </div>
+      </div>
+
+      <div class="roadmap-col">
+        <div class="roadmap-header later">
+          <div class="roadmap-period">Later &mdash; Ago/Out 2026</div>
+          <div class="roadmap-theme">ECP Emps se torna indispens&aacute;vel para a sa&uacute;de financeira do neg&oacute;cio</div>
+        </div>
+        <ul class="roadmap-outcomes">
+          <li>Empreendedores confiam no ECP Emps para antecipar problemas de fluxo de caixa</li>
+          <li>ARPAC atinge R$ 70/m&ecirc;s via servi&ccedil;os premium</li>
+          <li>Contadores recomendam como melhor conta PJ para MEIs</li>
+        </ul>
+        <div class="roadmap-krs">
+          <span class="roadmap-kr-tag">KR-02</span>
+          <span class="roadmap-kr-tag">KR-04</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ ANÁLISE COMPETITIVA ═══════════════════ -->
+    <h2>An&aacute;lise Competitiva</h2>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Clientes PJ</th>
+          <th>Web Desktop</th>
+          <th>Pix Gr&aacute;tis</th>
+          <th>Boleto Gr&aacute;tis</th>
+          <th>NF-e</th>
+          <th>Gest&atilde;o IA</th>
+          <th>Integra&ccedil;&atilde;o PF-PJ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nubank PJ</strong></td>
+          <td>15M+</td>
+          <td class="partial">Parcial</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+          <td class="partial">B&aacute;sica</td>
+        </tr>
+        <tr>
+          <td><strong>Cora</strong></td>
+          <td>1.4M+</td>
+          <td class="partial">CoraWeb</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="partial">Pago</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+        </tr>
+        <tr>
+          <td><strong>Inter PJ</strong></td>
+          <td>5M+</td>
+          <td class="partial">Parcial</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+        </tr>
+        <tr>
+          <td><strong>C6 Bank PJ</strong></td>
+          <td>3M+</td>
+          <td class="cross">&#10007;</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">Pago</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+        </tr>
+        <tr>
+          <td><strong>PagBank PJ</strong></td>
+          <td>8M+</td>
+          <td class="partial">Parcial</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+        </tr>
+        <tr>
+          <td><strong>Conta Simples</strong></td>
+          <td>200K+</td>
+          <td class="check">&#10003; Web</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+          <td class="cross">&#10007;</td>
+        </tr>
+        <tr style="background: var(--lime-dim);">
+          <td><strong style="color: var(--lime);">ECP Emps</strong></td>
+          <td>MVP</td>
+          <td class="check" style="color: var(--lime);"><strong>&#10003; Web-first</strong></td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="check">&#10003;</td>
+          <td class="check" style="color: var(--lime);"><strong>&#10003; IA</strong></td>
+          <td class="check" style="color: var(--lime);"><strong>&#10003; Nativa</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════════════ PREMISSAS ═══════════════════ -->
+    <h2>Premissas Cr&iacute;ticas</h2>
+    <p>As 4 premissas de maior risco s&atilde;o todas de <strong>desejabilidade</strong>. Se invalidadas, o produto perde raz&atilde;o de existir.</p>
+
+    <table class="assumptions-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Premissa</th>
+          <th>Oportunidade</th>
+          <th>Risco</th>
+          <th>M&eacute;todo de valida&ccedil;&atilde;o</th>
+          <th>Crit&eacute;rio de sucesso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>A-01</strong></td>
+          <td>MEIs realmente querem separar gastos PF/PJ (n&atilde;o apenas dizem)</td>
+          <td>OPP-07</td>
+          <td><span class="risk-badge high">Alto</span></td>
+          <td>Entrevista com 10 MEIs freelancers</td>
+          <td>7/10 demonstram comportamento ativo de separa&ccedil;&atilde;o</td>
+        </tr>
+        <tr>
+          <td><strong>A-03</strong></td>
+          <td>MEIs preferem cobrar via boleto se for simples e gratuito</td>
+          <td>OPP-04</td>
+          <td><span class="risk-badge high">Alto</span></td>
+          <td>Survey com 30 MEIs</td>
+          <td>60%+ usariam para 2+ clientes/m&ecirc;s</td>
+        </tr>
+        <tr>
+          <td><strong>A-05</strong></td>
+          <td>MEIs tomariam decis&otilde;es diferentes com visibilidade de fluxo de caixa</td>
+          <td>OPP-10</td>
+          <td><span class="risk-badge high">Alto</span></td>
+          <td>Entrevista com 8 MEIs + mock dashboard</td>
+          <td>6/8 identificam decis&atilde;o concreta que mudariam</td>
+        </tr>
+        <tr>
+          <td><strong>A-08</strong></td>
+          <td>MEIs com conta PF no ECP abririam conta PJ no mesmo ecossistema</td>
+          <td>OPP-01</td>
+          <td><span class="risk-badge high">Alto</span></td>
+          <td>Banner de interesse no ecp-digital-bank PF</td>
+          <td>5%+ clica; 30%+ preenche pr&eacute;-cadastro</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════════════ ISSUES ═══════════════════ -->
+    <h2>Issues e Pend&ecirc;ncias</h2>
+
+    <div class="alert blocking">
+      <strong>BLOCKING &mdash; KR-03 (Toggle PF&#x2194;PJ)</strong>
+      N&atilde;o existe tabela <code>analytics_events</code> no tech_spec para rastrear toggles PF/PJ no frontend. Tamb&eacute;m n&atilde;o h&aacute; defini&ccedil;&atilde;o de &ldquo;sess&atilde;o&rdquo; no schema. Cross-app tracking (PJ&#x2192;PF no port 5173) adiciona complexidade.<br>
+      <strong>Remedia&ccedil;&atilde;o:</strong> Adicionar tabela <code>analytics_events</code> ao tech_spec ou estender <code>pj_audit_logs</code> com <code>action='profile_switch'</code>.
+    </div>
+
+    <div class="alert warning">
+      <strong>LOW &mdash; KR-02 (Boletos)</strong>
+      Boletos parcelados (<code>type='installment'</code>) podem inflar contagem. F&oacute;rmula deve filtrar <code>parent_invoice_id IS NULL</code>.
+    </div>
+
+    <div class="alert warning">
+      <strong>LOW &mdash; KR-04 (Reten&ccedil;&atilde;o D30)</strong>
+      Sem tracking expl&iacute;cito de login PJ. Usar <code>pj_audit_logs</code> como proxy requer que a&ccedil;&otilde;es passivas (GET /pj/dashboard) gerem log.
+    </div>
+
+    <!-- ═══════════════════ PERGUNTAS ABERTAS ═══════════════════ -->
+    <h2>Perguntas Abertas</h2>
+
+    <ul class="questions-list">
+      <li>KR-03 requer tabela <code>analytics_events</code> n&atilde;o prevista no tech_spec. Incluir na Fase 03?</li>
+      <li>Premissas de desejabilidade (A-01, A-03, A-05, A-08) devem ser validadas antes do desenvolvimento ou assumimos o risco?</li>
+      <li>O target de 2+ toggles PF/PJ por sess&atilde;o pode ser agressivo demais &mdash; revisar ap&oacute;s primeiros dados?</li>
+    </ul>
+
+    <!-- ═══════════════════ HITL DECISION BOX ═══════════════════ -->
+    <div class="hitl-box">
+      <div class="hitl-title">HITL #1 &mdash; Decis&atilde;o de Aprova&ccedil;&atilde;o</div>
+      <div class="hitl-question">OKRs est&atilde;o corretos? OST cont&eacute;m apenas oportunidades (sem solu&ccedil;&otilde;es)? Princ&iacute;pios refletem a estrat&eacute;gia desejada?</div>
+      <ul class="hitl-options">
+        <li><strong>&#x2705; Aprovado</strong> &mdash; Contexto estrat&eacute;gico validado. Avan&ccedil;ar para Fase 02 (Product Discovery).</li>
+        <li><strong>&#x26A0;&#xFE0F; Aprovado com ressalvas</strong> &mdash; Contexto ok, mas com ajustes espec&iacute;ficos antes de avan&ccedil;ar.</li>
+        <li><strong>&#x274C; Reprovado</strong> &mdash; Retornar ao Product Manager com feedback espec&iacute;fico.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+</body>
+</html>
