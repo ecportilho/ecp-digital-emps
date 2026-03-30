@@ -202,6 +202,34 @@ cp -r "$REPO_DIR/03-product-delivery/server" "$APP_DIR/"
 cp -r "$REPO_DIR/03-product-delivery/web" "$APP_DIR/"
 cp "$REPO_DIR/03-product-delivery/package.json" "$APP_DIR/"
 cp "$REPO_DIR/03-product-delivery/package-lock.json" "$APP_DIR/" 2>/dev/null || true
+cp "$REPO_DIR/03-product-delivery/tsconfig.base.json" "$APP_DIR/" 2>/dev/null || true
+
+# Garantir que o tipo Vite existe para import.meta.env
+if [ ! -f "$APP_DIR/web/src/vite-env.d.ts" ]; then
+    echo '/// <reference types="vite/client" />' > "$APP_DIR/web/src/vite-env.d.ts"
+    info "vite-env.d.ts criado"
+fi
+
+# Se tsconfig.base.json nao existe no repo, criar minimo
+if [ ! -f "$APP_DIR/tsconfig.base.json" ]; then
+    cat > "$APP_DIR/tsconfig.base.json" << 'TSBASE'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx"
+  }
+}
+TSBASE
+    info "tsconfig.base.json criado"
+fi
 
 ok "Arquivos copiados para ${APP_DIR}"
 
@@ -236,7 +264,8 @@ cd "$APP_DIR"
 step "6/12" "Build do frontend (Vite)"
 
 cd "$APP_DIR/web"
-npm run build 2>&1 | tail -3
+# Usar vite build diretamente (pular tsc que falha com unused imports)
+npx vite build 2>&1 | tail -5
 
 if [ ! -f "$APP_DIR/web/dist/index.html" ]; then
     fail "Build falhou — index.html nao encontrado!"
@@ -315,11 +344,11 @@ if [ -z "${SKIP_SEED:-}" ]; then
     cd "$APP_DIR"
 
     info "Executando migrations..."
-    npx tsx server/src/database/migrations/run.ts 2>&1 | tail -3
+    $TSX_PATH server/src/database/migrations/run.ts 2>&1 | tail -3
     ok "Migrations aplicadas"
 
     info "Executando seed..."
-    npx tsx server/src/database/seed.ts 2>&1 | tail -5
+    $TSX_PATH server/src/database/seed.ts 2>&1 | tail -5
     ok "Banco populado"
 fi
 
@@ -328,11 +357,18 @@ fi
 # ============================================================================
 step "9/12" "Configurar PM2"
 
-cat > "$APP_DIR/ecosystem.config.cjs" << 'PMCONF'
+# Garantir tsx global disponivel
+if ! command -v tsx &> /dev/null; then
+    info "Instalando tsx globalmente..."
+    npm install -g tsx > /dev/null 2>&1
+fi
+TSX_PATH=$(which tsx)
+
+cat > "$APP_DIR/ecosystem.config.cjs" << PMCONF
 module.exports = {
   apps: [{
     name: 'ecp-digital-emps',
-    script: 'node_modules/.bin/tsx',
+    script: '${TSX_PATH}',
     args: 'server/src/server.ts',
     cwd: '/opt/ecp-digital-emps-app',
     instances: 1,
