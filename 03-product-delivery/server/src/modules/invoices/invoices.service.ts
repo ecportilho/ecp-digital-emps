@@ -3,6 +3,7 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
 import { generateBarcode, generateDigitableLine } from '../../shared/utils/boleto.js';
+import { ecpPayClient } from '../../services/ecp-pay-client.js';
 import type { CreateInvoiceInput, ListInvoicesInput } from './invoices.schema.js';
 
 interface InvoiceRow {
@@ -69,7 +70,7 @@ function mapInvoiceRow(row: InvoiceRow) {
   };
 }
 
-export function createInvoice(companyId: string, userId: string, input: CreateInvoiceInput) {
+export async function createInvoice(companyId: string, userId: string, input: CreateInvoiceInput) {
   const db = getDatabase();
 
   const account = db.prepare(
@@ -81,27 +82,64 @@ export function createInvoice(companyId: string, userId: string, input: CreateIn
   }
 
   const invoiceId = generateId();
-  const barcode = generateBarcode(input.amount, input.dueDate);
-  const digitableLine = generateDigitableLine(barcode);
+
+  // Try to register the boleto with ECP Pay; fall back to local mock on failure
+  let barcode: string;
+  let digitableLine: string;
+  let ecpPayTransactionId: string | null = null;
+  let pixQrcode: string | null = null;
+  let pixCopyPaste: string | null = null;
+
+  try {
+    const payResult = await ecpPayClient.createBoletoCharge({
+      amount: input.amount,
+      customer_name: input.customerName,
+      customer_document: input.customerDocument.replace(/\D/g, ''),
+      customer_email: input.customerEmail ?? undefined,
+      due_date: input.dueDate,
+      description: input.description ?? undefined,
+      interest_rate: input.interestRate ?? 100,
+      penalty_rate: input.penaltyRate ?? 200,
+      discount_amount: input.discountAmount ?? 0,
+      discount_days: input.discountDays ?? 0,
+    });
+
+    barcode = payResult.barcode;
+    digitableLine = payResult.digitable_line;
+    ecpPayTransactionId = payResult.transaction_id;
+    pixQrcode = payResult.pix_qr_code ?? null;
+    pixCopyPaste = payResult.pix_copy_paste ?? null;
+  } catch {
+    // ECP Pay unavailable — fall back to local mock barcode generation
+    barcode = generateBarcode(input.amount, input.dueDate);
+    digitableLine = generateDigitableLine(barcode);
+  }
 
   db.transaction(() => {
     db.prepare(`
-      INSERT INTO invoices (id, company_id, account_id, operator_id, customer_name, customer_document, customer_email, amount, due_date, description, barcode, digitable_line, interest_rate, penalty_rate, discount_days, discount_amount, type, installment_of, installment_total, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      INSERT INTO invoices (id, company_id, account_id, operator_id, customer_name, customer_document, customer_email, amount, due_date, description, barcode, digitable_line, pix_qrcode, pix_copy_paste, interest_rate, penalty_rate, discount_days, discount_amount, type, installment_of, installment_total, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `).run(
       invoiceId, companyId, account.id, userId,
       input.customerName, input.customerDocument.replace(/\D/g, ''),
       input.customerEmail ?? null, input.amount, input.dueDate,
       input.description ?? null, barcode, digitableLine,
+      pixQrcode, pixCopyPaste,
       input.interestRate ?? 100, input.penaltyRate ?? 200,
       input.discountDays ?? 0, input.discountAmount ?? 0,
       input.type ?? 'single', input.installmentOf ?? null, input.installmentTotal ?? null
     );
 
+    // If ECP Pay returned a transaction_id, store it in metadata
+    const auditMeta: Record<string, unknown> = { amount: input.amount, customer: input.customerName };
+    if (ecpPayTransactionId) {
+      auditMeta.ecpPayTransactionId = ecpPayTransactionId;
+    }
+
     db.prepare(`
       INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
       VALUES (?, ?, ?, 'create_invoice', 'invoice', ?, ?)
-    `).run(generateId(), companyId, userId, invoiceId, JSON.stringify({ amount: input.amount, customer: input.customerName }));
+    `).run(generateId(), companyId, userId, invoiceId, JSON.stringify(auditMeta));
   })();
 
   const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as InvoiceRow;
@@ -117,6 +155,10 @@ export function listInvoices(companyId: string, input: ListInvoicesInput) {
     conditions.push('status = ?');
     params.push(input.status);
   }
+  if (input.search) {
+    conditions.push('customer_name LIKE ?');
+    params.push(`%${input.search}%`);
+  }
   if (input.startDate) {
     conditions.push('due_date >= ?');
     params.push(input.startDate);
@@ -129,18 +171,17 @@ export function listInvoices(companyId: string, input: ListInvoicesInput) {
   const offset = (input.page - 1) * input.limit;
   const where = conditions.join(' AND ');
 
-  const total = db.prepare(`SELECT COUNT(*) as count FROM invoices WHERE ${where}`).get(...params) as { count: number };
   const rows = db.prepare(
     `SELECT * FROM invoices WHERE ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`
   ).all(...params, input.limit, offset) as InvoiceRow[];
 
-  return {
-    data: rows.map(mapInvoiceRow),
-    total: total.count,
-    page: input.page,
-    limit: input.limit,
-    totalPages: Math.ceil(total.count / input.limit),
-  };
+  return rows.map((row) => ({
+    id: row.id,
+    clientName: row.customer_name,
+    amount: row.amount,
+    dueDate: row.due_date,
+    status: row.status,
+  }));
 }
 
 export function getInvoice(companyId: string, invoiceId: string) {
@@ -227,13 +268,8 @@ export function getInvoiceSummary(companyId: string) {
   `).get(companyId) as Record<string, number>;
 
   return {
-    total: summary.total ?? 0,
-    pending: summary.pending ?? 0,
-    paid: summary.paid ?? 0,
-    overdue: summary.overdue ?? 0,
-    cancelled: summary.cancelled ?? 0,
-    pendingAmount: summary.pending_amount ?? 0,
-    paidAmount: summary.paid_amount ?? 0,
-    overdueAmount: summary.overdue_amount ?? 0,
+    total: { count: summary.total ?? 0, amount: (summary.pending_amount ?? 0) + (summary.paid_amount ?? 0) + (summary.overdue_amount ?? 0) },
+    paid: { count: summary.paid ?? 0, amount: summary.paid_amount ?? 0 },
+    overdue: { count: summary.overdue ?? 0, amount: summary.overdue_amount ?? 0 },
   };
 }

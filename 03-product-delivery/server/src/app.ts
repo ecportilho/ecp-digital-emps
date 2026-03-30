@@ -12,6 +12,7 @@ import { corporateCardsRoutes } from './modules/corporate-cards/corporate-cards.
 import { teamRoutes } from './modules/team/team.routes.js';
 import { pjNotificationsRoutes } from './modules/pj-notifications/pj-notifications.routes.js';
 import { pjDashboardRoutes } from './modules/pj-dashboard/pj-dashboard.routes.js';
+import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -44,6 +45,9 @@ export async function buildApp() {
   await app.register(teamRoutes, { prefix: '/pj/team' });
   await app.register(pjNotificationsRoutes, { prefix: '/pj/notifications' });
   await app.register(pjDashboardRoutes, { prefix: '/pj/dashboard' });
+
+  // Webhook routes (no JWT auth — uses secret header for server-to-server calls)
+  await app.register(webhooksRoutes, { prefix: '/webhooks' });
 
   // Health check
   app.get('/health', async () => ({ status: 'ok', service: 'ecp-emps-api' }));

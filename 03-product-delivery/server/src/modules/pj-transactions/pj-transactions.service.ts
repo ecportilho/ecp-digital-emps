@@ -58,6 +58,11 @@ export function listTransactions(companyId: string, input: ListTransactionsInput
     throw new AppError(404, ErrorCode.ACCOUNT_NOT_FOUND, 'Conta PJ não encontrada');
   }
 
+  // Get balance
+  const accountFull = db.prepare(
+    "SELECT balance FROM pj_accounts WHERE id = ?"
+  ).get(account.id) as { balance: number };
+
   const conditions = ['account_id = ?'];
   const params: (string | number)[] = [account.id];
 
@@ -72,6 +77,11 @@ export function listTransactions(companyId: string, input: ListTransactionsInput
   if (input.type) {
     conditions.push('type = ?');
     params.push(input.type);
+  }
+  if (input.period) {
+    const since = new Date(Date.now() - input.period * 24 * 60 * 60 * 1000).toISOString();
+    conditions.push('created_at >= ?');
+    params.push(since);
   }
   if (input.startDate) {
     conditions.push('created_at >= ?');
@@ -92,9 +102,17 @@ export function listTransactions(companyId: string, input: ListTransactionsInput
   const nextCursor = hasMore && data.length > 0 ? data[data.length - 1].created_at : null;
 
   return {
-    data: data.map(mapTxRow),
+    balance: accountFull.balance,
+    transactions: data.map((row) => ({
+      id: row.id,
+      description: row.description ?? '',
+      counterpart: row.counterpart_name ?? '',
+      category: row.category,
+      amount: row.amount,
+      type: row.direction === 'in' ? 'credit' as const : 'debit' as const,
+      date: row.created_at,
+    })),
     nextCursor,
-    hasMore,
   };
 }
 

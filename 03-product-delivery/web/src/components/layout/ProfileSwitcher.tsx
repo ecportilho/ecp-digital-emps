@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useAuthPJ } from '../../hooks/useAuthPJ';
 
 interface Profile {
   id: string;
@@ -9,28 +10,32 @@ interface Profile {
   active: boolean;
 }
 
-const profiles: Profile[] = [
-  {
-    id: 'pf-1',
-    name: 'Marina Silva',
-    subtitle: 'Conta pessoal',
-    type: 'pf',
-    active: false,
-  },
-  {
-    id: 'pj-1',
-    name: 'AB Design Studio',
-    subtitle: 'MEI \u2022 12.345.678/0001-95',
-    type: 'pj',
-    active: true,
-  },
-];
-
 export function ProfileSwitcher() {
+  const { auth } = useAuthPJ();
   const [isOpen, setIsOpen] = useState(false);
-  const activeProfile = profiles.find((p) => p.active);
 
-  if (!activeProfile) return null;
+  const companyName = auth?.company?.nomeFantasia || auth?.company?.razaoSocial || 'Empresa';
+  const companyCnpj = auth?.company?.cnpj || '';
+  const formattedCnpj = companyCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+
+  const profiles: Profile[] = [
+    {
+      id: 'pf-1',
+      name: 'Conta Pessoal',
+      subtitle: 'Pessoa física',
+      type: 'pf',
+      active: false,
+    },
+    {
+      id: 'pj-1',
+      name: companyName,
+      subtitle: formattedCnpj ? `PJ • ${formattedCnpj}` : 'Conta empresarial',
+      type: 'pj',
+      active: true,
+    },
+  ];
+
+  const activeProfile = profiles.find((p) => p.active)!;
 
   return (
     <div className="relative">
@@ -61,7 +66,6 @@ export function ProfileSwitcher() {
                 <button
                   key={profile.id}
                   onClick={() => {
-                    // In a real app, this would trigger profile switching via API
                     setIsOpen(false);
                     if (profile.type === 'pf') {
                       const pfUrl = import.meta.env.VITE_PF_APP_URL || 'http://localhost:5173';

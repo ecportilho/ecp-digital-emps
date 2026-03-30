@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
@@ -76,6 +77,75 @@ export function getMe(userId: string, companyId: string): AuthPjMeResponse {
       nomeFantasia: company.nome_fantasia,
       naturezaJuridica: company.natureza_juridica,
       status: company.status,
+    },
+  };
+}
+
+interface DevUserRow {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string;
+}
+
+interface DevCompanyRow {
+  company_id: string;
+  role: string;
+  razao_social: string;
+  nome_fantasia: string | null;
+  cnpj: string;
+}
+
+export function devLogin(email: string, password: string): {
+  token: string;
+  user: { id: string; name: string; email: string };
+  company: { id: string; razaoSocial: string; nomeFantasia: string | null; cnpj: string; role: string };
+} {
+  const db = getDatabase();
+
+  const user = db.prepare('SELECT * FROM pj_dev_users WHERE email = ?').get(email) as DevUserRow | undefined;
+  if (!user) {
+    throw new AppError(401, ErrorCode.UNAUTHORIZED, 'Email ou senha inválidos');
+  }
+
+  const passwordValid = bcrypt.compareSync(password, user.password_hash);
+  if (!passwordValid) {
+    throw new AppError(401, ErrorCode.UNAUTHORIZED, 'Email ou senha inválidos');
+  }
+
+  // Find user's company via team_members
+  const membership = db.prepare(`
+    SELECT tm.company_id, tm.role, c.razao_social, c.nome_fantasia, c.cnpj
+    FROM team_members tm
+    JOIN companies c ON c.id = tm.company_id
+    WHERE tm.user_id = ? AND tm.status = 'active' AND c.deleted_at IS NULL
+    ORDER BY tm.invited_at DESC LIMIT 1
+  `).get(user.id) as DevCompanyRow | undefined;
+
+  if (!membership) {
+    throw new AppError(403, ErrorCode.FORBIDDEN, 'Usuário não pertence a nenhuma empresa PJ');
+  }
+
+  const token = jwt.sign(
+    {
+      sub: user.id,
+      companyId: membership.company_id,
+      role: membership.role,
+      profile: 'pj',
+    },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  return {
+    token,
+    user: { id: user.id, name: user.name, email: user.email },
+    company: {
+      id: membership.company_id,
+      razaoSocial: membership.razao_social,
+      nomeFantasia: membership.nome_fantasia,
+      cnpj: membership.cnpj,
+      role: membership.role,
     },
   };
 }

@@ -44,7 +44,7 @@ export async function pjPixRoutes(app: FastifyInstance): Promise<void> {
     preHandler: [authPjMiddleware, requireRole('financial')],
   }, async (request, reply) => {
     const body = pixQrCodeSchema.parse(request.body);
-    const result = generateQrCode(request.companyId, body);
+    const result = await generateQrCode(request.companyId, body);
     return reply.status(200).send(result);
   });
 

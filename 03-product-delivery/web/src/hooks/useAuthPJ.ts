@@ -46,7 +46,41 @@ export function useAuthPJ() {
     }
   }, [fetchMe]);
 
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const data = await apiPJ.post<{
+        token: string;
+        user: { id: string; name: string; email: string };
+        company: { id: string; razaoSocial: string; nomeFantasia: string | null; cnpj: string; role: string };
+      }>('/auth/pj/dev-login', { email, password });
+      localStorage.setItem('pj_token', data.token);
+      await fetchMe();
+      return true;
+    } catch {
+      setError('Email ou senha inválidos');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchMe]);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('pj_token');
+    setAuth(null);
+    setError(null);
+  }, []);
+
   useEffect(() => {
+    // If arriving from bank with ?switch=pj, clear stale token to force re-login
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('switch') === 'pj') {
+      localStorage.removeItem('pj_token');
+      window.history.replaceState({}, '', window.location.pathname);
+      setLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem('pj_token');
     if (token) {
       fetchMe();
@@ -59,7 +93,10 @@ export function useAuthPJ() {
     auth,
     loading,
     error,
+    login,
+    logout,
     switchProfile,
+    isAuthenticated: auth !== null,
     isAdmin: auth?.role === 'admin',
     isFinancial: auth?.role === 'financial' || auth?.role === 'admin',
     isViewer: true,

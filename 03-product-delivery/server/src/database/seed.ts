@@ -199,7 +199,20 @@ function seed(): void {
 
   console.info('[seed] Seeding database with 7 companies (1 design studio + 6 FoodFlow restaurants)...');
 
+  // Hash password once for all dev users (Senha@123)
+  const passwordHash = bcrypt.hashSync('Senha@123', 10);
+
   db.transaction(() => {
+    // ── Dev users (standalone auth for development) ──
+    const allUsers = Object.values(USERS);
+    for (const user of allUsers) {
+      db.prepare(`
+        INSERT OR IGNORE INTO pj_dev_users (id, name, email, password_hash, cpf, phone)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(user.id, user.name, user.email, passwordHash, user.cpf, user.phone);
+    }
+    console.info(`  ✓ ${allUsers.length} dev users criados (senha: Senha@123)`);
+
     for (const company of COMPANIES) {
       const accountId = generateId();
       const ownerMemberId = generateId();

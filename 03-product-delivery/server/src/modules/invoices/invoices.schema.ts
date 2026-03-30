@@ -20,6 +20,7 @@ export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 
 export const listInvoicesSchema = z.object({
   status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).optional(),
+  search: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   page: z.coerce.number().int().positive().optional().default(1),

@@ -10,7 +10,7 @@ export async function invoicesRoutes(app: FastifyInstance): Promise<void> {
     preHandler: [authPjMiddleware, requireRole('financial')],
   }, async (request, reply) => {
     const body = createInvoiceSchema.parse(request.body);
-    const result = createInvoice(request.companyId, request.userId, body);
+    const result = await createInvoice(request.companyId, request.userId, body);
     return reply.status(201).send(result);
   });
 
@@ -39,8 +39,8 @@ export async function invoicesRoutes(app: FastifyInstance): Promise<void> {
     return reply.status(200).send(result);
   });
 
-  // PATCH /pj/invoices/:id/cancel
-  app.patch<{ Params: { id: string } }>('/:id/cancel', {
+  // PATCH /pj/invoices/:id — cancel via { status: 'cancelled' }
+  app.patch<{ Params: { id: string } }>('/:id', {
     preHandler: [authPjMiddleware, requireRole('financial')],
   }, async (request, reply) => {
     const result = cancelInvoice(request.companyId, request.userId, request.params.id);

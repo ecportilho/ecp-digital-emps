@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { ecpPayClient } from '../../services/ecp-pay-client.js';
 import type { PixTransferInput, CreatePixKeyInput, PixQrCodeInput } from './pj-pix.schema.js';
 
 interface AccountRow {
@@ -184,7 +185,7 @@ export function deletePixKey(companyId: string, userId: string, keyId: string) {
   return { success: true };
 }
 
-export function generateQrCode(companyId: string, input: PixQrCodeInput) {
+export async function generateQrCode(companyId: string, input: PixQrCodeInput) {
   const db = getDatabase();
 
   const key = db.prepare(
@@ -195,16 +196,49 @@ export function generateQrCode(companyId: string, input: PixQrCodeInput) {
     throw new AppError(404, ErrorCode.PIX_KEY_NOT_FOUND, 'Chave Pix não encontrada');
   }
 
-  // Mock QR Code payload (EMV standard simplified)
-  const payload = `00020126580014br.gov.bcb.pix0136${key.value}5204000053039865405${(input.amount / 100).toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
+  // Fetch company info for ECP Pay customer fields
+  const company = db.prepare(
+    'SELECT trade_name, document FROM pj_companies WHERE id = ?'
+  ).get(companyId) as { trade_name: string; document: string } | undefined;
 
-  return {
-    pixKey: key.value,
-    pixKeyType: key.type,
-    amount: input.amount,
-    qrCodePayload: payload,
-    description: input.description,
-  };
+  const customerName = company?.trade_name ?? 'Empresa';
+  const customerDocument = company?.document?.replace(/\D/g, '') ?? '00000000000000';
+
+  // Try to create a real Pix charge via ECP Pay; fall back to local mock on failure
+  try {
+    const payResult = await ecpPayClient.createPixCharge({
+      amount: input.amount,
+      customer_name: customerName,
+      customer_document: customerDocument,
+      description: input.description ?? `Pix cobranca - ${key.value}`,
+      expiration_seconds: 3600,
+    });
+
+    return {
+      pixKey: key.value,
+      pixKeyType: key.type,
+      amount: input.amount,
+      qrCode: payResult.qr_code,
+      qrCodePayload: payResult.qr_code_text,
+      expiration: payResult.expiration,
+      ecpPayTransactionId: payResult.transaction_id,
+      description: input.description,
+    };
+  } catch {
+    // ECP Pay unavailable — fall back to local mock QR Code payload
+    const payload = `00020126580014br.gov.bcb.pix0136${key.value}5204000053039865405${(input.amount / 100).toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
+
+    return {
+      pixKey: key.value,
+      pixKeyType: key.type,
+      amount: input.amount,
+      qrCode: null,
+      qrCodePayload: payload,
+      expiration: null,
+      ecpPayTransactionId: null,
+      description: input.description,
+    };
+  }
 }
 
 export function lookupPixKey(key: string, keyType: string) {

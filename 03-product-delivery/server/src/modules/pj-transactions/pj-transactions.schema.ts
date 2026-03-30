@@ -5,6 +5,7 @@ export const listTransactionsSchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
   category: z.string().optional(),
   type: z.enum(['credit', 'debit']).optional(),
+  period: z.coerce.number().int().positive().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });

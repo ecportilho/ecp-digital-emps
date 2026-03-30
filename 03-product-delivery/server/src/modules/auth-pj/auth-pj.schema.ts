@@ -21,3 +21,10 @@ export const authPjMeResponseSchema = z.object({
 });
 
 export type AuthPjMeResponse = z.infer<typeof authPjMeResponseSchema>;
+
+export const devLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export type DevLoginInput = z.infer<typeof devLoginSchema>;
