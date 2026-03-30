@@ -238,6 +238,14 @@ ok "Arquivos copiados para ${APP_DIR}"
 # ============================================================================
 step "5/12" "Instalar dependencias"
 
+# Garantir tsx global (usado para migrations, seed e PM2)
+if ! command -v tsx &> /dev/null; then
+    info "Instalando tsx globalmente..."
+    npm install -g tsx > /dev/null 2>&1
+fi
+TSX_PATH=$(which tsx)
+ok "tsx disponivel em ${TSX_PATH}"
+
 info "Instalando dependencias do server..."
 cd "$APP_DIR/server"
 npm install 2>&1 | tail -3
@@ -356,13 +364,6 @@ fi
 # ETAPA 9: Configurar e iniciar PM2
 # ============================================================================
 step "9/12" "Configurar PM2"
-
-# Garantir tsx global disponivel
-if ! command -v tsx &> /dev/null; then
-    info "Instalando tsx globalmente..."
-    npm install -g tsx > /dev/null 2>&1
-fi
-TSX_PATH=$(which tsx)
 
 cat > "$APP_DIR/ecosystem.config.cjs" << PMCONF
 module.exports = {
