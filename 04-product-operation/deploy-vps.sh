@@ -1,444 +1,243 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  ECP Digital Emps — Instalador Automatico para VPS
-#  Ubuntu 22.04 LTS | Bash 5+
+#  ECP Digital Emps — Instalador VPS
+#  Ubuntu 22.04+ | Bash 5+
 #
 #  USO:
-#    1. Copie este script para o servidor:
-#       scp deploy-vps.sh root@191.101.78.38:/root/deploy-emps.sh
-#
-#    2. Execute no servidor:
-#       ssh root@191.101.78.38
-#       chmod +x /root/deploy-emps.sh
-#       bash /root/deploy-emps.sh
-#
-#  O script e interativo — pede confirmacao antes de cada etapa critica.
-#  Pode ser re-executado com seguranca (idempotente).
+#    scp deploy-vps.sh root@191.101.78.38:/root/deploy-emps.sh
+#    ssh root@191.101.78.38
+#    chmod +x /root/deploy-emps.sh && bash /root/deploy-emps.sh
 # ============================================================================
 
 set -euo pipefail
 
-# ============================================================================
-# CONFIGURACAO
-# ============================================================================
 DOMAIN="emps.ecportilho.com"
 APP_NAME="ecp-digital-emps"
 REPO_DIR="/opt/ecp-digital-emps"
 APP_DIR="/opt/ecp-digital-emps-app"
 REPO_URL="https://github.com/ecportilho/ecp-digital-emps.git"
 APP_PORT=3334
-BANK_PORT=3333
-PAY_PORT=3335
 NODE_VERSION="20"
-CERTBOT_EMAIL=""
 
-# ============================================================================
-# CORES E FORMATACAO
-# ============================================================================
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'
+BOLD='\033[1m'; NC='\033[0m'
 
-banner() {
-    echo ""
-    echo -e "${MAGENTA}======================================================================${NC}"
-    echo -e "${BOLD}${MAGENTA}  $1${NC}"
-    echo -e "${MAGENTA}======================================================================${NC}"
-    echo ""
-}
-
-step() {
-    echo ""
-    echo -e "  ${BOLD}${CYAN}[$1]${NC} ${BOLD}$2${NC}"
-    echo -e "  ${BLUE}$(printf '%0.s-' {1..60})${NC}"
-}
-
-info() { echo -e "      ${BLUE}INFO${NC}  $1"; }
-ok()   { echo -e "      ${GREEN}OK${NC}    $1"; }
-warn() { echo -e "      ${YELLOW}AVISO${NC} $1"; }
-fail() { echo -e "      ${RED}ERRO${NC}  $1"; }
+banner() { echo ""; echo -e "${MAGENTA}====================================================================${NC}"; echo -e "${BOLD}${MAGENTA}  $1${NC}"; echo -e "${MAGENTA}====================================================================${NC}"; echo ""; }
+step()   { echo ""; echo -e "  ${BOLD}${CYAN}[$1]${NC} ${BOLD}$2${NC}"; echo -e "  ${BLUE}$(printf '%0.s-' {1..60})${NC}"; }
+info()   { echo -e "      ${BLUE}INFO${NC}  $1"; }
+ok()     { echo -e "      ${GREEN}OK${NC}    $1"; }
+warn()   { echo -e "      ${YELLOW}AVISO${NC} $1"; }
+fail()   { echo -e "      ${RED}ERRO${NC}  $1"; }
 
 ask_yes_no() {
     local prompt="$1" default="${2:-s}" yn
-    if [ "$default" = "s" ]; then
-        read -rp "      $prompt [S/n]: " yn; yn="${yn:-s}"
-    else
-        read -rp "      $prompt [s/N]: " yn; yn="${yn:-n}"
-    fi
+    if [ "$default" = "s" ]; then read -rp "      $prompt [S/n]: " yn; yn="${yn:-s}"
+    else read -rp "      $prompt [s/N]: " yn; yn="${yn:-n}"; fi
     case "$yn" in [sS]|[yY]) return 0 ;; *) return 1 ;; esac
 }
-
 ask_input() {
     local prompt="$1" default="${2:-}" value
-    if [ -n "$default" ]; then
-        read -rp "      $prompt [$default]: " value; echo "${value:-$default}"
-    else
-        read -rp "      $prompt: " value; echo "$value"
-    fi
+    if [ -n "$default" ]; then read -rp "      $prompt [$default]: " value; echo "${value:-$default}"
+    else read -rp "      $prompt: " value; echo "$value"; fi
 }
 
-check_command() { command -v "$1" &> /dev/null; }
-
-# ============================================================================
-# INICIO
 # ============================================================================
 banner "ECP Digital Emps — Instalador VPS"
-
-echo -e "  ${BOLD}Produto:${NC}  Banco digital PJ para empresas do ecossistema ECP"
 echo -e "  ${BOLD}Dominio:${NC}  https://${DOMAIN}"
-echo -e "  ${BOLD}App Dir:${NC}  ${APP_DIR}"
 echo -e "  ${BOLD}Porta:${NC}    ${APP_PORT}"
 echo ""
 
-if [ "$(id -u)" -ne 0 ]; then
-    fail "Este script precisa ser executado como root."
-    exit 1
-fi
+[ "$(id -u)" -ne 0 ] && { fail "Execute como root."; exit 1; }
 
-# ============================================================================
-# ETAPA 1: Coletar informacoes
 # ============================================================================
 step "1/12" "Coletar informacoes"
 
-CERTBOT_EMAIL=$(ask_input "Email para o certificado SSL (Let's Encrypt)" "ecportilho@gmail.com")
+CERTBOT_EMAIL=$(ask_input "Email SSL (Let's Encrypt)" "ecportilho@gmail.com")
+JWT_SECRET=$(ask_input "JWT Secret (IGUAL ao ecp-digital-bank)" "")
+[ -z "$JWT_SECRET" ] && { JWT_SECRET=$(openssl rand -hex 32); warn "JWT gerado novo (nao compartilhara sessao com bank)"; }
+PAY_WEBHOOK_SECRET=$(ask_input "Webhook secret do ECP Pay" "ecp-pay-webhook-secret-dev")
+PAY_API_KEY=$(ask_input "API Key no ECP Pay" "ecp-emps-dev-key")
 
-echo ""
-info "Integracoes com outros apps na mesma VPS:"
-info "  ecp-digital-bank: porta ${BANK_PORT} (compartilha JWT secret)"
-info "  ecp-digital-pay:  porta ${PAY_PORT} (webhooks de pagamento)"
-
-JWT_SECRET=$(ask_input "JWT Secret (deve ser IGUAL ao do ecp-digital-bank)" "")
-if [ -z "$JWT_SECRET" ]; then
-    warn "JWT secret vazio. Gerando novo (NAO compartilhara sessao com o bank)."
-    JWT_SECRET=$(openssl rand -hex 32)
-fi
-
-PAY_WEBHOOK_SECRET=$(ask_input "Segredo do webhook do ECP Pay" "ecp-pay-webhook-secret-dev")
-PAY_API_KEY=$(ask_input "API Key do ecp-emps no ECP Pay" "ecp-emps-dev-key")
-
-echo ""
-info "Configuracoes coletadas:"
-info "  Repo:            ${REPO_URL}"
-info "  Email SSL:       ${CERTBOT_EMAIL}"
-info "  JWT Secret:      ${JWT_SECRET:0:10}..."
-info "  Webhook Secret:  ${PAY_WEBHOOK_SECRET:0:10}..."
-echo ""
-
-if ! ask_yes_no "Prosseguir com a instalacao?"; then
-    warn "Instalacao cancelada."
-    exit 0
-fi
+echo ""; info "Repo: ${REPO_URL}"; info "JWT: ${JWT_SECRET:0:10}..."; echo ""
+ask_yes_no "Prosseguir?" || { warn "Cancelado."; exit 0; }
 
 # ============================================================================
-# ETAPA 2: Atualizar sistema e instalar dependencias
-# ============================================================================
-step "2/12" "Atualizar sistema e instalar dependencias"
+step "2/12" "Instalar dependencias do sistema"
 
-info "Atualizando pacotes do sistema..."
 apt update -qq && apt upgrade -y -qq
-ok "Sistema atualizado"
-
-info "Instalando ferramentas de build..."
 apt install -y -qq build-essential python3 curl git > /dev/null 2>&1
-ok "build-essential, python3, curl, git"
+ok "Pacotes base"
 
-if check_command node; then
-    CURRENT_NODE=$(node -v | sed 's/v//' | cut -d. -f1)
-    if [ "$CURRENT_NODE" -ge "$NODE_VERSION" ]; then
-        ok "Node.js $(node -v) ja instalado"
-    else
-        info "Atualizando Node.js para v${NODE_VERSION}..."
-        curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - > /dev/null 2>&1
-        apt install -y -qq nodejs > /dev/null 2>&1
-        ok "Node.js $(node -v) instalado"
-    fi
-else
-    info "Instalando Node.js ${NODE_VERSION}..."
+if ! command -v node &>/dev/null || [ "$(node -v | sed 's/v//' | cut -d. -f1)" -lt "$NODE_VERSION" ]; then
     curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - > /dev/null 2>&1
     apt install -y -qq nodejs > /dev/null 2>&1
-    ok "Node.js $(node -v) instalado"
 fi
+ok "Node.js $(node -v)"
 
-if check_command pm2; then ok "PM2 $(pm2 -v) ja instalado"
-else info "Instalando PM2..."; npm install -g pm2 > /dev/null 2>&1; ok "PM2 instalado"; fi
+command -v pm2 &>/dev/null || npm install -g pm2 > /dev/null 2>&1
+ok "PM2 $(pm2 -v)"
 
-if check_command nginx; then ok "Nginx ja instalado"
-else info "Instalando Nginx..."; apt install -y -qq nginx > /dev/null 2>&1; systemctl enable nginx > /dev/null 2>&1; systemctl start nginx; ok "Nginx instalado"; fi
+command -v tsx &>/dev/null || npm install -g tsx > /dev/null 2>&1
+TSX_PATH=$(which tsx)
+ok "tsx em ${TSX_PATH}"
 
-if check_command certbot; then ok "Certbot ja instalado"
-else info "Instalando Certbot..."; apt install -y -qq certbot python3-certbot-nginx > /dev/null 2>&1; ok "Certbot instalado"; fi
+command -v nginx &>/dev/null || { apt install -y -qq nginx > /dev/null 2>&1; systemctl enable nginx > /dev/null 2>&1; systemctl start nginx; }
+ok "Nginx"
 
-# ============================================================================
-# ETAPA 3: Clonar repositorio
+command -v certbot &>/dev/null || apt install -y -qq certbot python3-certbot-nginx > /dev/null 2>&1
+ok "Certbot"
+
 # ============================================================================
 step "3/12" "Clonar repositorio"
 
 if [ -d "$REPO_DIR/.git" ]; then
-    info "Repositorio ja existe em ${REPO_DIR}. Atualizando..."
-    cd "$REPO_DIR"
-    git fetch origin
-    git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
-    ok "Repositorio atualizado"
+    cd "$REPO_DIR"; git fetch origin; git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
+    ok "Atualizado"
 else
-    info "Clonando de ${REPO_URL}..."
     git clone "$REPO_URL" "$REPO_DIR"
-    ok "Repositorio clonado em ${REPO_DIR}"
+    ok "Clonado"
 fi
 
 # ============================================================================
-# ETAPA 4: Copiar para diretorio de producao
-# ============================================================================
-step "4/12" "Preparar diretorio de producao"
+step "4/12" "Copiar para producao"
 
 mkdir -p "$APP_DIR"
-
-info "Copiando arquivos da aplicacao..."
 cp -r "$REPO_DIR/03-product-delivery/server" "$APP_DIR/"
 cp -r "$REPO_DIR/03-product-delivery/web" "$APP_DIR/"
 cp "$REPO_DIR/03-product-delivery/package.json" "$APP_DIR/"
 cp "$REPO_DIR/03-product-delivery/package-lock.json" "$APP_DIR/" 2>/dev/null || true
 cp "$REPO_DIR/03-product-delivery/tsconfig.base.json" "$APP_DIR/" 2>/dev/null || true
 
-# Garantir que o tipo Vite existe para import.meta.env
+# Garantir tsconfig.base.json existe
+if [ ! -f "$APP_DIR/tsconfig.base.json" ]; then
+    cat > "$APP_DIR/tsconfig.base.json" << 'TSB'
+{"compilerOptions":{"target":"ES2022","module":"ESNext","moduleResolution":"bundler","strict":true,"esModuleInterop":true,"skipLibCheck":true,"forceConsistentCasingInFileNames":true,"resolveJsonModule":true,"isolatedModules":true,"jsx":"react-jsx"}}
+TSB
+    info "tsconfig.base.json criado"
+fi
+
+# Garantir vite-env.d.ts existe
 if [ ! -f "$APP_DIR/web/src/vite-env.d.ts" ]; then
     echo '/// <reference types="vite/client" />' > "$APP_DIR/web/src/vite-env.d.ts"
     info "vite-env.d.ts criado"
 fi
 
-# Se tsconfig.base.json nao existe no repo, criar minimo
-if [ ! -f "$APP_DIR/tsconfig.base.json" ]; then
-    cat > "$APP_DIR/tsconfig.base.json" << 'TSBASE'
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx"
-  }
-}
-TSBASE
-    info "tsconfig.base.json criado"
-fi
+ok "Arquivos copiados"
 
-ok "Arquivos copiados para ${APP_DIR}"
-
-# ============================================================================
-# ETAPA 5: Instalar dependencias
 # ============================================================================
 step "5/12" "Instalar dependencias"
 
-# Garantir tsx global (usado para migrations, seed e PM2)
-if ! command -v tsx &> /dev/null; then
-    info "Instalando tsx globalmente..."
-    npm install -g tsx > /dev/null 2>&1
-fi
-TSX_PATH=$(which tsx)
-ok "tsx disponivel em ${TSX_PATH}"
-
-info "Instalando dependencias do server..."
 cd "$APP_DIR/server"
 npm install 2>&1 | tail -3
-ok "Server pronto"
+ok "Server"
 
-# Verificar better-sqlite3
-if [ -f "$APP_DIR/server/node_modules/better-sqlite3/build/Release/better_sqlite3.node" ]; then
-    ok "better-sqlite3 compilado com sucesso"
+if [ -f "node_modules/better-sqlite3/build/Release/better_sqlite3.node" ]; then
+    ok "better-sqlite3 OK"
 else
-    warn "better-sqlite3 binario nao encontrado — tentando recompilar..."
-    npm rebuild better-sqlite3 2>&1 | tail -3
+    warn "Recompilando better-sqlite3..."; npm rebuild better-sqlite3 2>&1 | tail -3
 fi
 
-info "Instalando dependencias do web..."
 cd "$APP_DIR/web"
 npm install 2>&1 | tail -3
-ok "Web pronto"
-
-cd "$APP_DIR"
+ok "Web"
 
 # ============================================================================
-# ETAPA 6: Build do frontend
-# ============================================================================
-step "6/12" "Build do frontend (Vite)"
+step "6/12" "Build do frontend"
 
 cd "$APP_DIR/web"
-# Usar vite build diretamente (pular tsc que falha com unused imports)
 npx vite build 2>&1 | tail -5
 
-if [ ! -f "$APP_DIR/web/dist/index.html" ]; then
-    fail "Build falhou — index.html nao encontrado!"
-    exit 1
+[ ! -f "$APP_DIR/web/dist/index.html" ] && { fail "Build falhou!"; exit 1; }
+
+# Verificar se localhost ficou no build
+if grep -q "localhost:3334" "$APP_DIR/web/dist/assets/"*.js 2>/dev/null; then
+    warn "localhost encontrado no build — limpando e refazendo..."
+    rm -rf dist node_modules/.vite
+    npx vite build --force 2>&1 | tail -3
 fi
-ok "Frontend pronto em ${APP_DIR}/web/dist/"
+
+ok "Frontend em web/dist/"
 
 # ============================================================================
-# ETAPA 7: Configurar .env
-# ============================================================================
-step "7/12" "Configurar variaveis de ambiente"
+step "7/12" "Configurar .env"
 
 if [ -f "$APP_DIR/.env" ]; then
-    warn "Arquivo .env ja existe. Mantendo o existente."
+    warn ".env ja existe — mantendo"
 else
     cat > "$APP_DIR/.env" << ENVFILE
-# ================================================================
-# ECP Digital Emps — Variaveis de Ambiente (PRODUCAO)
-# Gerado automaticamente em $(date '+%Y-%m-%d %H:%M:%S')
-# ================================================================
-
-# Servidor
+# ECP Digital Emps — PRODUCAO ($(date '+%Y-%m-%d %H:%M'))
 PORT=${APP_PORT}
 HOST=127.0.0.1
 NODE_ENV=production
 LOG_LEVEL=info
-
-# JWT (DEVE ser igual ao ecp-digital-bank para compartilhar sessao PF/PJ)
 JWT_SECRET=${JWT_SECRET}
-
-# Banco de dados
 DATABASE_PATH=./database-emps.sqlite
-
-# CORS
 CORS_ORIGIN=https://${DOMAIN}
-
-# Referencia ao ecp-digital-bank (PF) na mesma VPS
-PF_API_URL=http://127.0.0.1:${BANK_PORT}
-
-# ECP Pay Integration
-ECP_PAY_URL=http://127.0.0.1:${PAY_PORT}
+PF_API_URL=http://127.0.0.1:3333
+ECP_PAY_URL=http://127.0.0.1:3335
 ECP_PAY_API_KEY=${PAY_API_KEY}
-
-# Webhook do ECP Pay (recebe creditos de split)
 ECP_PAY_WEBHOOK_SECRET=${PAY_WEBHOOK_SECRET}
-
-# Frontend
 VITE_API_URL=https://${DOMAIN}
 VITE_PF_APP_URL=https://bank.ecportilho.com
 ENVFILE
-
-    # Copiar .env tambem para server/ (alguns imports leem de la)
     cp "$APP_DIR/.env" "$APP_DIR/server/.env"
-
-    chmod 600 "$APP_DIR/.env"
-    chmod 600 "$APP_DIR/server/.env"
+    chmod 600 "$APP_DIR/.env" "$APP_DIR/server/.env"
     ok ".env criado"
 fi
 
 # ============================================================================
-# ETAPA 8: Banco de dados (migrations + seed)
-# ============================================================================
 step "8/12" "Banco de dados"
 
+SKIP_SEED=""
 if [ -f "$APP_DIR/database-emps.sqlite" ]; then
-    if ask_yes_no "Banco ja existe. Recriar? (APAGA DADOS)" "n"; then
+    if ask_yes_no "Banco ja existe. Recriar?" "n"; then
         rm -f "$APP_DIR/database-emps.sqlite" "$APP_DIR/database-emps.sqlite-wal" "$APP_DIR/database-emps.sqlite-shm"
-        info "Banco removido. Recriando..."
     else
-        warn "Mantendo banco existente. Pulando seed."
-        SKIP_SEED=1
+        warn "Mantendo banco existente"; SKIP_SEED=1
     fi
 fi
 
-if [ -z "${SKIP_SEED:-}" ]; then
+if [ -z "$SKIP_SEED" ]; then
     cd "$APP_DIR"
-
-    info "Executando migrations..."
+    info "Migrations..."
     $TSX_PATH server/src/database/migrations/run.ts 2>&1 | tail -3
-    ok "Migrations aplicadas"
+    ok "Migrations"
 
-    info "Executando seed..."
+    info "Seed..."
     $TSX_PATH server/src/database/seed.ts 2>&1 | tail -5
-    ok "Banco populado"
+    ok "Seed completo"
 fi
 
 # ============================================================================
-# ETAPA 9: Configurar e iniciar PM2
-# ============================================================================
-step "9/12" "Configurar PM2"
-
-cat > "$APP_DIR/ecosystem.config.cjs" << PMCONF
-module.exports = {
-  apps: [{
-    name: 'ecp-digital-emps',
-    script: '${TSX_PATH}',
-    args: 'server/src/server.ts',
-    cwd: '/opt/ecp-digital-emps-app',
-    instances: 1,
-    exec_mode: 'fork',
-    env_production: {
-      NODE_ENV: 'production',
-      PORT: 3334,
-      HOST: '127.0.0.1',
-    },
-    max_memory_restart: '512M',
-    max_restarts: 10,
-    min_uptime: '10s',
-    restart_delay: 4000,
-    kill_timeout: 5000,
-    listen_timeout: 10000,
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    merge_logs: true,
-    cron_restart: '0 4 * * *',
-  }]
-};
-PMCONF
+step "9/12" "PM2"
 
 pm2 delete "$APP_NAME" 2>/dev/null || true
 
+echo "module.exports={apps:[{name:'ecp-digital-emps',script:'${TSX_PATH}',args:'server/src/server.ts',cwd:'${APP_DIR}',instances:1,exec_mode:'fork',env_production:{NODE_ENV:'production',PORT:${APP_PORT},HOST:'127.0.0.1'},max_memory_restart:'512M',max_restarts:10,min_uptime:'10s',restart_delay:4000,cron_restart:'0 4 * * *'}]};" > "$APP_DIR/ecosystem.config.cjs"
+
 cd "$APP_DIR"
 NODE_ENV=production pm2 start ecosystem.config.cjs --env production
-ok "Aplicacao iniciada com PM2"
 
 sleep 5
 if pm2 pid "$APP_NAME" > /dev/null 2>&1; then
-    ok "PM2 status: online"
+    ok "Online"
 else
-    fail "PM2 nao conseguiu iniciar a aplicacao!"
-    pm2 logs "$APP_NAME" --lines 20 --nostream
-    exit 1
-fi
-
-HEALTH=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/health" 2>/dev/null || echo "000")
-if [ "$HEALTH" = "200" ]; then
-    ok "API respondendo na porta ${APP_PORT}"
-else
-    warn "API retornou HTTP ${HEALTH} — pode nao ter /health, testando /auth/pj/me..."
-    # Testar outra rota
-    ALT=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/auth/pj/me" 2>/dev/null || echo "000")
-    if [ "$ALT" = "401" ] || [ "$ALT" = "200" ]; then
-        ok "API respondendo na porta ${APP_PORT} (auth endpoint funcional)"
-    else
-        fail "API nao respondeu"
-        pm2 logs "$APP_NAME" --lines 20 --nostream
-    fi
+    fail "Nao iniciou!"; pm2 logs "$APP_NAME" --lines 15 --nostream; exit 1
 fi
 
 pm2 save > /dev/null 2>&1
 pm2 startup systemd -u root --hp /root > /dev/null 2>&1 || true
-ok "PM2 configurado para iniciar no boot"
+ok "PM2 configurado"
 
 # ============================================================================
-# ETAPA 10: Configurar Nginx (HTTP temporario)
-# ============================================================================
-step "10/12" "Configurar Nginx"
+step "10/12" "Nginx"
 
-info "Criando configuracao HTTP temporaria..."
-
-cat > /etc/nginx/sites-available/ecp-digital-emps << 'NGINX_TEMP'
+tee /etc/nginx/sites-available/ecp-digital-emps > /dev/null << 'NGX'
 upstream ecp_emps_backend {
     server 127.0.0.1:3334;
     keepalive 16;
 }
-
 server {
     listen 80;
     listen [::]:80;
@@ -448,11 +247,8 @@ server {
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
     gzip_min_length 256;
 
-    location /.well-known/acme-challenge/ {
-        root /var/www/html;
-    }
+    location /.well-known/acme-challenge/ { root /var/www/html; }
 
-    # Webhook endpoint (ECP Pay envia creditos de split)
     location /webhooks/ {
         proxy_pass http://ecp_emps_backend;
         proxy_http_version 1.1;
@@ -463,7 +259,6 @@ server {
         proxy_set_header Connection "";
     }
 
-    # API routes (proxy com rewrite: /api/* -> /*)
     location /api/ {
         proxy_pass http://ecp_emps_backend/;
         proxy_http_version 1.1;
@@ -475,7 +270,6 @@ server {
         proxy_read_timeout 30s;
     }
 
-    # Static assets (frontend build)
     location /assets/ {
         alias /opt/ecp-digital-emps-app/web/dist/assets/;
         expires 1y;
@@ -483,160 +277,90 @@ server {
         access_log off;
     }
 
-    # SPA fallback (React Router)
     location / {
         root /opt/ecp-digital-emps-app/web/dist;
         try_files $uri $uri/ /index.html;
     }
 
-    # Security headers
     add_header X-Frame-Options DENY always;
     add_header X-Content-Type-Options nosniff always;
-
     access_log /var/log/nginx/ecp-digital-emps-access.log;
     error_log /var/log/nginx/ecp-digital-emps-error.log;
 }
-NGINX_TEMP
+NGX
 
-ln -sf /etc/nginx/sites-available/ecp-digital-emps /etc/nginx/sites-enabled/ecp-digital-emps
+ln -sf /etc/nginx/sites-available/ecp-digital-emps /etc/nginx/sites-enabled/
 
 if nginx -t 2>&1 | grep -q "successful"; then
-    systemctl reload nginx
-    ok "Nginx configurado e recarregado (HTTP)"
+    systemctl reload nginx; ok "Nginx OK"
 else
-    fail "Configuracao do Nginx invalida!"
-    nginx -t
-    exit 1
+    fail "Nginx config invalida!"; nginx -t; exit 1
 fi
 
 # ============================================================================
-# ETAPA 11: Certificado SSL (Let's Encrypt)
-# ============================================================================
-step "11/12" "Certificado SSL (Let's Encrypt)"
+step "11/12" "SSL (Let's Encrypt)"
 
-info "Verificando DNS de ${DOMAIN}..."
+SKIP_SSL=""
 RESOLVED_IP=$(dig +short "$DOMAIN" 2>/dev/null | head -1)
 SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
 
 if [ "$RESOLVED_IP" = "$SERVER_IP" ]; then
-    ok "DNS OK: ${DOMAIN} -> ${RESOLVED_IP}"
+    ok "DNS: ${DOMAIN} -> ${RESOLVED_IP}"
 else
-    warn "DNS aponta para '${RESOLVED_IP}', IP deste servidor e '${SERVER_IP}'"
-    if ! ask_yes_no "Tentar gerar o certificado mesmo assim?" "n"; then
-        warn "Pulando SSL. Execute depois:"
-        echo "      certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos -m ${CERTBOT_EMAIL}"
-        SKIP_SSL=1
-    fi
+    warn "DNS: '${RESOLVED_IP}' vs servidor '${SERVER_IP}'"
+    ask_yes_no "Tentar SSL mesmo assim?" "n" || SKIP_SSL=1
 fi
 
-if [ -z "${SKIP_SSL:-}" ]; then
+if [ -z "$SKIP_SSL" ]; then
     if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-        ok "Certificado SSL ja existe para ${DOMAIN}"
+        ok "Certificado ja existe"
     else
-        info "Gerando certificado SSL..."
         certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$CERTBOT_EMAIL"
-        if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-            ok "Certificado SSL gerado com sucesso"
-        else
-            fail "Falha ao gerar certificado SSL"
-            SKIP_SSL=1
-        fi
+        [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ] && ok "SSL gerado" || { fail "SSL falhou"; SKIP_SSL=1; }
     fi
 fi
 
-# ============================================================================
-# ETAPA 12: Verificacao final
 # ============================================================================
 step "12/12" "Verificacao final"
 
 ERRORS=0
 
-if pm2 pid "$APP_NAME" > /dev/null 2>&1; then ok "PM2: ${APP_NAME} esta online"
-else fail "PM2: ${APP_NAME} nao esta rodando"; ERRORS=$((ERRORS + 1)); fi
+pm2 pid "$APP_NAME" > /dev/null 2>&1 && ok "PM2: online" || { fail "PM2: offline"; ERRORS=$((ERRORS+1)); }
 
-HEALTH=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/health" 2>/dev/null || echo "000")
-if [ "$HEALTH" = "200" ]; then ok "API: respondendo na porta ${APP_PORT}"
-else
-    ALT=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/auth/pj/me" 2>/dev/null || echo "000")
-    if [ "$ALT" = "401" ] || [ "$ALT" = "200" ]; then ok "API: respondendo na porta ${APP_PORT}"
-    else fail "API: nao respondeu"; ERRORS=$((ERRORS + 1)); fi
-fi
+H=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/health" 2>/dev/null || echo "000")
+[ "$H" = "200" ] && ok "API: porta ${APP_PORT}" || {
+    A=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${APP_PORT}/auth/pj/me" 2>/dev/null || echo "000")
+    [ "$A" = "401" ] && ok "API: porta ${APP_PORT} (auth funcional)" || { fail "API: sem resposta"; ERRORS=$((ERRORS+1)); }
+}
 
-if [ -f "$APP_DIR/database-emps.sqlite" ]; then
-    DB_SIZE=$(du -h "$APP_DIR/database-emps.sqlite" | cut -f1)
-    ok "Banco: database-emps.sqlite (${DB_SIZE})"
-else fail "Banco: nao encontrado"; ERRORS=$((ERRORS + 1)); fi
+[ -f "$APP_DIR/database-emps.sqlite" ] && ok "Banco: $(du -h "$APP_DIR/database-emps.sqlite" | cut -f1)" || { fail "Banco: nao encontrado"; ERRORS=$((ERRORS+1)); }
+[ -f "$APP_DIR/web/dist/index.html" ] && ok "Frontend: build OK" || { fail "Frontend: sem build"; ERRORS=$((ERRORS+1)); }
+systemctl is-active --quiet nginx && ok "Nginx: rodando" || { fail "Nginx: parado"; ERRORS=$((ERRORS+1)); }
 
-if [ -f "$APP_DIR/web/dist/index.html" ]; then ok "Frontend: build presente"
-else fail "Frontend: build nao encontrado"; ERRORS=$((ERRORS + 1)); fi
-
-if systemctl is-active --quiet nginx; then ok "Nginx: rodando"
-else fail "Nginx: parado"; ERRORS=$((ERRORS + 1)); fi
-
-EXTERNAL_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://${DOMAIN}" 2>/dev/null || echo "000")
-if [ "$EXTERNAL_HTTP" = "200" ] || [ "$EXTERNAL_HTTP" = "301" ]; then ok "HTTP externo: ${DOMAIN} acessivel"
-else warn "HTTP externo: retornou ${EXTERNAL_HTTP}"; fi
-
-if [ -z "${SKIP_SSL:-}" ] && [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-    EXTERNAL_HTTPS=$(curl -s -o /dev/null -w "%{http_code}" "https://${DOMAIN}" 2>/dev/null || echo "000")
-    if [ "$EXTERNAL_HTTPS" = "200" ]; then ok "HTTPS: ${DOMAIN} com SSL ativo"
-    else warn "HTTPS: retornou ${EXTERNAL_HTTPS}"; fi
-fi
-
-BANK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${BANK_PORT}/health" 2>/dev/null || echo "000")
-if [ "$BANK_STATUS" = "200" ]; then ok "ECP Digital Bank: acessivel na porta ${BANK_PORT}"
-else warn "ECP Digital Bank: nao respondeu (pode nao estar rodando)"; fi
-
-PAY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PAY_PORT}/pay/health" 2>/dev/null || echo "000")
-if [ "$PAY_STATUS" = "200" ]; then ok "ECP Digital Pay: acessivel na porta ${PAY_PORT}"
-else warn "ECP Digital Pay: nao respondeu (pode nao estar rodando)"; fi
+grep -q "localhost:3334" "$APP_DIR/web/dist/assets/"*.js 2>/dev/null && { fail "Frontend: localhost no build!"; ERRORS=$((ERRORS+1)); } || ok "Frontend: sem localhost"
 
 # ============================================================================
-# RESULTADO FINAL
-# ============================================================================
-banner "Resultado Final"
+banner "Resultado"
 
-if [ "$ERRORS" -eq 0 ]; then
-    echo -e "  ${GREEN}${BOLD}INSTALACAO CONCLUIDA COM SUCESSO!${NC}"
-else
-    echo -e "  ${YELLOW}${BOLD}INSTALACAO CONCLUIDA COM ${ERRORS} AVISO(S)${NC}"
-fi
+[ "$ERRORS" -eq 0 ] && echo -e "  ${GREEN}${BOLD}INSTALACAO OK!${NC}" || echo -e "  ${YELLOW}${BOLD}INSTALACAO COM ${ERRORS} PROBLEMA(S)${NC}"
 
 echo ""
-echo -e "  ${BOLD}Acesse:${NC}"
-if [ -z "${SKIP_SSL:-}" ] && [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-    echo -e "    Painel PJ:     ${GREEN}https://${DOMAIN}${NC}"
-else
-    echo -e "    Painel PJ:     ${GREEN}http://${DOMAIN}${NC}"
-fi
+echo -e "  ${BOLD}Acesse:${NC}  ${GREEN}https://${DOMAIN}${NC}"
 echo ""
-echo -e "  ${BOLD}Login de teste (empresas):${NC}"
-echo -e "    AB Design Studio:      ${CYAN}ana.beatriz@abdesign.com.br / Senha@123${NC}"
-echo -e "    Pasta & Fogo:           ${CYAN}financeiro@pastaefogo.com.br / Senha@123${NC}"
-echo -e "    Sushi Wave:             ${CYAN}contato@sushiwave.com.br / Senha@123${NC}"
-echo -e "    Burger Lab:             ${CYAN}pagar@burgerlab.com.br / Senha@123${NC}"
-echo -e "    Green Bowl Co.:         ${CYAN}financeiro@greenbowl.com.br / Senha@123${NC}"
-echo -e "    Pizza Club 24h:         ${CYAN}contato@pizzaclub24h.com.br / Senha@123${NC}"
-echo -e "    Brasa & Lenha:          ${CYAN}financeiro@brasaelenha.com.br / Senha@123${NC}"
+echo -e "  ${BOLD}Logins de teste:${NC}"
+echo -e "    financeiro@pastaefogo.com.br     / Senha@123  (Pasta & Fogo)"
+echo -e "    financeiro@brasaelenha.com.br     / Senha@123  (Brasa & Lenha)"
+echo -e "    contato@sushiwave.com.br          / Senha@123  (Sushi Wave)"
+echo -e "    pagar@burgerlab.com.br            / Senha@123  (Burger Lab)"
 echo ""
-echo -e "  ${BOLD}Integracoes:${NC}"
-echo -e "    ECP Bank (PF):  http://127.0.0.1:${BANK_PORT}  → bank.ecportilho.com"
-echo -e "    ECP Pay:        http://127.0.0.1:${PAY_PORT}   → pay.ecportilho.com"
-echo -e "    Webhook:        /webhooks/payment-received (splits do ECP Pay)"
+echo -e "  ${BOLD}Comandos:${NC}"
+echo -e "    pm2 logs ecp-digital-emps          # Logs"
+echo -e "    pm2 reload ecp-digital-emps        # Reiniciar"
 echo ""
-echo -e "  ${BOLD}Comandos uteis:${NC}"
-echo -e "    pm2 status                         # Ver status"
-echo -e "    pm2 logs ecp-digital-emps           # Ver logs"
-echo -e "    pm2 reload ecp-digital-emps         # Reiniciar"
-echo ""
-echo -e "  ${BOLD}Redeploy (atualizar codigo):${NC}"
+echo -e "  ${BOLD}Redeploy:${NC}"
 echo -e "    cd ${REPO_DIR} && git pull origin main"
 echo -e "    cp -r 03-product-delivery/server ${APP_DIR}/"
 echo -e "    cp -r 03-product-delivery/web/src ${APP_DIR}/web/"
-echo -e "    cd ${APP_DIR}/web && npm run build"
+echo -e "    cd ${APP_DIR}/web && npx vite build"
 echo -e "    pm2 reload ecp-digital-emps"
-echo ""
-echo -e "${MAGENTA}======================================================================${NC}"
-echo -e "${BOLD}${MAGENTA}  ECP Digital Emps — Instalacao finalizada!${NC}"
-echo -e "${MAGENTA}======================================================================${NC}"
 echo ""

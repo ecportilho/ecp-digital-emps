@@ -9,6 +9,7 @@ import {
   Building2,
   UserCircle,
 } from 'lucide-react';
+import { useAuthPJ } from '../../hooks/useAuthPJ';
 
 const navItems = [
   { to: '/pj/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,13 +23,18 @@ const navItems = [
 ];
 
 export function SidebarPJ() {
+  const { auth } = useAuthPJ();
+  const companyName = auth?.company?.nomeFantasia || auth?.company?.razaoSocial || 'Empresa';
+  const companyCnpj = (auth?.company?.cnpj || '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  const companyType = auth?.company?.naturezaJuridica?.toUpperCase() || 'PJ';
+
   return (
     <aside className="hidden lg:flex flex-col w-[280px] bg-secondary-bg border-r border-border">
       {/* Logo area */}
       <div className="px-6 py-5 border-b border-border">
         <h1 className="text-xl font-bold text-lime">ECP Emps</h1>
-        <p className="text-sm text-text-secondary mt-1">AB Design Studio</p>
-        <p className="text-xs text-text-tertiary">MEI &bull; 12.345.678/0001-95</p>
+        <p className="text-sm text-text-secondary mt-1">{companyName}</p>
+        <p className="text-xs text-text-tertiary">{companyType} &bull; {companyCnpj}</p>
       </div>
 
       {/* Navigation */}
