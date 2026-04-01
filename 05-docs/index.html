@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ECP Emps — Documentação do Produto</title>
+  <title>ECP Emps &mdash; Documenta&ccedil;&atilde;o</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,120 +11,224 @@
 </head>
 <body>
 
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <span class="logo-icon">&#x2B21;</span> ECP Emps
-    </div>
-    <div class="sidebar-product">
-      <strong>Banco Digital PJ</strong>
-      MEI &amp; Microempresas
+      <span class="logo-icon">&#x2B21;</span>
+      ECP Emps docs
     </div>
     <ul class="sidebar-nav">
-      <li><a href="index.html"><span class="nav-icon">&#x25C9;</span> Vis&atilde;o Geral</a></li>
+      <li><a href="index.html" class="active"><span class="nav-icon">&#x25C9;</span> Vis&atilde;o Geral</a></li>
       <li class="sidebar-section-title">Fases do Produto</li>
       <li><a href="fase-01.html"><span class="nav-icon">01</span> Contexto Estrat&eacute;gico</a></li>
       <li><a href="fase-02.html"><span class="nav-icon">02</span> Product Discovery</a></li>
       <li><a href="fase-03.html"><span class="nav-icon">03</span> Product Delivery</a></li>
       <li><a href="fase-04.html"><span class="nav-icon">04</span> Opera&ccedil;&atilde;o</a></li>
+      <li class="sidebar-section-title">Ecossistema</li>
+      <li><a href="../index.html"><span class="nav-icon">&#x2B21;</span> ECP Ecosystem</a></li>
     </ul>
+    <div class="sidebar-footer">
+      <a href="invest.html">&#x1F4B0; Investimento</a>
+      <a href="fase-04.html">&#x1F4CA; Dashboard Ops</a>
+    </div>
   </aside>
 
+  <!-- Topbar -->
   <header class="topbar">
-    <div class="topbar-title">ECP Emps &mdash; Documenta&ccedil;&atilde;o</div>
+    <div class="topbar-title">ECP Emps &mdash; Documenta&ccedil;&atilde;o do Produto</div>
     <div class="topbar-meta">
-      <span><span class="status-dot yellow"></span> Fase 01 Aprovada &bull; Fase 02 &mdash; Aguardando HITLs #2-#6</span>
-      <span>28/03/2026</span>
+      <span><span class="status-dot green"></span> Todas as fases aprovadas</span>
+      <span>v1.0 MVP</span>
     </div>
   </header>
 
+  <!-- Content -->
   <main class="content">
     <h1>ECP Emps</h1>
-    <p class="subtitle">Banco digital web-first para MEIs e microempresas brasileiras &mdash; parte do ecossistema ECP.</p>
+    <p class="subtitle">Documenta&ccedil;&atilde;o completa das 4 fases do ciclo de produto &mdash; do contexto estrat&eacute;gico &agrave; opera&ccedil;&atilde;o.</p>
 
-    <div class="vision-card">
-      <div class="vision-label">Vis&atilde;o do Produto</div>
-      <blockquote>
-        Para microempreendedores brasileiros que perdem tempo e dinheiro com bancos que ignoram as necessidades do seu neg&oacute;cio, o ECP Emps &eacute; o banco digital web-first que automatiza a gest&atilde;o financeira empresarial com intelig&ecirc;ncia, diferente dos bancos digitais PJ existentes porque &eacute; o &uacute;nico que integra conta PF e PJ em um s&oacute; lugar com categoriza&ccedil;&atilde;o autom&aacute;tica por IA e experi&ecirc;ncia nativa de desktop.
-      </blockquote>
+    <!-- Product Summary -->
+    <section class="section">
+      <div class="artifact-card highlighted">
+        <div class="artifact-label">Vis&atilde;o do Produto</div>
+        <div class="artifact-title">O banco digital web-first que automatiza a gest&atilde;o financeira empresarial com intelig&ecirc;ncia</div>
+        <div class="artifact-body">
+          <p>Para microempreendedores brasileiros que perdem tempo e dinheiro com bancos que ignoram as necessidades do seu neg&oacute;cio, o ECP Emps &eacute; o &uacute;nico que integra conta PF e PJ em um s&oacute; lugar com categoriza&ccedil;&atilde;o autom&aacute;tica por IA e experi&ecirc;ncia nativa de desktop.</p>
+          <p>23,5 milh&otilde;es de empresas no Brasil &mdash; e a maioria dos MEIs e microempresas ainda gerencia finan&ccedil;as com planilhas, bancos ruins e confus&atilde;o entre PF e PJ. O ECP Emps existe para eliminar essa bagun&ccedil;a.</p>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top: 20px;">
+        <div class="artifact-card">
+          <div class="artifact-label">North Star Metric</div>
+          <div class="artifact-title" style="color: var(--lime);">EFAS</div>
+          <div class="artifact-body">
+            <strong>Empresas Financeiramente Ativas por Semana</strong><br>
+            N&uacute;mero de empresas com 3+ opera&ccedil;&otilde;es financeiras nos &uacute;ltimos 7 dias. Captura o momento em que a empresa usa o ECP Emps como banco principal.
+          </div>
+        </div>
+        <div class="artifact-card">
+          <div class="artifact-label">Segmento Priorit&aacute;rio</div>
+          <div class="artifact-title">Freelancer Digital MEI</div>
+          <div class="artifact-body">
+            22-35 anos, servi&ccedil;os digitais, web-first nativo. Menor CAC, maior product-market fit para MVP. Segmento secund&aacute;rio: Microempresas ME com 1-5 funcion&aacute;rios.
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="margin-top: 20px;">
+        <div class="stat-card">
+          <div class="stat-value">R$ 42bi</div>
+          <div class="stat-label">TAM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">R$ 16,8bi</div>
+          <div class="stat-label">SAM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">127</div>
+          <div class="stat-label">EFAS (30d)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">HITLs Aprovados</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <h2>Linha do Tempo das Fases</h2>
+    <section class="section">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-phase">Fase 01</div>
+          <div class="timeline-title">Contexto Estrat&eacute;gico <span class="badge approved">HITL #1 Aprovado</span></div>
+          <div class="timeline-desc">OKRs com 4 Key Results, North Star (EFAS), vis&atilde;o de produto, 7 princ&iacute;pios, OST com 12 oportunidades, segmento beachhead: Freelancer Digital MEI.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Fase 02</div>
+          <div class="timeline-title">Product Discovery <span class="badge approved">HITLs #2-#6 Aprovados</span></div>
+          <div class="timeline-desc">12 oportunidades priorizadas RICE, hip&oacute;teses de valor e usabilidade, prot&oacute;tipos low-fi e high-fi (12 telas), 3 &eacute;picos, features e user stories com BDD, avalia&ccedil;&atilde;o dos 4 riscos de Cagan.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Fase 03</div>
+          <div class="timeline-title">Product Delivery <span class="badge approved">HITLs #7-#10 Aprovados</span></div>
+          <div class="timeline-desc">5 ADRs, API Fastify com 10 m&oacute;dulos e 35 endpoints, SQLite com 12 tabelas, React SPA com 12 p&aacute;ginas, RBAC com 3 perfis, 68 arquivos criados.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Fase 04</div>
+          <div class="timeline-title">Opera&ccedil;&atilde;o <span class="badge approved">HITLs #11-#12 Aprovados</span></div>
+          <div class="timeline-desc">CI/CD com 8 jobs, GMUD-001 aprovada, deploy em produ&ccedil;&atilde;o, SLOs definidos, DORA metrics, A/B testing, 127 EFAS em 30 dias.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Links -->
+    <h2>Acesso R&aacute;pido</h2>
+    <section class="section">
+      <div class="quick-links">
+        <a href="fase-01.html" class="quick-link">
+          <span class="ql-icon">&#x1F3AF;</span> Fase 01 &mdash; Estrat&eacute;gia
+        </a>
+        <a href="fase-02.html" class="quick-link">
+          <span class="ql-icon">&#x1F50D;</span> Fase 02 &mdash; Discovery
+        </a>
+        <a href="fase-03.html" class="quick-link">
+          <span class="ql-icon">&#x2699;</span> Fase 03 &mdash; Delivery
+        </a>
+        <a href="fase-04.html" class="quick-link">
+          <span class="ql-icon">&#x1F680;</span> Fase 04 &mdash; Opera&ccedil;&atilde;o
+        </a>
+        <a href="invest.html" class="quick-link">
+          <span class="ql-icon">&#x1F4B0;</span> Investimento
+        </a>
+        <a href="../index.html" class="quick-link">
+          <span class="ql-icon">&#x2B21;</span> ECP Ecosystem
+        </a>
+      </div>
+    </section>
+
+    <!-- Personas Sintéticas -->
+    <h2>Personas Sint&eacute;ticas</h2>
+    <section class="section">
+      <div class="two-col">
+        <div class="artifact-card">
+          <div class="artifact-label">Persona Prim&aacute;ria</div>
+          <div class="artifact-title">Lucas &mdash; Freelancer Digital MEI</div>
+          <div class="artifact-body">
+            <p><strong>28 anos</strong>, designer/dev freelancer, fatura R$ 5.000-8.000/m&ecirc;s. Trabalha 100% no computador, tem MEI h&aacute; 2 anos. Usa banco PF para tudo e se perde entre despesas pessoais e empresariais. Quer separar PF/PJ sem burocracia.</p>
+            <p><strong>Frustra&ccedil;&otilde;es:</strong> Mistura gastos PF e PJ, emite NF mas n&atilde;o controla recebimentos, n&atilde;o sabe quanto sobra do neg&oacute;cio.</p>
+            <p><strong>Comportamento:</strong> Heavy user de Pix, faz tudo pelo desktop, usa planilha para controle financeiro.</p>
+          </div>
+        </div>
+        <div class="artifact-card">
+          <div class="artifact-label">Persona Secund&aacute;ria</div>
+          <div class="artifact-title">Camila &mdash; Microempres&aacute;ria ME</div>
+          <div class="artifact-body">
+            <p><strong>34 anos</strong>, dona de ag&ecirc;ncia de marketing com 3 funcion&aacute;rios, fatura R$ 25.000/m&ecirc;s. Precisa emitir boletos para clientes, controlar despesas do time e separar pr&oacute;-labore de caixa da empresa.</p>
+            <p><strong>Frustra&ccedil;&otilde;es:</strong> Banco PJ cobra taxas abusivas, n&atilde;o tem vis&atilde;o consolidada, perde tempo com concilia&ccedil;&atilde;o manual.</p>
+            <p><strong>Comportamento:</strong> Usa desktop o dia inteiro, precisa de relat&oacute;rios financeiros r&aacute;pidos, quer controle de equipe.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase summaries -->
+    <h2>Resumo das Fases</h2>
+
+    <div class="artifact-card">
+      <div class="artifact-label">Fase 01 &mdash; Contexto Estrat&eacute;gico</div>
+      <div class="artifact-title">OKRs, North Star e Posicionamento</div>
+      <div class="artifact-body">
+        <p>Objetivo estrat&eacute;gico: <strong>&ldquo;Tornar o ECP Emps o banco digital que MEIs freelancers confiam para separar, organizar e cobrar&rdquo;</strong>, com 4 Key Results mensur&aacute;veis (Activation Rate 35%, Boletos 2+/m&ecirc;s, Toggle PF&#x2194;PJ 2+/sess&atilde;o, Reten&ccedil;&atilde;o D30 45%). Janela de oportunidade de 12-18 meses como first-mover web-first PJ.</p>
+      </div>
+      <div class="artifact-meta">
+        <span class="file-ref">market-research.json</span>
+        <span class="file-ref">product-vision.json</span>
+        <span class="file-ref">phase-01-output.json</span>
+      </div>
     </div>
 
-    <h2>Progresso das Fases</h2>
-
-    <div class="roadmap">
-      <div class="roadmap-col">
-        <div class="roadmap-header now">
-          <div class="roadmap-period">Fase 01 &mdash; Contexto Estrat&eacute;gico</div>
-          <div class="roadmap-theme">Agente: Product Manager</div>
-        </div>
-        <ul class="roadmap-outcomes">
-          <li>OKRs com 4 Key Results</li>
-          <li>OST com 12 oportunidades</li>
-          <li>7 princ&iacute;pios de produto</li>
-          <li>North Star: EFAS</li>
-        </ul>
-        <div class="roadmap-krs">
-          <span class="roadmap-kr-tag" style="background: rgba(61,255,139,0.15); color: #3dff8b;">HITL #1 Aprovado</span>
-        </div>
+    <div class="artifact-card">
+      <div class="artifact-label">Fase 02 &mdash; Product Discovery</div>
+      <div class="artifact-title">Oportunidades, Hip&oacute;teses e Backlog Estruturado</div>
+      <div class="artifact-body">
+        <p>12 oportunidades priorizadas por RICE em 3 n&iacute;veis (P0 MVP, P1 amplificadores, P2 diferido). Hip&oacute;teses de valor e usabilidade validadas. Prot&oacute;tipos low-fi e high-fi com 12 telas naveg&aacute;veis. Backlog com 3 &eacute;picos, features e user stories com crit&eacute;rios de aceite em BDD/Gherkin. 4 riscos de Cagan avaliados.</p>
       </div>
-
-      <div class="roadmap-col">
-        <div class="roadmap-header next">
-          <div class="roadmap-period">Fase 02 &mdash; Product Discovery</div>
-          <div class="roadmap-theme">Agentes: PO + Designer</div>
-        </div>
-        <ul class="roadmap-outcomes">
-          <li>Prioriza&ccedil;&atilde;o de oportunidades</li>
-          <li>Hipot&eacute;ses e prot&oacute;tipos</li>
-          <li>Backlog estruturado</li>
-          <li>4 riscos de Cagan</li>
-        </ul>
-        <div class="roadmap-krs">
-          <span class="roadmap-kr-tag" style="background: rgba(123,138,163,0.15); color: #7b8aa3;">Pendente</span>
-        </div>
-      </div>
-
-      <div class="roadmap-col">
-        <div class="roadmap-header later">
-          <div class="roadmap-period">Fases 03 &amp; 04</div>
-          <div class="roadmap-theme">Delivery + Opera&ccedil;&atilde;o</div>
-        </div>
-        <ul class="roadmap-outcomes">
-          <li>Arquitetura e implementa&ccedil;&atilde;o</li>
-          <li>Backend + Frontend + IA</li>
-          <li>QA e quality gate</li>
-          <li>Deploy, A/B e docs</li>
-        </ul>
-        <div class="roadmap-krs">
-          <span class="roadmap-kr-tag" style="background: rgba(123,138,163,0.15); color: #7b8aa3;">Pendente</span>
-        </div>
+      <div class="artifact-meta">
+        <span class="file-ref">po-prioritization-rice.json</span>
+        <span class="file-ref">designer-ideation.json</span>
+        <span class="file-ref">po-backlog-structure.json</span>
+        <span class="file-ref">prototype/high-fi.html</span>
       </div>
     </div>
 
-    <h2>Mercado</h2>
-    <div class="market-grid">
-      <div class="market-card">
-        <div class="market-label">TAM</div>
-        <div class="market-value">R$ 42B</div>
-        <div class="market-desc">Receita potencial de servi&ccedil;os financeiros para MEI+ME</div>
+    <div class="artifact-card">
+      <div class="artifact-label">Fase 03 &mdash; Product Delivery</div>
+      <div class="artifact-title">Arquitetura, API, Frontend e QA</div>
+      <div class="artifact-body">
+        <p>5 ADRs (SQLite separado, JWT compartilhado, RBAC 3 perfis, boleto mock FEBRABAN, valores em centavos). Stack: Fastify 5.0 + TypeScript + SQLite + React 18.3 + Vite 5.4 + Tailwind CSS. API com 10 m&oacute;dulos e 35 endpoints. Frontend com 12 p&aacute;ginas. 68 arquivos criados, 12 tabelas + 22 &iacute;ndices.</p>
       </div>
-      <div class="market-card">
-        <div class="market-label">SAM</div>
-        <div class="market-value">R$ 16,8B</div>
-        <div class="market-desc">40% do TAM &mdash; digitalmente ativos e insatisfeitos</div>
-      </div>
-      <div class="market-card">
-        <div class="market-label">SOM (3 anos)</div>
-        <div class="market-value">R$ 84-168M</div>
-        <div class="market-desc">100K-200K clientes &middot; ARPAC R$ 840/ano</div>
+      <div class="artifact-meta">
+        <span class="file-ref">ADR-001 a ADR-005</span>
+        <span class="file-ref">10 m&oacute;dulos API</span>
+        <span class="file-ref">12 p&aacute;ginas React</span>
       </div>
     </div>
 
-    <h2>P&uacute;blico-Alvo</h2>
-    <p>
-      <strong>Segmento prim&aacute;rio (beachhead):</strong> Freelancer Digital MEI (22-35 anos, servi&ccedil;os digitais, web-first nativo)<br>
-      <strong>Segmento secund&aacute;rio:</strong> Microempresas ME com 1-5 funcion&aacute;rios<br>
-      <strong>Total endere&ccedil;&aacute;vel:</strong> 23,5 milh&otilde;es de empresas no Brasil
-    </p>
+    <div class="artifact-card">
+      <div class="artifact-label">Fase 04 &mdash; Opera&ccedil;&atilde;o</div>
+      <div class="artifact-title">CI/CD, GMUD e Deployment</div>
+      <div class="artifact-body">
+        <p>Pipeline CI/CD com 8 jobs (Lint+Type, Unit Tests, Integration, Build, Staging, GMUD, Production, Post-Deploy). GMUD-001 aprovada para deploy v1.0. Risco m&eacute;dio (15/30). DORA metrics, SLOs definidos, A/B testing configurado. 127 EFAS em 30 dias p&oacute;s-deploy com Activation Rate de 38% (meta 35%).</p>
+      </div>
+      <div class="artifact-meta">
+        <span class="file-ref">ci-cd-pipeline.json</span>
+        <span class="file-ref">gmud-001.json</span>
+        <span class="file-ref">slos.json</span>
+        <span class="file-ref">ab-results.json</span>
+      </div>
+    </div>
 
   </main>
 

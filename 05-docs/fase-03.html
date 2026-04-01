@@ -8,6 +8,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#131c28',
+        primaryTextColor: '#eaf2ff',
+        primaryBorderColor: '#1c2836',
+        lineColor: '#b7ff2a',
+        secondaryColor: '#0f1620',
+        tertiaryColor: '#0b0f14',
+        fontFamily: 'Inter, sans-serif'
+      }
+    });
+  </script>
   <style>
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
     .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; }
@@ -109,6 +125,187 @@
         <tr><td><strong>Banco</strong></td><td>SQLite3</td><td>&#8212;</td><td>database-emps.sqlite (WAL mode)</td></tr>
       </tbody>
     </table>
+
+    <!-- ═══════════════════ DDD ═══════════════════ -->
+    <h3>Bounded Contexts (Domain-Driven Design)</h3>
+    <p>6 Bounded Contexts em mon&oacute;lito modular Fastify. Separa&ccedil;&atilde;o l&oacute;gica por m&oacute;dulos com JWT compartilhado PF/PJ.</p>
+
+    <div class="mermaid">
+classDiagram
+    class IdentityPJ {
+        +AuthPJ (switch PF-PJ)
+        +RBAC Middleware
+        +JWT shared com PF
+        POST /auth/pj/switch
+        GET /auth/pj/me
+    }
+    class CompanyMgmt {
+        +Company (aggregate root)
+        +TeamMember
+        +CNPJ, NaturezaJuridica
+        POST /companies
+        GET /companies/me
+        PATCH /companies/me
+    }
+    class BankingPJ {
+        +PJAccount (aggregate root)
+        +PJTransaction
+        +Money, Category
+        GET /pj/accounts/balance
+        POST /pj/accounts/transfer-pf
+    }
+    class PixPJ {
+        +PJPixKey (aggregate root)
+        +PixTransfer
+        +PixKeyType, RateLimit
+        POST /pj/pix/transfer
+        CRUD /pj/pix/keys
+    }
+    class Billing {
+        +Invoice (aggregate root)
+        +Barcode, PixQRCode
+        +InvoiceStatus
+        POST /pj/invoices
+        GET /pj/invoices
+    }
+    class CorporateCards {
+        +CorporateCard (aggregate root)
+        +CardPurchase, CardInvoice
+        +CardLimit
+        CRUD /pj/corporate-cards
+        GET /pj/corporate-cards/:id/invoice
+    }
+    IdentityPJ --> CompanyMgmt : PJ context
+    IdentityPJ --> BankingPJ : User authenticated
+    CompanyMgmt --> BankingPJ : Company owns Account
+    PixPJ --> BankingPJ : debit/credit
+    Billing --> BankingPJ : credit on payment
+    CorporateCards --> BankingPJ : debit on purchase
+    </div>
+
+    <!-- ═══════════════════ SEQUENCE DIAGRAMS ═══════════════════ -->
+    <h2>Diagramas de Sequ&ecirc;ncia</h2>
+
+    <h3>Switch PF &#x2192; PJ &mdash; Autentica&ccedil;&atilde;o Compartilhada</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as Usu&aacute;rio (Browser)
+    participant F as Frontend (React)
+    participant A as API Emps (Fastify :3334)
+    participant DB as SQLite (database-emps)
+
+    Note over U,DB: Usu&aacute;rio j&aacute; logado no Bank PF
+
+    U->>F: Clica "Mudar para PJ"
+    F->>A: POST /api/auth/pj/switch
+    Note over A: Header: Authorization Bearer (JWT do PF)
+
+    A->>A: Valida JWT (shared secret com PF)
+    A->>DB: SELECT company WHERE owner_user_id = ?
+    DB-->>A: company { id, cnpj, razao_social }
+    A->>DB: SELECT team_member WHERE user_id = ? AND company_id = ?
+    DB-->>A: { role: "admin" }
+
+    A->>A: Gera contexto PJ (companyId + role)
+    A-->>F: { company, role, pjAccount }
+    F->>F: Ativa modo PJ no ProfileSwitcher
+    F-->>U: Dashboard PJ carregado
+    </div>
+
+    <h3>Pix PJ &mdash; Transfer&ecirc;ncia Empresarial</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as Usu&aacute;rio (Browser)
+    participant F as Frontend (React)
+    participant A as API Emps (Fastify)
+    participant DB as SQLite
+
+    U->>F: Informa chave Pix destino
+    F->>A: GET /api/pj/pix/lookup?key=...
+    A->>DB: SELECT pix_key WHERE key_value = ?
+    A-->>F: { name, keyType }
+    F-->>U: Exibe destinat&aacute;rio
+
+    U->>F: Informa valor (ex: R$ 2.000)
+    F->>A: POST /api/pj/pix/transfer
+    Note over A: Middleware: JWT + requireRole(financial)
+
+    A->>A: Verificar rate limit (20/hora)
+    A->>DB: SELECT COUNT pj_pix_rate_limit (ultima hora)
+    DB-->>A: count = 5 (OK)
+
+    A->>A: Verificar saldo PJ
+    A->>DB: SELECT balance FROM pj_accounts
+    DB-->>A: balance = 850000 (R$ 8.500)
+
+    Note over A,DB: Transa&ccedil;&atilde;o at&ocirc;mica (SQLite)
+    A->>DB: BEGIN TRANSACTION
+    A->>DB: UPDATE pj_accounts SET balance -= 200000
+    A->>DB: INSERT pj_transactions (d&eacute;bito, category: pix_out)
+    A->>DB: INSERT pj_pix_rate_limit
+    A->>DB: INSERT pj_audit_logs (action: pix_transfer)
+    A->>DB: COMMIT
+
+    A-->>F: { transactionId, status: "completed", balanceAfter }
+    F-->>U: Comprovante de transfer&ecirc;ncia PJ
+    </div>
+
+    <h3>Emiss&atilde;o de Boleto de Cobran&ccedil;a</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as Usu&aacute;rio (Browser)
+    participant F as Frontend (React)
+    participant A as API Emps (Fastify)
+    participant DB as SQLite
+
+    U->>F: Preenche dados da cobran&ccedil;a
+    Note over F: customer_name, amount, due_date, type
+
+    F->>A: POST /api/pj/invoices
+    Note over A: Middleware: JWT + requireRole(financial)
+
+    A->>A: Validar dados (Zod schema)
+    A->>A: Gerar barcode FEBRABAN (mock)
+    A->>A: Gerar Pix QR Code (copia-e-cola)
+
+    A->>DB: INSERT invoices (status: pending)
+    DB-->>A: { invoiceId }
+    A->>DB: INSERT pj_notifications (nova cobran&ccedil;a criada)
+
+    A-->>F: { id, barcode, pixQrcode, status: "pending" }
+    F-->>U: Preview do boleto + QR Code Pix
+    </div>
+
+    <h3>Dashboard PJ &mdash; Carregamento Inicial</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant U as Usu&aacute;rio (Browser)
+    participant F as Frontend (React)
+    participant A as API Emps (Fastify)
+    participant DB as SQLite
+
+    U->>F: Acessa /pj/dashboard
+    F->>F: Verifica JWT + contexto PJ
+
+    par Chamadas paralelas
+        F->>A: GET /api/pj/dashboard
+        A->>DB: SELECT balance FROM pj_accounts
+        A->>DB: SELECT SUM(amount) GROUP BY direction (cash flow)
+        A->>DB: SELECT COUNT invoices BY status (cobran&ccedil;as)
+        A-->>F: { balance, cashFlow, invoiceSummary }
+    and
+        F->>A: GET /api/pj/transactions?limit=5
+        A->>DB: SELECT * FROM pj_transactions ORDER BY created_at DESC
+        A-->>F: { transactions: [...] }
+    and
+        F->>A: GET /api/pj/notifications/unread-count
+        A->>DB: SELECT COUNT(*) WHERE is_read = 0
+        A-->>F: { count: 7 }
+    end
+
+    F->>F: Renderiza dashboard PJ completo
+    F-->>U: Saldo + Cash Flow + Cobran&ccedil;as + Transa&ccedil;&otilde;es + Notifica&ccedil;&otilde;es
+    </div>
 
     <!-- ═══════════════════ ADRs ═══════════════════ -->
     <h2>Architectural Decision Records (ADRs)</h2>
@@ -217,6 +414,137 @@
         <div class="module-desc">Audit trail completo</div>
         <div class="module-files">id, company_id, user_id, action, resource, resource_id, metadata, ip_address</div>
       </div>
+    </div>
+
+    <!-- ═══════════════════ ER DIAGRAM ═══════════════════ -->
+    <h3>Diagrama Entidade-Relacionamento</h3>
+    <p>12 tabelas, 22 &iacute;ndices. SQLite3 com WAL mode e foreign keys habilitadas. Valores monet&aacute;rios em centavos (INTEGER).</p>
+
+    <div class="mermaid">
+erDiagram
+    companies {
+        TEXT id PK
+        TEXT owner_user_id FK
+        TEXT cnpj UK
+        TEXT razao_social
+        TEXT nome_fantasia
+        TEXT natureza_juridica
+        TEXT endereco
+        TEXT status
+        TEXT created_at
+    }
+
+    pj_accounts {
+        TEXT id PK
+        TEXT company_id FK "UK"
+        TEXT agency
+        TEXT number UK
+        INTEGER balance
+        INTEGER daily_transfer_limit
+        TEXT status
+    }
+
+    team_members {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT user_id FK
+        TEXT role "admin|financial|viewer"
+        TEXT status "active|invited|removed"
+    }
+
+    pj_transactions {
+        TEXT id PK
+        TEXT account_id FK
+        TEXT operator_id FK
+        TEXT type
+        TEXT category
+        INTEGER amount
+        INTEGER balance_after
+        TEXT direction "in|out"
+        TEXT reference_id UK
+    }
+
+    pj_pix_keys {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT account_id FK
+        TEXT type "cnpj|email|phone|random"
+        TEXT value UK
+        TEXT status
+    }
+
+    invoices {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT customer_name
+        INTEGER amount
+        TEXT due_date
+        TEXT barcode
+        TEXT pix_qrcode
+        TEXT status "pending|paid|overdue|cancelled"
+        TEXT type "single|installment|recurring"
+    }
+
+    corporate_cards {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT holder_id FK
+        TEXT last4
+        INTEGER limit_cents
+        INTEGER used_cents
+        INTEGER due_day
+        TEXT status
+    }
+
+    corporate_card_purchases {
+        TEXT id PK
+        TEXT card_id FK
+        TEXT merchant_name
+        TEXT merchant_category
+        INTEGER amount
+        TEXT status
+    }
+
+    corporate_invoices {
+        TEXT id PK
+        TEXT card_id FK
+        TEXT reference_month
+        INTEGER total_cents
+        TEXT due_date
+        TEXT status "open|closed|paid|overdue"
+    }
+
+    pj_notifications {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT user_id FK
+        TEXT title
+        TEXT body
+        TEXT type
+        INTEGER is_read
+    }
+
+    pj_audit_logs {
+        TEXT id PK
+        TEXT company_id FK
+        TEXT user_id FK
+        TEXT action
+        TEXT resource
+        TEXT resource_id
+        TEXT metadata
+        TEXT ip_address
+    }
+
+    companies ||--|| pj_accounts : "has"
+    companies ||--o{ team_members : "has"
+    companies ||--o{ pj_pix_keys : "registers"
+    companies ||--o{ invoices : "issues"
+    companies ||--o{ corporate_cards : "owns"
+    companies ||--o{ pj_notifications : "receives"
+    companies ||--o{ pj_audit_logs : "logs"
+    pj_accounts ||--o{ pj_transactions : "records"
+    corporate_cards ||--o{ corporate_card_purchases : "has"
+    corporate_cards ||--o{ corporate_invoices : "generates"
     </div>
 
     <!-- ═══════════════════ API MODULES ═══════════════════ -->
