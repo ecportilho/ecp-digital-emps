@@ -32,7 +32,7 @@ export function SidebarPJ() {
     <aside className="hidden lg:flex flex-col w-[280px] bg-secondary-bg border-r border-border">
       {/* Logo area */}
       <div className="px-6 py-5 border-b border-border">
-        <h1 className="text-xl font-bold text-lime">ECP Emps</h1>
+        <h1 className="text-xl font-bold text-lime"><span className="text-2xl">&#x2B21;</span> ECP Emps</h1>
         <p className="text-sm text-text-secondary mt-1">{companyName}</p>
         <p className="text-xs text-text-tertiary">{companyType} &bull; {companyCnpj}</p>
       </div>
