@@ -68,7 +68,7 @@ export function ProfileSwitcher() {
                   onClick={() => {
                     setIsOpen(false);
                     if (profile.type === 'pf') {
-                      const pfUrl = import.meta.env.VITE_PF_APP_URL || 'http://localhost:5173';
+                      const pfUrl = import.meta.env.VITE_PF_APP_URL || 'https://bank.ecportilho.com';
                       window.location.href = pfUrl;
                     }
                   }}
