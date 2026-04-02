@@ -22,12 +22,14 @@ import { formatCurrency } from '../lib/formatters';
 interface CardItem {
   id: string;
   last4: string;
-  holderName: string;
-  companyName: string;
-  limit: number;
-  used: number;
+  cardHolder: string;
+  holderName?: string;
+  companyName?: string;
+  limitCents: number;
+  usedCents: number;
+  availableCents: number;
   status: 'active' | 'blocked';
-  type: 'virtual' | 'physical';
+  type?: 'virtual' | 'physical';
 }
 
 function Skeleton({ className = '' }: { className?: string }) {
@@ -62,9 +64,9 @@ export default function CartoesLista() {
     setActionError('');
     try {
       await apiPJ.post('/pj/cards', {
-        holderName: newHolderName,
-        limit: parseCents(newLimit),
-        type: newType,
+        holderId: newHolderName,
+        limitCents: parseCents(newLimit),
+        dueDay: 25,
       });
       setShowNewModal(false);
       setNewHolderName('');
@@ -94,7 +96,7 @@ export default function CartoesLista() {
     setActionError('');
     try {
       await apiPJ.patch(`/pj/cards/${selectedCard.id}`, {
-        limit: parseCents(limitStr),
+        limitCents: parseCents(limitStr),
       });
       setShowLimitModal(false);
       setSelectedCard(null);
@@ -108,7 +110,7 @@ export default function CartoesLista() {
 
   const openLimitModal = (card: CardItem) => {
     setSelectedCard(card);
-    setLimitStr((card.limit / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+    setLimitStr((card.limitCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
     setActionError('');
     setShowLimitModal(true);
   };
@@ -165,7 +167,7 @@ export default function CartoesLista() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {cards.map((card) => {
-            const usagePercent = getUsagePercent(card.used, card.limit);
+            const usagePercent = getUsagePercent(card.usedCents, card.limitCents);
             const usageColor = getUsageColor(usagePercent);
             return (
               <div key={card.id} className="space-y-4">
@@ -188,7 +190,7 @@ export default function CartoesLista() {
                   <div className="flex justify-between">
                     <div>
                       <p className="text-xs text-text-tertiary">Titular</p>
-                      <p className="text-sm font-medium text-text-primary">{card.holderName}</p>
+                      <p className="text-sm font-medium text-text-primary">{card.cardHolder}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-text-tertiary">Empresa</p>
@@ -202,7 +204,7 @@ export default function CartoesLista() {
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm text-text-secondary">Limite utilizado</p>
                     <p className="text-sm font-medium text-text-primary">
-                      {formatCurrency(card.used)} / {formatCurrency(card.limit)}
+                      {formatCurrency(card.usedCents)} / {formatCurrency(card.limitCents)}
                     </p>
                   </div>
                   <div className="w-full h-2.5 rounded-full bg-border">
@@ -212,7 +214,7 @@ export default function CartoesLista() {
                     />
                   </div>
                   <p className="text-xs text-text-tertiary mt-1.5">
-                    {usagePercent.toFixed(0)}% utilizado - Disponivel: {formatCurrency(card.limit - card.used)}
+                    {usagePercent.toFixed(0)}% utilizado - Disponivel: {formatCurrency(card.limitCents - card.usedCents)}
                   </p>
 
                   {/* Actions */}
@@ -319,7 +321,7 @@ export default function CartoesLista() {
         <div className="space-y-4">
           {selectedCard && (
             <p className="text-sm text-text-secondary">
-              Cartao **** {selectedCard.last4} - {selectedCard.holderName}
+              Cartao **** {selectedCard.last4} - {selectedCard.cardHolder}
             </p>
           )}
           <Input
