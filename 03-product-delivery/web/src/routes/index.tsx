@@ -11,15 +11,7 @@ import CartoesLista from './cartoes-lista';
 import CartoesFatura from './cartoes-fatura';
 import Team from './team';
 import Empresa from './empresa';
-
-function PerfilPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-text-primary">Perfil</h1>
-      <p className="mt-2 text-text-secondary">Dados do operador</p>
-    </div>
-  );
-}
+import PerfilPage from './perfil';
 
 export function AppRoutes() {
   return (
