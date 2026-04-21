@@ -69,6 +69,14 @@ export function useAuthPJ() {
     localStorage.removeItem('pj_token');
     setAuth(null);
     setError(null);
+    // useAuthPJ() cria estado independente em cada componente que o chama
+    // (SidebarPJ, HeaderPJ, App etc.). Sem isto, apenas o componente que
+    // disparou o logout limpa o proprio estado — o App.tsx continua com
+    // isAuthenticated=true e nao redireciona, mas as chamadas de API ja
+    // quebram porque o token foi removido. Navegar para '/' forca o
+    // re-mount limpo da arvore; todos os hooks releem o localStorage
+    // (ja vazio) e o App.tsx renderiza o LoginPage.
+    window.location.href = '/';
   }, []);
 
   useEffect(() => {
