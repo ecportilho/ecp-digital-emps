@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import type { InviteMemberInput, UpdateRoleInput } from './team.schema.js';
 
 interface MemberRow {
@@ -57,10 +58,14 @@ export function inviteMember(companyId: string, userId: string, input: InviteMem
       VALUES (?, ?, NULL, ?, ?, 'team')
     `).run(generateId(), companyId, 'Novo membro convidado', `${input.name} foi convidado como ${input.role}`);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'add_member', 'team_member', ?, ?)
-    `).run(generateId(), companyId, userId, memberId, JSON.stringify({ email: input.email, role: input.role }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'add_member',
+      resource: 'team_member',
+      resourceId: memberId,
+      metadata: { email: input.email, role: input.role },
+    });
   })();
 
   const member = db.prepare('SELECT * FROM team_members WHERE id = ?').get(memberId) as MemberRow;
@@ -89,10 +94,14 @@ export function updateMemberRole(companyId: string, userId: string, memberId: st
   db.transaction(() => {
     db.prepare('UPDATE team_members SET role = ? WHERE id = ?').run(input.role, memberId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'update_member_role', 'team_member', ?, ?)
-    `).run(generateId(), companyId, userId, memberId, JSON.stringify({ oldRole: member.role, newRole: input.role }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'update_member_role',
+      resource: 'team_member',
+      resourceId: memberId,
+      metadata: { oldRole: member.role, newRole: input.role },
+    });
   })();
 
   const updated = db.prepare('SELECT * FROM team_members WHERE id = ?').get(memberId) as MemberRow;
@@ -120,10 +129,14 @@ export function removeMember(companyId: string, userId: string, memberId: string
     db.prepare("UPDATE team_members SET status = 'removed', removed_at = datetime('now') WHERE id = ?")
       .run(memberId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'remove_member', 'team_member', ?, ?)
-    `).run(generateId(), companyId, userId, memberId, JSON.stringify({ name: member.name, email: member.email }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'remove_member',
+      resource: 'team_member',
+      resourceId: memberId,
+      metadata: { name: member.name, email: member.email },
+    });
   })();
 
   return { success: true };

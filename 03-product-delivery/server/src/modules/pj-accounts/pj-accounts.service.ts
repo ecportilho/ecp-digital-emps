@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import type { TransferPfInput } from './pj-accounts.schema.js';
 
 interface AccountRow {
@@ -84,10 +85,14 @@ export function transferPf(companyId: string, userId: string, input: TransferPfI
       generateId()
     );
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'transfer_pf', 'transaction', ?, ?)
-    `).run(generateId(), companyId, userId, txId, JSON.stringify({ direction: input.direction, amount: input.amount }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'transfer_pf',
+      resource: 'transaction',
+      resourceId: txId,
+      metadata: { direction: input.direction, amount: input.amount },
+    });
   })();
 
   return {

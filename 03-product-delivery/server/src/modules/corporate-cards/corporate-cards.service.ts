@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import bcrypt from 'bcryptjs';
 import type { CreateCardInput, UpdateCardLimitInput, BlockCardInput } from './corporate-cards.schema.js';
 
@@ -95,10 +96,14 @@ export function createCard(companyId: string, userId: string, input: CreateCardI
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'active')
     `).run(cardId, companyId, account.id, input.holderId, hashedNumber, last4, holder.name.toUpperCase(), expiry, input.limitCents, input.dueDay);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'create_card', 'card', ?, ?)
-    `).run(generateId(), companyId, userId, cardId, JSON.stringify({ holderId: input.holderId, limit: input.limitCents }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'create_card',
+      resource: 'card',
+      resourceId: cardId,
+      metadata: { holderId: input.holderId, limit: input.limitCents },
+    });
   })();
 
   const card = db.prepare('SELECT * FROM corporate_cards WHERE id = ?').get(cardId) as CardRow;
@@ -140,10 +145,14 @@ export function updateCardLimit(companyId: string, userId: string, cardId: strin
     db.prepare("UPDATE corporate_cards SET limit_cents = ?, updated_at = datetime('now') WHERE id = ?")
       .run(input.limitCents, cardId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'update_card_limit', 'card', ?, ?)
-    `).run(generateId(), companyId, userId, cardId, JSON.stringify({ oldLimit: card.limit_cents, newLimit: input.limitCents }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'update_card_limit',
+      resource: 'card',
+      resourceId: cardId,
+      metadata: { oldLimit: card.limit_cents, newLimit: input.limitCents },
+    });
   })();
 
   return getCard(companyId, cardId);
@@ -165,10 +174,14 @@ export function blockCard(companyId: string, userId: string, cardId: string, inp
     db.prepare("UPDATE corporate_cards SET status = ?, updated_at = datetime('now') WHERE id = ?")
       .run(newStatus, cardId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, ?, 'card', ?, ?)
-    `).run(generateId(), companyId, userId, input.blocked ? 'block_card' : 'unblock_card', cardId, JSON.stringify({ previousStatus: card.status }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: input.blocked ? 'block_card' : 'unblock_card',
+      resource: 'card',
+      resourceId: cardId,
+      metadata: { previousStatus: card.status },
+    });
   })();
 
   return { id: cardId, status: newStatus };

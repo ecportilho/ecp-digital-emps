@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { errorHandler } from './shared/middleware/error-handler.js';
+import { requestContextStorage } from './shared/utils/request-context.js';
 import { authPjRoutes } from './modules/auth-pj/auth-pj.routes.js';
 import { companiesRoutes } from './modules/companies/companies.routes.js';
 import { pjAccountsRoutes } from './modules/pj-accounts/pj-accounts.routes.js';
@@ -31,6 +32,12 @@ export async function buildApp() {
   });
 
   await app.register(helmet, { contentSecurityPolicy: false });
+
+  // Per-request async context so services can emit ip-tagged audit logs without
+  // threading request.ip through every function signature.
+  app.addHook('onRequest', (request, _reply, done) => {
+    requestContextStorage.run({ ip: request.ip ?? null }, () => done());
+  });
 
   app.setErrorHandler(errorHandler);
 

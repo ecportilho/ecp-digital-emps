@@ -133,10 +133,36 @@ export default function PJDashboard() {
           <p className="text-3xl font-bold text-lime mt-1">
             {balanceVisible ? formatCurrency(dashboard.balance) : 'R$ ••••••'}
           </p>
-          <p className="text-xs text-success mt-1 flex items-center gap-1">
-            <TrendingUp size={12} />
-            Rendendo 100% CDI
-          </p>
+          {(() => {
+            // CDI 12% a.a. (valor de referencia 2026) → ~0.0457% ao dia util.
+            // Estimativa diaria de rendimento: saldo * taxa_diaria.
+            // Mostramos apenas se o saldo for positivo e nao estivermos ocultando valores.
+            const CDI_ANNUAL = 0.12;
+            const DAILY_RATE = Math.pow(1 + CDI_ANNUAL, 1 / 252) - 1;
+            const dailyYield = Math.round(dashboard.balance * DAILY_RATE);
+            if (!balanceVisible) {
+              return (
+                <p className="text-xs text-success mt-1 flex items-center gap-1">
+                  <TrendingUp size={12} />
+                  Rendendo 100% CDI
+                </p>
+              );
+            }
+            if (dailyYield <= 0) {
+              return (
+                <p className="text-xs text-text-tertiary mt-1 flex items-center gap-1">
+                  <TrendingUp size={12} />
+                  Rendimento 100% CDI — comeca quando houver saldo
+                </p>
+              );
+            }
+            return (
+              <p className="text-xs text-success mt-1 flex items-center gap-1">
+                <TrendingUp size={12} />
+                Rendendo 100% CDI — aprox. {formatCurrency(dailyYield)}/dia util
+              </p>
+            );
+          })()}
         </div>
       </Card>
 

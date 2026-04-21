@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import { generateBarcode, generateDigitableLine } from '../../shared/utils/boleto.js';
 import { ecpPayClient } from '../../services/ecp-pay-client.js';
 import type { CreateInvoiceInput, ListInvoicesInput } from './invoices.schema.js';
@@ -109,8 +110,14 @@ export async function createInvoice(companyId: string, userId: string, input: Cr
     ecpPayTransactionId = payResult.transaction_id;
     pixQrcode = payResult.pix_qr_code ?? null;
     pixCopyPaste = payResult.pix_copy_paste ?? null;
-  } catch {
-    // ECP Pay unavailable — fall back to local mock barcode generation
+  } catch (err) {
+    // ECP Pay unavailable — fall back to local mock barcode generation.
+    // Log explicitly so the degradation is visible in ops; silent fallback was
+    // masking upstream outages.
+    const reason = err instanceof Error ? err.message : String(err);
+    console.warn(
+      `[ecp-pay-fallback] createBoletoCharge failed, generating local mock barcode | amount=${input.amount} | reason=${reason}`
+    );
     barcode = generateBarcode(input.amount, input.dueDate);
     digitableLine = generateDigitableLine(barcode);
   }
@@ -136,10 +143,14 @@ export async function createInvoice(companyId: string, userId: string, input: Cr
       auditMeta.ecpPayTransactionId = ecpPayTransactionId;
     }
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'create_invoice', 'invoice', ?, ?)
-    `).run(generateId(), companyId, userId, invoiceId, JSON.stringify(auditMeta));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'create_invoice',
+      resource: 'invoice',
+      resourceId: invoiceId,
+      metadata: auditMeta,
+    });
   })();
 
   const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as InvoiceRow;
@@ -219,10 +230,14 @@ export function cancelInvoice(companyId: string, userId: string, invoiceId: stri
     db.prepare("UPDATE invoices SET status = 'cancelled', updated_at = datetime('now') WHERE id = ?")
       .run(invoiceId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'cancel_invoice', 'invoice', ?, ?)
-    `).run(generateId(), companyId, userId, invoiceId, JSON.stringify({ previousStatus: invoice.status }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'cancel_invoice',
+      resource: 'invoice',
+      resourceId: invoiceId,
+      metadata: { previousStatus: invoice.status },
+    });
   })();
 
   return { id: invoiceId, status: 'cancelled' };
@@ -242,10 +257,14 @@ export function resendInvoice(companyId: string, userId: string, invoiceId: stri
     db.prepare("UPDATE invoices SET notification_sent = 1, updated_at = datetime('now') WHERE id = ?")
       .run(invoiceId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'resend_invoice', 'invoice', ?, ?)
-    `).run(generateId(), companyId, userId, invoiceId, JSON.stringify({ email: invoice.customer_email }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'resend_invoice',
+      resource: 'invoice',
+      resourceId: invoiceId,
+      metadata: { email: invoice.customer_email },
+    });
   })();
 
   return { id: invoiceId, notificationSent: true };

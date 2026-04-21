@@ -3,6 +3,7 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
 import { validateCnpj } from '../../shared/utils/cnpj.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import type { CreateCompanyInput, UpdateCompanyInput } from './companies.schema.js';
 
 interface CompanyRow {
@@ -56,10 +57,14 @@ export function createCompany(userId: string, input: CreateCompanyInput) {
       VALUES (?, ?, ?, 'admin', ?, ?, 'active', datetime('now'))
     `).run(memberId, companyId, userId, input.razaoSocial, `admin@empresa.com`);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'create_company', 'company', ?, ?)
-    `).run(generateId(), companyId, userId, companyId, JSON.stringify({ cnpj: strippedCnpj }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'create_company',
+      resource: 'company',
+      resourceId: companyId,
+      metadata: { cnpj: strippedCnpj },
+    });
   })();
 
   return { id: companyId, accountId, status: 'active' };
@@ -117,10 +122,14 @@ export function updateCompany(companyId: string, userId: string, input: UpdateCo
   db.transaction(() => {
     db.prepare(`UPDATE companies SET ${sets.join(', ')} WHERE id = ?`).run(...values);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'update_company', 'company', ?, ?)
-    `).run(generateId(), companyId, userId, companyId, JSON.stringify(input));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'update_company',
+      resource: 'company',
+      resourceId: companyId,
+      metadata: input,
+    });
   })();
 
   return getCompany(companyId);

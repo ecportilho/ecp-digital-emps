@@ -1,5 +1,6 @@
 import { getDatabase } from '../../database/connection.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 
 interface WebhookPayload {
   transaction_id: string;
@@ -71,18 +72,19 @@ export function creditAccountFromWebhook(payload: WebhookPayload) {
     );
 
     // 3. Audit log
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, 'system', 'split_credit', 'transaction', ?, ?)
-    `).run(
-      generateId(), company.id, txId,
-      JSON.stringify({
+    logAudit(db, {
+      companyId: company.id,
+      userId: 'system',
+      action: 'split_credit',
+      resource: 'transaction',
+      resourceId: txId,
+      metadata: {
         ecp_pay_transaction_id: payload.transaction_id,
         split_id: payload.split_id,
         source_app: payload.source_app,
         amount: payload.amount,
-      })
-    );
+      },
+    });
   })();
 
   return {
