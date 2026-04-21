@@ -17,7 +17,6 @@ export function HeaderPJ() {
   const initials = computeInitials(displayName);
 
   const handleLogout = () => {
-    if (!window.confirm('Deseja sair da sua conta PJ?')) return;
     logout();
   };
 

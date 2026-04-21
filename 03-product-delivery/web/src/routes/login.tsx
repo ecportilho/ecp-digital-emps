@@ -20,6 +20,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -151,54 +152,100 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           </form>
         </div>
 
-        {/* Quick Login Buttons */}
-        <div style={{
-          background: '#131c28',
-          border: '1px solid #27364a',
-          borderRadius: 18,
-          padding: 24,
-        }}>
-          <div style={{ fontSize: 12, color: '#7b8aa3', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-            Acesso rápido (demo) — Senha: Senha@123
+        {/* Discreet toggle — revela o acesso rapido apenas sob demanda */}
+        {!showDemoAccounts && (
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => setShowDemoAccounts(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#7b8aa3',
+                fontSize: 11,
+                fontFamily: "'Inter', sans-serif",
+                textDecoration: 'underline',
+                textDecorationStyle: 'dotted',
+                textUnderlineOffset: 3,
+                cursor: 'pointer',
+                padding: '4px 8px',
+                opacity: 0.6,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '0.6'; }}
+              aria-label="Mostrar contas de demo"
+              title="Acesso rapido para demo"
+            >
+              ·
+            </button>
           </div>
+        )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {DEMO_ACCOUNTS.map(account => (
+        {/* Quick Login Buttons — aparece apenas apos clicar no toggle */}
+        {showDemoAccounts && (
+          <div style={{
+            background: '#131c28',
+            border: '1px solid #27364a',
+            borderRadius: 18,
+            padding: 24,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: '#7b8aa3', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Acesso rápido (demo) — Senha: Senha@123
+              </div>
               <button
-                key={account.email}
-                onClick={() => handleQuickLogin(account.email)}
+                onClick={() => setShowDemoAccounts(false)}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 14px',
-                  background: email === account.email ? 'rgba(183,255,42,0.12)' : '#0b0f14',
-                  border: `1px solid ${email === account.email ? '#b7ff2a' : '#27364a'}`,
-                  borderRadius: 10,
-                  color: '#eaf2ff',
+                  background: 'none',
+                  border: 'none',
+                  color: '#7b8aa3',
+                  fontSize: 11,
                   cursor: 'pointer',
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: 13,
-                  textAlign: 'left',
                 }}
+                aria-label="Fechar acesso rapido"
               >
-                <div>
-                  <div style={{ fontWeight: 600 }}>{account.company}</div>
-                  <div style={{ fontSize: 11, color: '#7b8aa3' }}>{account.email}</div>
-                </div>
-                <div style={{
-                  fontSize: 10,
-                  color: '#a9b7cc',
-                  background: '#0f1620',
-                  padding: '3px 8px',
-                  borderRadius: 20,
-                }}>
-                  {account.role}
-                </div>
+                ✕
               </button>
-            ))}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {DEMO_ACCOUNTS.map(account => (
+                <button
+                  key={account.email}
+                  onClick={() => handleQuickLogin(account.email)}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    background: email === account.email ? 'rgba(183,255,42,0.12)' : '#0b0f14',
+                    border: `1px solid ${email === account.email ? '#b7ff2a' : '#27364a'}`,
+                    borderRadius: 10,
+                    color: '#eaf2ff',
+                    cursor: 'pointer',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 13,
+                    textAlign: 'left',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{account.company}</div>
+                    <div style={{ fontSize: 11, color: '#7b8aa3' }}>{account.email}</div>
+                  </div>
+                  <div style={{
+                    fontSize: 10,
+                    color: '#a9b7cc',
+                    background: '#0f1620',
+                    padding: '3px 8px',
+                    borderRadius: 20,
+                  }}>
+                    {account.role}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div style={{ textAlign: 'center', marginTop: 24, fontSize: 11, color: '#7b8aa3' }}>
           Ecossistema ECP — ecp-digital-bank (PF) + ecp-digital-emps (PJ) + ecp-digital-food

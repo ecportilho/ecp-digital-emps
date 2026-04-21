@@ -35,7 +35,6 @@ export function SidebarPJ() {
   };
 
   const handleLogout = () => {
-    if (!window.confirm('Deseja sair da sua conta PJ?')) return;
     logout();
   };
 

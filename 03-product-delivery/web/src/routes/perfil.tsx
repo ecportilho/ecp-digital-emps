@@ -14,7 +14,6 @@ export default function PerfilPage() {
   const { auth, logout } = useAuthPJ();
 
   const handleLogout = () => {
-    if (!window.confirm('Deseja sair da sua conta PJ?')) return;
     logout();
   };
 
