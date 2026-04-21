@@ -4,7 +4,96 @@ import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
 import { logAudit } from '../../shared/utils/audit-log.js';
 import { ecpPayClient } from '../../services/ecp-pay-client.js';
+import { lookupPfPixKey, creditPfAccountByKey } from '../../services/bank-integration.js';
 import type { PixTransferInput, CreatePixKeyInput, PixQrCodeInput } from './pj-pix.schema.js';
+
+interface CompanyDestination {
+  type: 'pj';
+  companyId: string;
+  accountId: string;
+  name: string;
+  document: string;
+}
+
+interface PfDestination {
+  type: 'pf';
+  name: string;
+  document: string | null;
+  keyType: string;
+}
+
+type PixDestination = CompanyDestination | PfDestination;
+
+/**
+ * Resolve uma chave Pix contra o ecossistema ECP:
+ *  1. Procura em `pj_pix_keys` (chaves PJ registradas em outras empresas do emps)
+ *  2. Se for CNPJ, procura em `companies.cnpj` tambem
+ *  3. Se nao achou PJ, consulta o ecp-digital-bank via HTTP para PF
+ * Retorna null quando ninguem no ecossistema tem a chave.
+ */
+function resolvePixDestination(key: string): Promise<PixDestination | null> {
+  const db = getDatabase();
+  const cleanKey = key.trim();
+
+  // 1) PJ key registrada em outra empresa do emps
+  const pjKeyRow = db.prepare(`
+    SELECT c.id AS company_id, c.nome_fantasia, c.razao_social, c.cnpj,
+           a.id AS account_id
+      FROM pj_pix_keys pk
+      JOIN companies c ON c.id = pk.company_id AND c.deleted_at IS NULL
+      JOIN pj_accounts a ON a.company_id = c.id AND a.status = 'active'
+     WHERE pk.value = ? AND pk.status = 'active' AND pk.deleted_at IS NULL
+     LIMIT 1
+  `).get(cleanKey) as
+    | { company_id: string; nome_fantasia: string | null; razao_social: string; cnpj: string; account_id: string }
+    | undefined;
+
+  if (pjKeyRow) {
+    return Promise.resolve({
+      type: 'pj' as const,
+      companyId: pjKeyRow.company_id,
+      accountId: pjKeyRow.account_id,
+      name: pjKeyRow.nome_fantasia || pjKeyRow.razao_social,
+      document: pjKeyRow.cnpj,
+    });
+  }
+
+  // 2) CNPJ direto (mesmo sem chave Pix cadastrada)
+  const cnpjDigits = cleanKey.replace(/\D/g, '');
+  if (cnpjDigits.length === 14) {
+    const companyRow = db.prepare(`
+      SELECT c.id AS company_id, c.nome_fantasia, c.razao_social, c.cnpj,
+             a.id AS account_id
+        FROM companies c
+        JOIN pj_accounts a ON a.company_id = c.id AND a.status = 'active'
+       WHERE c.cnpj = ? AND c.deleted_at IS NULL
+       LIMIT 1
+    `).get(cnpjDigits) as
+      | { company_id: string; nome_fantasia: string | null; razao_social: string; cnpj: string; account_id: string }
+      | undefined;
+
+    if (companyRow) {
+      return Promise.resolve({
+        type: 'pj' as const,
+        companyId: companyRow.company_id,
+        accountId: companyRow.account_id,
+        name: companyRow.nome_fantasia || companyRow.razao_social,
+        document: companyRow.cnpj,
+      });
+    }
+  }
+
+  // 3) PF via ecp-digital-bank
+  return lookupPfPixKey(cleanKey).then((pfResult) => {
+    if (!pfResult) return null;
+    return {
+      type: 'pf' as const,
+      name: pfResult.holderName,
+      document: null,
+      keyType: pfResult.keyType,
+    };
+  });
+}
 
 interface AccountRow {
   id: string;
@@ -79,7 +168,7 @@ function incrementRateLimit(accountId: string): void {
   }
 }
 
-export function pixTransfer(companyId: string, userId: string, input: PixTransferInput) {
+export async function pixTransfer(companyId: string, userId: string, input: PixTransferInput) {
   const db = getDatabase();
 
   const account = db.prepare(
@@ -94,8 +183,6 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
     throw new AppError(400, ErrorCode.INSUFFICIENT_BALANCE, 'Saldo insuficiente');
   }
 
-  // Enforce daily transfer limit (RN-01 / spec §5). The limit is the max sum of
-  // outgoing Pix debits in a calendar day (America/Sao_Paulo, via date('now')).
   if (account.daily_transfer_limit > 0) {
     const spentToday = sumPixDebitsToday(account.id);
     if (spentToday + input.amount > account.daily_transfer_limit) {
@@ -110,9 +197,22 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
 
   checkRateLimit(account.id);
 
+  // Resolve destination inside the ECP ecosystem (PJ in emps or PF in bank).
+  // Resolution is best-effort — if we cannot resolve, we still debit the sender
+  // (the key may be at a bank outside the ECP network). This matches the real
+  // Pix semantics: the network doesn't verify the destination before sending.
+  const destination = await resolvePixDestination(input.pixKey);
+
+  const sender = db.prepare(
+    'SELECT nome_fantasia, razao_social FROM companies WHERE id = ?'
+  ).get(companyId) as { nome_fantasia: string | null; razao_social: string } | undefined;
+  const senderName = sender?.nome_fantasia || sender?.razao_social || 'Conta PJ';
+
   const txId = generateId();
+  const referenceId = generateId();
   const newBalance = account.balance - input.amount;
 
+  // Phase 1: debit + local PJ credit (if applicable) atomically in a single transaction.
   db.transaction(() => {
     db.prepare("UPDATE pj_accounts SET balance = ?, updated_at = datetime('now') WHERE id = ?")
       .run(newBalance, account.id);
@@ -120,7 +220,26 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
     db.prepare(`
       INSERT INTO pj_transactions (id, account_id, operator_id, type, category, amount, balance_after, direction, description, pix_key, pix_key_type, reference_id, status)
       VALUES (?, ?, ?, 'debit', 'pix_sent', ?, ?, 'out', ?, ?, ?, ?, 'completed')
-    `).run(txId, account.id, userId, input.amount, newBalance, input.description || 'Pix enviado', input.pixKey, input.pixKeyType, generateId());
+    `).run(txId, account.id, userId, input.amount, newBalance, input.description || 'Pix enviado', input.pixKey, input.pixKeyType, referenceId);
+
+    // If destination is a PJ inside this emps DB, credit atomically in the same transaction.
+    if (destination && destination.type === 'pj') {
+      const destAccount = db.prepare(
+        'SELECT id, balance FROM pj_accounts WHERE id = ?'
+      ).get(destination.accountId) as { id: string; balance: number } | undefined;
+      if (destAccount) {
+        const destNewBalance = destAccount.balance + input.amount;
+        db.prepare("UPDATE pj_accounts SET balance = ?, updated_at = datetime('now') WHERE id = ?")
+          .run(destNewBalance, destAccount.id);
+        db.prepare(`
+          INSERT INTO pj_transactions (id, account_id, operator_id, type, category, amount, balance_after, direction, description, pix_key, pix_key_type, reference_id, status)
+          VALUES (?, ?, ?, 'credit', 'pix_received', ?, ?, 'in', ?, ?, ?, ?, 'completed')
+        `).run(
+          generateId(), destAccount.id, 'system:pix_inbound', input.amount, destNewBalance,
+          `Pix recebido de ${senderName}`, input.pixKey, input.pixKeyType, txId
+        );
+      }
+    }
 
     incrementRateLimit(account.id);
 
@@ -130,11 +249,45 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
       action: 'send_pix',
       resource: 'transaction',
       resourceId: txId,
-      metadata: { pixKey: input.pixKey, amount: input.amount },
+      metadata: {
+        pixKey: input.pixKey,
+        amount: input.amount,
+        destinationType: destination?.type ?? 'external',
+        destinationName: destination?.name ?? null,
+      },
     });
   })();
 
-  return { transactionId: txId, amount: input.amount, balanceAfter: newBalance };
+  // Phase 2: if destination is a PF in bank, credit via HTTP. If this fails, we
+  // reverse the sender debit so nobody loses money — Pix requires end-to-end
+  // atomicity and the network (here: the ecosystem) is the arbiter.
+  if (destination && destination.type === 'pf') {
+    try {
+      await creditPfAccountByKey({
+        key: input.pixKey,
+        amountCents: input.amount,
+        description: input.description || 'Pix recebido',
+        senderName,
+      });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      console.error(`[pixTransfer] Credit PF failed, reversing debit | tx=${txId} | reason=${reason}`);
+      db.transaction(() => {
+        db.prepare("UPDATE pj_accounts SET balance = balance + ?, updated_at = datetime('now') WHERE id = ?")
+          .run(input.amount, account.id);
+        db.prepare("UPDATE pj_transactions SET status = 'reversed', description = description || ' — revertido: ' || ? WHERE id = ?")
+          .run(reason.slice(0, 120), txId);
+      })();
+      throw new AppError(502, ErrorCode.INTERNAL_ERROR, `Falha ao entregar Pix: ${reason}`);
+    }
+  }
+
+  return {
+    transactionId: txId,
+    amount: input.amount,
+    balanceAfter: newBalance,
+    destination: destination ? { type: destination.type, name: destination.name } : null,
+  };
 }
 
 export function listPixKeys(companyId: string) {
@@ -290,14 +443,31 @@ export async function generateQrCode(companyId: string, input: PixQrCodeInput) {
   }
 }
 
-export function lookupPixKey(key: string, keyType: string) {
-  // Mock lookup - in production this would query DICT (Diretório de Identificadores de Contas Transacionais)
+export async function lookupPixKey(key: string, keyType: string) {
+  const destination = await resolvePixDestination(key);
+
+  if (!destination) {
+    // Fora do ecossistema ECP — devolve resposta generica. Em producao DICT
+    // retornaria o titular real de qualquer banco participante.
+    return {
+      key,
+      keyType,
+      name: 'Destinatario externo',
+      document: null,
+      institution: 'Fora do ecossistema ECP',
+      accountType: null,
+      resolved: false as const,
+    };
+  }
+
   return {
     key,
     keyType,
-    name: 'Destinatário Exemplo',
-    document: '***456***',
-    institution: 'Banco Exemplo',
-    accountType: 'checking',
+    name: destination.name,
+    document: destination.type === 'pj' ? destination.document : null,
+    institution: destination.type === 'pj' ? 'ECP Emps (PJ)' : 'ECP Bank (PF)',
+    accountType: destination.type === 'pj' ? 'pj_account' : 'checking',
+    destinationType: destination.type,
+    resolved: true as const,
   };
 }

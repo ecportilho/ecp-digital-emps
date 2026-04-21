@@ -10,7 +10,7 @@ export async function pjPixRoutes(app: FastifyInstance): Promise<void> {
     preHandler: [authPjMiddleware, requireRole('financial')],
   }, async (request, reply) => {
     const body = pixTransferSchema.parse(request.body);
-    const result = pixTransfer(request.companyId, request.userId, body);
+    const result = await pixTransfer(request.companyId, request.userId, body);
     return reply.status(200).send(result);
   });
 
@@ -53,7 +53,7 @@ export async function pjPixRoutes(app: FastifyInstance): Promise<void> {
     preHandler: [authPjMiddleware, requireRole('financial')],
   }, async (request, reply) => {
     const query = pixLookupSchema.parse(request.query);
-    const result = lookupPixKey(query.key, query.keyType);
+    const result = await lookupPixKey(query.key, query.keyType);
     return reply.status(200).send(result);
   });
 }

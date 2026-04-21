@@ -21,16 +21,39 @@ interface LookupResult {
   institution: string;
   key: string;
   keyType: string;
+  destinationType?: 'pj' | 'pf';
+  resolved: boolean;
 }
 
 interface TransferResult {
   transactionId: string;
   amount: number;
-  recipient: string;
-  date: string;
+  balanceAfter: number;
+  destination?: { type: 'pj' | 'pf'; name: string } | null;
 }
 
+type PixKeyType = 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
+
 type Step = 'key' | 'amount' | 'confirm' | 'success';
+
+function detectKeyType(raw: string): PixKeyType {
+  const trimmed = raw.trim();
+  if (trimmed.includes('@')) return 'email';
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.length === 11) return 'cpf';
+  if (digits.length === 14) return 'cnpj';
+  if (digits.length === 10 || digits.length === 12 || digits.length === 13) return 'phone';
+  // fallback — qualquer string nao numerica e nao email vira chave aleatoria
+  return 'random';
+}
+
+const keyTypeLabel: Record<PixKeyType, string> = {
+  cpf: 'CPF',
+  cnpj: 'CNPJ',
+  email: 'E-mail',
+  phone: 'Telefone',
+  random: 'Chave aleatoria',
+};
 
 export default function PJPixEnviar() {
   const [step, setStep] = useState<Step>('key');
@@ -53,8 +76,11 @@ export default function PJPixEnviar() {
     setLookupLoading(true);
     setLookupError('');
     try {
-      const result = await apiPJ.get<LookupResult>(`/pj/pix/lookup?key=${encodeURIComponent(pixKey)}`);
-      setLookupData(result);
+      const keyType = detectKeyType(pixKey);
+      const result = await apiPJ.get<LookupResult>(
+        `/pj/pix/lookup?key=${encodeURIComponent(pixKey.trim())}&keyType=${keyType}`
+      );
+      setLookupData({ ...result, keyType });
       setStep('amount');
     } catch (err: any) {
       setLookupError(err?.message || 'Chave Pix nao encontrada');
@@ -79,8 +105,10 @@ export default function PJPixEnviar() {
     setTransferLoading(true);
     setTransferError('');
     try {
+      const keyType = lookupData?.keyType || detectKeyType(pixKey);
       const result = await apiPJ.post<TransferResult>('/pj/pix/transfer', {
-        key: lookupData!.key,
+        pixKey: lookupData!.key || pixKey.trim(),
+        pixKeyType: keyType,
         amount: amountCents,
         description,
       });
@@ -189,9 +217,27 @@ export default function PJPixEnviar() {
             <ArrowLeft size={14} /> Voltar
           </button>
           <div className="p-4 rounded-control bg-background mb-4">
-            <p className="text-xs text-text-tertiary">Destinatario</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-text-tertiary">Destinatario</p>
+              {lookupData.destinationType === 'pj' && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-lime-dim text-lime">PJ</span>
+              )}
+              {lookupData.destinationType === 'pf' && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-info/15 text-info">PF</span>
+              )}
+              {!lookupData.resolved && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-warning/20 text-warning">EXTERNA</span>
+              )}
+            </div>
             <p className="text-sm font-medium text-text-primary mt-1">{lookupData.name}</p>
-            <p className="text-xs text-text-tertiary mt-0.5">{lookupData.institution}</p>
+            <p className="text-xs text-text-tertiary mt-0.5">
+              {lookupData.institution} &bull; {keyTypeLabel[lookupData.keyType as PixKeyType] || lookupData.keyType}
+            </p>
+            {!lookupData.resolved && (
+              <p className="text-xs text-warning mt-2">
+                Chave fora do ecossistema ECP — confirme os dados antes de enviar.
+              </p>
+            )}
           </div>
           <div className="space-y-4">
             <Input
@@ -286,7 +332,7 @@ export default function PJPixEnviar() {
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-sm text-text-tertiary">ID da transacao</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-text-primary font-mono">{receipt.transactionId}</span>
+                <span className="text-sm text-text-primary font-mono">{receipt.transactionId.slice(0, 18)}...</span>
                 <button
                   onClick={() => copyToClipboard(receipt.transactionId)}
                   className="text-text-tertiary hover:text-text-primary transition-colors"
@@ -297,23 +343,19 @@ export default function PJPixEnviar() {
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-sm text-text-tertiary">Destinatario</span>
-              <span className="text-sm text-text-primary">{receipt.recipient}</span>
+              <span className="text-sm text-text-primary">
+                {receipt.destination?.name || lookupData?.name || 'Destinatario externo'}
+                {receipt.destination?.type === 'pj' && <span className="ml-2 text-[10px] text-lime">PJ</span>}
+                {receipt.destination?.type === 'pf' && <span className="ml-2 text-[10px] text-info">PF</span>}
+              </span>
             </div>
             <div className="flex justify-between py-3 border-b border-border">
               <span className="text-sm text-text-tertiary">Valor</span>
               <span className="text-lg font-bold text-lime">{formatCurrency(receipt.amount)}</span>
             </div>
             <div className="flex justify-between py-3">
-              <span className="text-sm text-text-tertiary">Data</span>
-              <span className="text-sm text-text-primary">
-                {new Date(receipt.date).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
+              <span className="text-sm text-text-tertiary">Saldo apos</span>
+              <span className="text-sm text-text-primary">{formatCurrency(receipt.balanceAfter)}</span>
             </div>
           </div>
 
