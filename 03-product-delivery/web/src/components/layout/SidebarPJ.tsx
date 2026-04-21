@@ -8,6 +8,7 @@ import {
   Users,
   Building2,
   UserCircle,
+  LogOut,
 } from 'lucide-react';
 import { useAuthPJ } from '../../hooks/useAuthPJ';
 
@@ -23,10 +24,20 @@ const navItems = [
 ];
 
 export function SidebarPJ() {
-  const { auth } = useAuthPJ();
+  const { auth, logout } = useAuthPJ();
   const companyName = auth?.company?.nomeFantasia || auth?.company?.razaoSocial || 'Empresa';
   const companyCnpj = (auth?.company?.cnpj || '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   const companyType = auth?.company?.naturezaJuridica?.toUpperCase() || 'PJ';
+
+  const handleSwitchToPF = () => {
+    const pfUrl = import.meta.env.VITE_PF_APP_URL || 'https://bank.ecportilho.com';
+    window.location.href = pfUrl;
+  };
+
+  const handleLogout = () => {
+    if (!window.confirm('Deseja sair da sua conta PJ?')) return;
+    logout();
+  };
 
   return (
     <aside className="hidden lg:flex flex-col w-[280px] bg-secondary-bg border-r border-border">
@@ -57,11 +68,22 @@ export function SidebarPJ() {
         ))}
       </nav>
 
-      {/* Profile switcher trigger */}
-      <div className="px-3 py-4 border-t border-border">
-        <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-control text-sm text-text-secondary hover:text-text-primary hover:bg-surface transition-colors">
+      {/* Profile actions */}
+      <div className="px-3 py-4 border-t border-border space-y-1">
+        <button
+          onClick={handleSwitchToPF}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-control text-sm text-text-secondary hover:text-text-primary hover:bg-surface transition-colors"
+        >
           <div className="w-2 h-2 rounded-full bg-lime" />
           <span>Alternar para PF</span>
+        </button>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-control text-sm text-text-secondary hover:text-danger hover:bg-surface transition-colors"
+          aria-label="Sair da conta"
+        >
+          <LogOut size={18} />
+          <span>Sair</span>
         </button>
       </div>
     </aside>

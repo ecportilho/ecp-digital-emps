@@ -5,7 +5,7 @@ import { useAuthPJ } from './hooks/useAuthPJ';
 import LoginPage from './routes/login';
 
 export function App() {
-  const { auth, loading, login, logout, isAuthenticated } = useAuthPJ();
+  const { loading, login, isAuthenticated } = useAuthPJ();
 
   if (loading) {
     return (

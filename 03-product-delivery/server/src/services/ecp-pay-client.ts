@@ -8,13 +8,13 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { ECP_PAY_API_KEY } from '../shared/config/secrets.js';
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
 const ECP_PAY_URL = process.env.ECP_PAY_URL || 'http://localhost:3335';
-const ECP_PAY_API_KEY = process.env.ECP_PAY_API_KEY || 'ecp-emps-dev-key';
 const SOURCE_APP = 'ecp-emps';
 
 // ---------------------------------------------------------------------------

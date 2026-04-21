@@ -2,6 +2,7 @@ import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
 import { generateId } from '../../shared/utils/uuid.js';
+import { logAudit } from '../../shared/utils/audit-log.js';
 import { ecpPayClient } from '../../services/ecp-pay-client.js';
 import type { PixTransferInput, CreatePixKeyInput, PixQrCodeInput } from './pj-pix.schema.js';
 
@@ -29,6 +30,24 @@ interface RateLimitRow {
 
 const MAX_PIX_PER_HOUR = 20;
 const MAX_PIX_KEYS = 20;
+
+/**
+ * Sum of Pix debits (outgoing) already made today for this account.
+ * Used to enforce the daily_transfer_limit set on each pj_accounts row.
+ */
+function sumPixDebitsToday(accountId: string): number {
+  const db = getDatabase();
+  const row = db.prepare(
+    `SELECT COALESCE(SUM(amount), 0) AS total
+       FROM pj_transactions
+      WHERE account_id = ?
+        AND category = 'pix_sent'
+        AND direction = 'out'
+        AND status = 'completed'
+        AND date(created_at) = date('now')`
+  ).get(accountId) as { total: number };
+  return row.total || 0;
+}
 
 function checkRateLimit(accountId: string): void {
   const db = getDatabase();
@@ -75,6 +94,20 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
     throw new AppError(400, ErrorCode.INSUFFICIENT_BALANCE, 'Saldo insuficiente');
   }
 
+  // Enforce daily transfer limit (RN-01 / spec §5). The limit is the max sum of
+  // outgoing Pix debits in a calendar day (America/Sao_Paulo, via date('now')).
+  if (account.daily_transfer_limit > 0) {
+    const spentToday = sumPixDebitsToday(account.id);
+    if (spentToday + input.amount > account.daily_transfer_limit) {
+      const remaining = Math.max(account.daily_transfer_limit - spentToday, 0);
+      throw new AppError(
+        400,
+        ErrorCode.DAILY_LIMIT_EXCEEDED,
+        `Limite diário de transferência excedido. Disponível hoje: R$ ${(remaining / 100).toFixed(2)}.`
+      );
+    }
+  }
+
   checkRateLimit(account.id);
 
   const txId = generateId();
@@ -91,10 +124,14 @@ export function pixTransfer(companyId: string, userId: string, input: PixTransfe
 
     incrementRateLimit(account.id);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'send_pix', 'transaction', ?, ?)
-    `).run(generateId(), companyId, userId, txId, JSON.stringify({ pixKey: input.pixKey, amount: input.amount }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'send_pix',
+      resource: 'transaction',
+      resourceId: txId,
+      metadata: { pixKey: input.pixKey, amount: input.amount },
+    });
   })();
 
   return { transactionId: txId, amount: input.amount, balanceAfter: newBalance };
@@ -152,10 +189,14 @@ export function createPixKey(companyId: string, userId: string, input: CreatePix
       VALUES (?, ?, ?, ?, ?, 'active')
     `).run(keyId, companyId, account.id, input.type, keyValue);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'create_pix_key', 'pix_key', ?, ?)
-    `).run(generateId(), companyId, userId, keyId, JSON.stringify({ type: input.type, value: keyValue }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'create_pix_key',
+      resource: 'pix_key',
+      resourceId: keyId,
+      metadata: { type: input.type, value: keyValue },
+    });
   })();
 
   return { id: keyId, type: input.type, value: keyValue, status: 'active' };
@@ -176,10 +217,14 @@ export function deletePixKey(companyId: string, userId: string, keyId: string) {
     db.prepare("UPDATE pj_pix_keys SET status = 'inactive', deleted_at = datetime('now') WHERE id = ?")
       .run(keyId);
 
-    db.prepare(`
-      INSERT INTO pj_audit_logs (id, company_id, user_id, action, resource, resource_id, metadata)
-      VALUES (?, ?, ?, 'delete_pix_key', 'pix_key', ?, ?)
-    `).run(generateId(), companyId, userId, keyId, JSON.stringify({ type: key.type, value: key.value }));
+    logAudit(db, {
+      companyId,
+      userId,
+      action: 'delete_pix_key',
+      resource: 'pix_key',
+      resourceId: keyId,
+      metadata: { type: key.type, value: key.value },
+    });
   })();
 
   return { success: true };
@@ -224,8 +269,12 @@ export async function generateQrCode(companyId: string, input: PixQrCodeInput) {
       ecpPayTransactionId: payResult.transaction_id,
       description: input.description,
     };
-  } catch {
-    // ECP Pay unavailable — fall back to local mock QR Code payload
+  } catch (err) {
+    // ECP Pay unavailable — fall back to local mock QR Code payload.
+    const reason = err instanceof Error ? err.message : String(err);
+    console.warn(
+      `[ecp-pay-fallback] createPixCharge failed, generating local mock QR | amount=${input.amount} | reason=${reason}`
+    );
     const payload = `00020126580014br.gov.bcb.pix0136${key.value}5204000053039865405${(input.amount / 100).toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
 
     return {

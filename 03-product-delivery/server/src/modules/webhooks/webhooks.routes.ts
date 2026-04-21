@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { creditAccountFromWebhook } from './webhooks.service.js';
+import { ECP_PAY_WEBHOOK_SECRET } from '../../shared/config/secrets.js';
 
 export async function webhooksRoutes(app: FastifyInstance): Promise<void> {
   // POST /webhooks/payment-received
@@ -7,9 +8,8 @@ export async function webhooksRoutes(app: FastifyInstance): Promise<void> {
   app.post('/payment-received', async (request, reply) => {
     // Verify webhook secret
     const secret = request.headers['x-webhook-secret'] as string;
-    const expectedSecret = process.env.ECP_PAY_WEBHOOK_SECRET || 'ecp-pay-webhook-secret-dev';
 
-    if (secret !== expectedSecret) {
+    if (secret !== ECP_PAY_WEBHOOK_SECRET) {
       return reply.status(401).send({ error: 'Invalid webhook secret' });
     }
 

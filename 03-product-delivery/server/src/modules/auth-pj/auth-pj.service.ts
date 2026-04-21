@@ -3,9 +3,8 @@ import bcrypt from 'bcryptjs';
 import { getDatabase } from '../../database/connection.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { ErrorCode } from '../../shared/errors/error-codes.js';
+import { JWT_SECRET } from '../../shared/config/secrets.js';
 import type { AuthPjMeResponse } from './auth-pj.schema.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'ecp-digital-bank-dev-secret-mude-em-producao';
 
 interface CompanyRow {
   id: string;

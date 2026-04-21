@@ -1,7 +1,4 @@
-import dotenv from 'dotenv';
-import { resolve } from 'node:path';
-dotenv.config({ path: resolve(process.cwd(), '.env') });
-dotenv.config({ path: resolve(process.cwd(), '..', '.env') });
+import './bootstrap.js';
 import { buildApp } from './app.js';
 
 const PORT = Number(process.env.PORT) || 3334;

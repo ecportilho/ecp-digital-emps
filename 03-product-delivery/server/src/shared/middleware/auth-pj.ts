@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { AppError } from '../errors/app-error.js';
 import { ErrorCode } from '../errors/error-codes.js';
 import { getDatabase } from '../../database/connection.js';
+import { JWT_SECRET } from '../config/secrets.js';
 
 interface JwtPayload {
   sub: string;
@@ -10,8 +11,6 @@ interface JwtPayload {
   role?: string;
   profile?: string;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET || 'ecp-digital-bank-dev-secret-mude-em-producao';
 
 export async function authPjMiddleware(
   request: FastifyRequest,
